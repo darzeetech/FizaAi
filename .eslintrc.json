@@ -1,0 +1,98 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "react", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "env": {
+    "es6": true,
+    "browser": true,
+    "jest": true,
+    "node": true
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "tsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-use-before-define": "off",
+    // "@typescript-eslint/indent": ["warn"],
+    "@typescript-eslint/no-use-before-define": ["off"],
+    "curly": "error",
+    "padding-line-between-statements": [
+      "error",
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": "return"
+      },
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": "if"
+      },
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": "switch"
+      }
+    ],
+    "react/jsx-filename-extension": ["warn", { "extensions": [".tsx"] }],
+    "max-len": ["warn", { "code": 100 }],
+    "no-console": "error",
+    "@typescript-eslint/no-explicit-any": ["off"],
+    "comma-dangle": "off",
+    "quotes": "off",
+    "react/react-in-jsx-scope": "off",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-var-requires": ["off"],
+    "@typescript-eslint/explicit-module-boundary-types": 0,
+    "@typescript-eslint/explicit-function-return-type": 0,
+    "@typescript-eslint/ban-ts-comment": 0
+    // "import/order": [
+    //   "error",
+    //   {
+    //     "groups": [["builtin", "external"], ["internal"], ["parent", "sibling", "index"]],
+    //     "newlines-between": "always",
+    //     "alphabetize": {
+    //       /* sort in ascending order. Options: ["ignore", "asc", "desc"] */
+    //       "order": "asc",
+    //       /* ignore case. Options: [true, false] */
+    //       "caseInsensitive": true
+    //     }
+    //   }
+    // ],
+    // "import/no-extraneous-dependencies": [
+    //   "error",
+    //   {
+    //     "devDependencies": [
+    //       "**/*.test.js",
+    //       "**/*.test.ts",
+    //       "**/*.test.tsx",
+    //       "**/*.spec.js",
+    //       "**/*.spec.ts",
+    //       "**/*.spec.tsx"
+    //     ]
+    //   }
+    // ]
+  }
+  //   "overrides": [
+  //     {
+  //       "files": ["*.ts", "*.tsx"],
+  //       "rules": {
+  //         "import/order": ["error", { "newlines-between": "always" }]
+  //       }
+  //     }
+  //   ]
+}

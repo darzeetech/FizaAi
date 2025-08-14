@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="165" height="165" viewBox="0 0 165 165" fill="none">
+<rect width="165" height="165" rx="78.6777" fill="#4D7AFF" fill-opacity="0.16"/>
+<rect x="23" y="23" width="120" height="120" rx="60" fill="#4D7AFF" fill-opacity="0.12"/>
+<rect x="54" y="54" width="57.0413" height="57.0413" rx="28.5207" fill="#4D7AFF" fill-opacity="0.1"/>
+<g clip-path="url(#playBtnAudioID)">
+<path d="M74.8984 91.4943H80.3075V72.5625H74.8984V91.4943ZM85.7166 72.5625V91.4943H91.1257V72.5625H85.7166Z" fill="#4D7AFF"/>
+</g>
+<defs>
+<clipPath id="playBtnAudioID">
+<rect width="32.4545" height="32.4545" fill="white" transform="translate(66.7852 65.8008)"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="165" height="165" viewBox="0 0 165 165" fill="none">
+<rect width="165" height="165" rx="78.6777" fill="#4D7AFF" fill-opacity="0.16"/>
+<rect x="22" y="22" width="122.727" height="122.727" rx="61.3636" fill="#4D7AFF" fill-opacity="0.12"/>
+<g clip-path="url(#pauseBtnAudioID)">
+<path d="M75.998 70.374V96.6203L96.6202 83.4972L75.998 70.374Z" fill="#4D7AFF"/>
+</g>
+<defs>
+<clipPath id="pauseBtnAudioID">
+<rect width="44.9937" height="44.9937" fill="white" transform="translate(61 61)"/>
+</clipPath>
+</defs>
+</svg>

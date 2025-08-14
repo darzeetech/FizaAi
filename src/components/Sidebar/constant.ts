@@ -1,0 +1,85 @@
+import { BiHelpCircle } from 'react-icons/bi';
+import { MdOutlinePrivacyTip } from 'react-icons/md';
+import { MdOutlineSupervisorAccount } from 'react-icons/md';
+import { IoMdChatboxes } from 'react-icons/io';
+import { DashboardIcon, FileIcon, ManagePortfolioIcon, MenuIcon } from '../../assets/icons';
+
+export const SIDEBAR_ITEMS = [
+  {
+    label: 'Dashboard',
+    value: 'dashboard',
+    icon: DashboardIcon,
+    path: '/dashboard',
+    visible: true,
+    active: true,
+    children: [],
+  },
+  {
+    label: 'Orders',
+    value: 'order',
+    icon: FileIcon,
+    path: '/orders-list',
+    activePathList: ['orders', 'orders-list', 'select-customer', 'select-outfit'],
+    visible: true,
+    active: false,
+    children: [],
+  },
+  {
+    label: 'Manage Portfolio',
+    value: 'managePortfolio',
+    icon: ManagePortfolioIcon,
+    path: '/manage-portfolio',
+    visible: false,
+    active: false,
+    children: [],
+  },
+  {
+    label: 'Customer List',
+    value: 'customerList',
+    icon: MenuIcon,
+    path: '/customers',
+    visible: true,
+    active: false,
+    children: [],
+  },
+  {
+    label: 'Help Center',
+    value: 'helpCenter',
+    icon: BiHelpCircle,
+    path: '',
+    link: 'https://www.darzeeapp.com/help-center?utm_source=webapp&utm_medium=InApp&utm_campaign=InApp&utm_id=webapp',
+    visible: true,
+    active: false,
+    children: [],
+  },
+  {
+    label: 'VIP Customer Support',
+    value: 'vipCustomerSupport',
+    icon: MdOutlineSupervisorAccount,
+    path: '',
+    link: 'https://www.facebook.com/groups/149964064327400?utm_source=webapp&utm_medium=InApp&utm_campaign=InApp&utm_id=webapp',
+    visible: true,
+    active: false,
+    children: [],
+  },
+  {
+    label: 'FAQs',
+    value: 'faqs',
+    icon: IoMdChatboxes,
+    path: '',
+    link: 'https://www.darzeeapp.com/faq?utm_source=webapp&utm_medium=InApp&utm_campaign=InApp&utm_id=webapp',
+    visible: true,
+    active: false,
+    children: [],
+  },
+  {
+    label: 'Privacy Policy',
+    value: 'privacyPolicy',
+    icon: MdOutlinePrivacyTip,
+    path: '',
+    link: 'https://www.darzeeapp.com/privacy-policy?utm_source=webapp&utm_medium=InApp&utm_campaign=InApp&utm_id=webapp',
+    visible: true,
+    active: false,
+    children: [],
+  },
+];

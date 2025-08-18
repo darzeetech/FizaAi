@@ -135,6 +135,7 @@ type OutfitOption = {
   outfit_link: string;
   pieces: number;
   stitch_options_exist: boolean;
+  outfit_type: string;
   portfolio_eligible: boolean;
 };
 
@@ -2024,23 +2025,35 @@ export default function FizaAI() {
                         /* Single Color for one-piece outfits */
                         <div className="mb-6">
                           <div className="flex items-center gap-5 mb-5 ">
-                            <label className="block mb-3 font-medium">Top</label>
+                            <label className="block mb-3 font-medium">
+                              {selectedOutfitDetails?.outfit_type === 'BOTTOM' ? 'Bottom' : 'Top'}
+                            </label>
                             <div className="flex gap-3 items-center">
                               <div style={{ position: 'relative', display: 'inline-block' }}>
                                 <div
-                                  onClick={() => setShowPicker(!showPicker)}
+                                  onClick={() =>
+                                    selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                      ? setShowPickerone(!showPickerone)
+                                      : setShowPicker(!showPicker)
+                                  }
                                   style={{
                                     width: 40,
                                     height: 40,
-                                    borderRadius: '0.375rem', // same as Tailwind's rounded
+                                    borderRadius: '0.375rem',
                                     cursor: 'pointer',
-                                    backgroundColor: toppcolor,
+                                    backgroundColor:
+                                      selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                        ? bottommcolor
+                                        : toppcolor,
                                     border: '1px solid #ccc',
                                   }}
                                   title="Select color"
                                 />
 
-                                {showPicker && (
+                                {((selectedOutfitDetails?.outfit_type === 'BOTTOM' &&
+                                  showPickerone) ||
+                                  (selectedOutfitDetails?.outfit_type !== 'BOTTOM' &&
+                                    showPicker)) && (
                                   <div
                                     style={{
                                       position: 'absolute',
@@ -2054,13 +2067,23 @@ export default function FizaAI() {
                                     }}
                                   >
                                     <HexColorPicker
-                                      color={toppcolor}
+                                      color={
+                                        selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                          ? bottommcolor
+                                          : toppcolor
+                                      }
                                       onChange={(newColor) =>
-                                        updateFormDataSection234('topColor', newColor)
+                                        selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                          ? updateFormDataSection234('bottomColor', newColor)
+                                          : updateFormDataSection234('topColor', newColor)
                                       }
                                     />
                                     <button
-                                      onClick={() => setShowPicker(false)}
+                                      onClick={() =>
+                                        selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                          ? setShowPickerone(false)
+                                          : setShowPicker(false)
+                                      }
                                       style={{
                                         marginTop: 8,
                                         padding: '4px 8px',
@@ -2077,16 +2100,22 @@ export default function FizaAI() {
                                   </div>
                                 )}
                               </div>
-                              <span className="ml-2 text-sm">{formDataSection234.topColor}</span>
+                              <span className="ml-2 text-sm">
+                                {selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                  ? formDataSection234.bottomColor
+                                  : formDataSection234.topColor}
+                              </span>
                             </div>
                           </div>
                           {/* Keep the existing color options as presets */}
                           <div className="flex gap-3 ">
                             {colorOptions.map((color) => (
                               <div
-                                key={`top-${color.id}`}
+                                key={`single-${color.id}`}
                                 className={`w-8 h-8 rounded cursor-pointer ${
-                                  formDataSection234.topColor === color.color
+                                  (selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                    ? formDataSection234.bottomColor
+                                    : formDataSection234.topColor) === color.color
                                     ? 'ring-2 ring-offset-2 ring-[#79539f]'
                                     : ''
                                 }`}
@@ -2094,7 +2123,11 @@ export default function FizaAI() {
                                   backgroundColor: color.color,
                                   border: color.color === '#ffffff' ? '1px solid #e2e8f0' : 'none',
                                 }}
-                                onClick={() => updateFormDataSection234('topColor', color.color)}
+                                onClick={() =>
+                                  selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                    ? updateFormDataSection234('bottomColor', color.color)
+                                    : updateFormDataSection234('topColor', color.color)
+                                }
                               />
                             ))}
                           </div>

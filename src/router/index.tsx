@@ -128,7 +128,7 @@ import PrivateWrapper from './PrivateWrapper';
 // import Invoice from '../pages/Invoice';
 
 import FizaAI from '../pages/Fizaai/aifiza';
-import ShareFizaai from '../pages/Fizaai/shareFizaai'; // Ensure this import is correct
+// import ShareFizaai from '../pages/Fizaai/shareFizaai'; // Ensure this import is correct
 
 const allRoutes = [
   {

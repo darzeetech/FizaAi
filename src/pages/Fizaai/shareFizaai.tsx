@@ -160,7 +160,7 @@ const colorOptions = [
   { id: 'white', color: '#ffffff' },
 ];
 
-export default function FizaAI() {
+export default function shareFizaai() {
   // Current step (1: About You, 2: Select Outfit, 3: Color, 4: Stitch Options)
   const [currentStep, setCurrentStep] = useState(1);
   const [outfitOptions, setOutfitOptions] = useState<OutfitOption[]>([]);
@@ -1187,16 +1187,14 @@ export default function FizaAI() {
     }
 
     // setIsDownloading(true); // Show loader
-
+    const BASE_URL = process.env.REACT_APP_BASE_URL; // Ensure BASE_URL is defined
     const version = currentVersionEntry?.version ?? 1;
     const outfitName = formDataSection234?.selectedOutfit || 'Outfit';
     const fileName = `${outfitName} Version ${version}.jpg`;
 
     try {
-      const apiUrl = `https://backend.stage.darzeeapp.com/file/download-file?fileUrl=${encodeURIComponent(
-        generatedImageUrl
-      )}`;
-      const response = await fetch(apiUrl, { mode: 'cors', credentials: 'omit' });
+      const url = `${BASE_URL}file/download-file?fileUrl=${encodeURIComponent(generatedImageUrl)}`;
+      const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
 
       if (!response.ok) {
         throw new Error('Network response was not OK');

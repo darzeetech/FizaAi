@@ -1186,21 +1186,21 @@ export default function FizaAI() {
       return;
     }
 
+    // setIsDownloading(true); // Show loader
+    const BASE_URL = process.env.REACT_APP_BASE_URL; // Ensure BASE_URL is defined
+    const version = currentVersionEntry?.version ?? 1;
     const outfitName = formDataSection234?.selectedOutfit || 'Outfit';
-    const fileName = `${outfitName} Version 1.jpg`;
+    const fileName = `${outfitName} Version ${version}.jpg`;
 
     try {
-      const response = await fetch(generatedImageUrl, {
-        mode: 'no-cors',
-        credentials: 'omit',
-      });
+      const url = `${BASE_URL}file/download-file?fileUrl=${encodeURIComponent(generatedImageUrl)}`;
+      const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
 
       if (!response.ok) {
         throw new Error('Network response was not OK');
       }
 
       const blob = await response.blob();
-
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = fileName;
@@ -1209,9 +1209,10 @@ export default function FizaAI() {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      // Fallback: Open in new tab
       window.open(generatedImageUrl, '_blank');
       alert('Could not force download – image opened in a new tab instead.');
+    } finally {
+      // setIsDownloading(false); // Hide loader
     }
   };
 

@@ -1250,6 +1250,7 @@ export default function FizaAI() {
             onNewOutfit={handleNewOutfit}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            selectedTab={selectedTab}
 
             // This now expects the entire entry object
           />

@@ -21,6 +21,7 @@ interface StudioSidebarProps {
   onNewOutfit: () => void;
   currentStep: number;
   setCurrentStep: (step: number) => void;
+  selectedTab: 'studio' | 'lookbook';
 }
 
 interface VersionData {
@@ -44,6 +45,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
   onNewOutfit,
   currentStep,
   setCurrentStep,
+  selectedTab,
 }) => {
   const [searchMode, setSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -212,6 +214,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
       )}
 
       {/* Body */}
+
       {showProfile ? (
         <UserProfile
           showProfile={showProfile}
@@ -220,7 +223,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
           setCurrentStep={setCurrentStep}
           setShowStudio={setShowStudio}
         />
-      ) : (
+      ) : selectedTab === 'studio' ? (
         <div className="flex-1 overflow-y-auto px-4 custom-scrollbar py-[1rem] pb-[2rem] hidde">
           <div className="space-y-6">
             {Object.entries(filteredGroupedItems).map(([dateLabel, versionGroups]) => (
@@ -275,7 +278,9 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
             ))}
           </div>
         </div>
-      )}
+      ) : selectedTab === 'lookbook' ? (
+        <div>kkk</div>
+      ) : null}
 
       {/* Footer */}
       {!showProfile && (

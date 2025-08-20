@@ -1334,8 +1334,10 @@ export default function FizaAI() {
 
                 {/* Lookbook Tab */}
                 <div
-                  onClick={() => setSelectedTab('lookbook')}
-                  className={`fle items-center md:gap-2 gap-1 cursor-pointer pb-2 hidden ${
+                  onClick={() => {
+                    setSelectedTab('lookbook');
+                  }}
+                  className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2  ${
                     selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
                   }`}
                 >

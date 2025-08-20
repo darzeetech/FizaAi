@@ -221,7 +221,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
           setShowStudio={setShowStudio}
         />
       ) : (
-        <div className="flex-1 overflow-y-auto px-4 custom-scrollbar py-[1rem] pb-[2rem]">
+        <div className="flex-1 overflow-y-auto px-4 custom-scrollbar py-[1rem] pb-[2rem] hidde">
           <div className="space-y-6">
             {Object.entries(filteredGroupedItems).map(([dateLabel, versionGroups]) => (
               <div key={dateLabel}>

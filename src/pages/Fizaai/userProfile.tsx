@@ -78,7 +78,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
           </div>
         </div>
         {/* Menu Options Row-by-Row */}
-        <div className="fle hidden flex-col w-full text-base text-black font-medium">
+        <div className="flex  flex-col w-full text-base text-black font-medium">
           {/* Orders */}
           <div
             onClick={() => setSelectedMenu('orders')}

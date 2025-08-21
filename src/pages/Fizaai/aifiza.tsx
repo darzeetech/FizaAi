@@ -199,6 +199,7 @@ export default function FizaAI() {
   const [currentVersionEntry, setCurrentVersionEntry] = useState<VersionData | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [items, setItems] = useState<VersionData[]>([]);
+  const [selectlookbook, setSelectlookbook] = useState<string>('Explore Designers');
   // Split state for section 1 (About You)
   const [formDataSection1, setFormDataSection1] = useState<FormDataSection1>({
     first_name: '',
@@ -1251,6 +1252,8 @@ export default function FizaAI() {
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             selectedTab={selectedTab}
+            selectlookbook={selectlookbook}
+            setSelectlookbook={setSelectlookbook}
 
             // This now expects the entire entry object
           />

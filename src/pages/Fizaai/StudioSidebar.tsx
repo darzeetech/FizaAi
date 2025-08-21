@@ -6,6 +6,13 @@ import sidebar from '../../assets/images/view_sidebar.png';
 import search from '../../assets/images/Frame 1000010377.png';
 import design from '../../assets/images/design.png';
 import coins from '../../assets/images/coins.png';
+import explore from '../../assets/images/Frame 1000010742.png';
+import collective from '../../assets/images/collective.png';
+import clothes from '../../assets/images/clothes.png';
+import art from '../../assets/images/art.png';
+import star from '../../assets/images/star.png';
+import tree from '../../assets/images/tree.png';
+import pending from '../../assets/images/pending.png';
 import './sidebar.css';
 import UserProfile from './userProfile';
 import { FaChevronDown, FaSearch } from 'react-icons/fa';
@@ -22,6 +29,8 @@ interface StudioSidebarProps {
   currentStep: number;
   setCurrentStep: (step: number) => void;
   selectedTab: 'studio' | 'lookbook';
+  selectlookbook: string;
+  setSelectlookbook: (value: string) => void;
 }
 
 interface VersionData {
@@ -46,6 +55,8 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
   currentStep,
   setCurrentStep,
   selectedTab,
+  selectlookbook,
+  setSelectlookbook,
 }) => {
   const [searchMode, setSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -279,7 +290,97 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
           </div>
         </div>
       ) : selectedTab === 'lookbook' ? (
-        <div>kkk</div>
+        <div className="flex flex-col h-full justify-between w-full">
+          <div className="flex flex-col">
+            {/* Explore Designers */}
+            <div
+              onClick={() => setSelectlookbook('Explore Designers')}
+              className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
+                selectlookbook === 'Explore Designers' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
+              }`}
+            >
+              <img src={explore} alt="Address" className="w-[4rem] rounded-xl h-8 ml-2" />
+              <span className="ml-3 text-[.9rem]  font-semibold ">Explore Designers</span>
+            </div>
+            {/* Outfits */}
+            <div
+              onClick={() => setSelectlookbook('Outfits')}
+              className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
+                selectlookbook === 'Outfits' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
+              }`}
+            >
+              <img
+                src={clothes}
+                alt="Address"
+                className="w-[1.2rem] aspect-auto rounded-xl  ml-6"
+              />
+              <span className="ml-3 text-[.9rem]  font-semibold">Outfits</span>
+            </div>
+
+            {/* Collective */}
+            <div
+              onClick={() => setSelectlookbook('Collective')}
+              className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
+                selectlookbook === 'Collective' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
+              }`}
+            >
+              <img
+                src={collective}
+                alt="Address"
+                className="w-[1.2rem] aspect-auto rounded-xl  ml-6"
+              />
+              <span className="ml-3 text-[.9rem]  font-semibold">Collective</span>
+            </div>
+
+            {/* My Designs */}
+            <div
+              onClick={() => setSelectlookbook('My Designs')}
+              className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
+                selectlookbook === 'My Designs' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
+              }`}
+            >
+              <img src={art} alt="Address" className="w-[1.2rem] aspect-auto rounded-xl  ml-6" />
+              <span className="ml-3 text-[.9rem]  font-semibold">My Designs</span>
+            </div>
+
+            {/* Favorites */}
+            <div
+              onClick={() => setSelectlookbook('Favorites')}
+              className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
+                selectlookbook === 'Favorites' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
+              }`}
+            >
+              <img src={star} alt="Address" className="w-[1.2rem] aspect-auto rounded-xl  ml-6" />
+              <span className="ml-3 text-[.9rem]  font-semibold">Favorites</span>
+            </div>
+
+            {/* Brought to life */}
+            <div
+              onClick={() => setSelectlookbook('Brought to life')}
+              className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
+                selectlookbook === 'Brought to life' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
+              }`}
+            >
+              <img src={tree} alt="Address" className="w-[1.2rem] aspect-auto rounded-xl  ml-6" />
+              <span className="ml-3 text-[.9rem]  font-semibold">Brought to life</span>
+            </div>
+
+            {/* Awaiting Artisan */}
+            <div
+              onClick={() => setSelectlookbook('Awaiting Artisan')}
+              className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
+                selectlookbook === 'Awaiting Artisan' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
+              }`}
+            >
+              <img
+                src={pending}
+                alt="Address"
+                className="w-[1.2rem] aspect-auto rounded-xl  ml-6"
+              />
+              <span className="ml-3 text-[.9rem]  font-semibold">Awaiting Artisan</span>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {/* Footer */}

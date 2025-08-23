@@ -22,6 +22,7 @@ import {
   FaCopy,
   FaTimes,
 } from 'react-icons/fa';
+import { LuLink } from 'react-icons/lu';
 
 import aiimage from '../../assets/images/ai.png';
 import coins from '../../assets/images/coins.png';
@@ -250,6 +251,8 @@ export default function FizaAI() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [isGeneratingShareLink, setIsGeneratingShareLink] = useState(false);
+  // const [shareStep, setShareStep] = useState<'ready' | 'generating' | 'done'>('ready');
+  const [showShareSuccessModal, setShowShareSuccessModal] = useState(false);
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);
@@ -260,76 +263,57 @@ export default function FizaAI() {
   };
 
   const handleShare = (platform: string) => {
-    const shareText = `Check out my AI-generated outfit design on Darzee!`;
-    const shareUrl = window.location.href;
-    const imageUrl = generatedImageUrl;
+    //const shareText = `Check out my AI-generated outfit design on Darzee!`;
+    const shareUrl = shareLink || 'Check out my AI-generated outfit design on Darzee!';
 
     switch (platform) {
       case 'whatsapp': {
-        const whatsappText = imageUrl
-          ? `${shareText}\n\nImage: ${imageUrl}\n\n${shareUrl}`
-          : `${shareText}\n\n${shareUrl}`;
+        const whatsappText = `${shareUrl}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(whatsappText)}`, '_blank');
         break;
       }
-      case 'telegram':
-        if (imageUrl) {
-          window.open(
-            `https://telegram.me/share/url?url=${encodeURIComponent(
-              imageUrl
-            )}&text=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`,
-            '_blank'
-          );
-        } else {
-          window.open(
-            `https://telegram.me/share/url?url=${encodeURIComponent(
-              shareUrl
-            )}&text=${encodeURIComponent(shareText)}`,
-            '_blank'
-          );
-        }
+      case 'telegram': {
+        window.open(`https://telegram.me/share/url?url=${encodeURIComponent(shareUrl)}`, '_blank');
         break;
+      }
       case 'email': {
-        const emailBody = imageUrl
-          ? `${shareText}\n\nView the design: ${shareUrl}\n\nImage: ${imageUrl}`
-          : `${shareText}\n\nView the design: ${shareUrl}`;
+        const emailBody = `$${shareUrl}`;
         window.open(
           `mailto:?subject=${encodeURIComponent(
-            'Check out my AI outfit design'
+            'Check out my AI-generated outfit design on Darzee!'
           )}&body=${encodeURIComponent(emailBody)}`,
           '_blank'
         );
         break;
       }
       case 'twitter': {
-        const twitterText = imageUrl ? `${shareText} ${shareUrl}` : `${shareText} ${shareUrl}`;
+        const twitterText = `${shareUrl}`;
         window.open(
           `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}`,
           '_blank'
         );
         break;
       }
-      case 'facebook':
+      case 'facebook': {
         window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
           '_blank'
         );
         break;
+      }
       case 'copy': {
-        const copyText = imageUrl
-          ? `${shareText}\n\nDesign: ${shareUrl}\nImage: ${imageUrl}`
-          : `${shareText}\n\n${shareUrl}`;
+        const copyText = `${shareUrl}`;
         navigator.clipboard.writeText(copyText).then(() => {
-          alert('Link and image URL copied to clipboard!');
+          alert('Link copied to clipboard!');
         });
         break;
       }
       default:
         break;
     }
+
     setShowShareModal(false);
   };
-
   const handleGenerateShareLink = async () => {
     if (!currentVersionEntry?.id) {
       alert('No generated image available to create share link');
@@ -351,6 +335,8 @@ export default function FizaAI() {
       if (response.status && response.data?.link) {
         // Backend returns the direct shareable link here
         setShareLink(response.data.link);
+
+        return true;
       } else {
         alert('Failed to generate share link');
         setShareLink(null);
@@ -360,6 +346,8 @@ export default function FizaAI() {
       console.error('Error generating share link:', error);
       alert('An error occurred while generating share link');
       setShareLink(null);
+
+      return false;
     } finally {
       setIsGeneratingShareLink(false);
     }
@@ -2826,52 +2814,67 @@ export default function FizaAI() {
 
         {/* Share Modal */}
         {showShareModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            {/* White card container */}
+            <div className="bg-white rounded-2xl shadow-lg flex flex-col items-center w-[430px] max-w-full px-6 py-6">
+              {/* Title */}
+              <div className="w-full text-left font-medium text-[17px] mb-6">
+                Share public link to chat
+              </div>
+
+              {/* Warning Banner */}
+              <div className="w-full rounded-2xl bg-[#d4c5ab] flex items-start px-6 py-4 mb-6">
+                <div className="mt-0.5 mr-3 shrink-0">
+                  <span className="inline-block w-6 h-6 rounded-full border border-[#00000022] bg-[#fff7ea] flex items-center justify-center">
+                    <span className="text-[#62563c] font-bold text-base">i</span>
+                  </span>
+                </div>
+                <div className="text-[14px] leading-snug flex-1">
+                  <div className="font-semibold">This image may include personal information</div>
+                  <div className="text-[#333] mt-1">
+                    Take a moment to check the content before the sharing the link.
+                  </div>
+                </div>
+              </div>
+
+              {/* Privacy Subtext */}
+              <div className="text-gray-500 text-[15px] mb-8 text-left w-full leading-snug">
+                Your name, custom instructions, and any messages you add after sharing stay private
+              </div>
+
+              {/* Create Link Button */}
+              <button
+                onClick={async () => {
+                  setIsGeneratingShareLink(true);
+                  const ok = await handleGenerateShareLink();
+                  setIsGeneratingShareLink(false);
+                  setShowShareModal(false);
+
+                  if (ok) {
+                    setShowShareSuccessModal(true);
+                  }
+                }}
+                className="flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-full bg-[#493041] hover:bg-[#2d1b26] text-white text-[14px] font-medium transition disabled:opacity-70"
+                disabled={isGeneratingShareLink}
+              >
+                <LuLink size={20} className="mr-1" />
+                {isGeneratingShareLink ? 'Generating...' : 'Create Link'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showShareSuccessModal && shareLink && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[500]">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Share Your Design</h3>
                 <button
-                  onClick={() => setShowShareModal(false)}
+                  onClick={() => setShowShareSuccessModal(false)}
                   className="text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   <FaTimes size={20} />
                 </button>
-              </div>
-
-              {/* Generate Share Link Button and Display */}
-              <div className="mb-4">
-                <button
-                  onClick={handleGenerateShareLink}
-                  disabled={isGeneratingShareLink}
-                  className="w-full mb-2 px-4 py-2 bg-[#79539F] text-white rounded-md hover:bg-[#5a3d70] transition-colors"
-                >
-                  {isGeneratingShareLink ? 'Generating...' : 'Generate Share Link'}
-                </button>
-
-                {shareLink && (
-                  <div className="break-words p-2 border border-gray-300 rounded-mdtext-sm bg-gray-100">
-                    <label className="font-semibold">Your Shareable Link:</label>
-                    <div className="flex items-center justify-between mt-1 gap-2">
-                      <a
-                        href={shareLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#4F2945] underline truncate flex-1"
-                      >
-                        {shareLink}
-                      </a>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(shareLink);
-                          alert('Share link copied to clipboard!');
-                        }}
-                        className="px-2 py-1 bg-[#79539F] text-white rounded-md hover:bg-[#5a3d70]"
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

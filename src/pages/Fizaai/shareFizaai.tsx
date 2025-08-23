@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import BulkImageUploadField from '../../components/FormComponents/BulkImageUploadField';
 import './sidebar.css';
+import { useNavigate } from 'react-router-dom';
 
 //import Image from "next/image"
 import {
@@ -184,6 +185,7 @@ export default function shareFizaaI() {
   const [tickedOptions, setTickedOptions] = useState<Set<string>>(new Set());
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);
@@ -842,13 +844,26 @@ export default function shareFizaaI() {
 
   // Update the handleGeneratePreview function
   const handleGeneratePreview = async (entry?: VersionData) => {
+    const x = 1;
     try {
+      if (x === 1) {
+        navigate('/');
+        // eslint-disable-next-line no-console
+        console.log('Generating preview with data:');
+
+        return;
+        // eslint-disable-next-line no-console
+        console.log('Generating preview with data:');
+      }
       // Check if user has 0 tokens
       // if (coinBalance === 0) {
       //   setShowPopup(true);
 
       //   return;
       // }
+
+      // eslint-disable-next-line no-console
+      console.log('Generating preview with data:');
 
       if (window.innerWidth < 768) {
         setShowMobilePreview(true);
@@ -1008,6 +1023,10 @@ export default function shareFizaaI() {
     }
   };
 
+  const handleSingup = () => {
+    navigate('/');
+  };
+
   return (
     <div className="flex w-full min-h-screen relative overflow-hidden">
       {/* Sidebar */}
@@ -1137,8 +1156,8 @@ export default function shareFizaaI() {
             <div className="flex items-center justify-end gap-2 md:gap-4 w-1/2">
               <div className="flex items-center gap-2 md:gap-3 py-1.5 rounded-full cursor-pointer transition-all duration-300">
                 <button
-                  // onClick={() => handleVersionSelect(versionSample)}
-                  className="flex items-center bg-[#79539F] hover:bg-green-700 text-white px-3 py-1 rounded-md text-[.8rem] md:text-[1rem] font-medium transition"
+                  onClick={() => handleSingup()}
+                  className="flex items-center bg-[#79539F]  text-white px-3 py-1 rounded-md text-[.8rem] md:text-[1rem] font-medium transition"
                 >
                   Sign Up
                 </button>

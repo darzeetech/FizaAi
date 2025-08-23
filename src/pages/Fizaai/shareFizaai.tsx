@@ -1077,7 +1077,7 @@ export default function shareFizaaI() {
                     alt="Sidebar Toggle"
                     className="h-6 md:h-10 aspect-auto cursor-pointer hidden"
                   />
-                  <div className="flex  w-[85%] md:w-[60%] pl-8 ">
+                  <div className="flex  w-[85%] md:w-[60%] md:pl-8 pl-4 ">
                     {/* Studio Tab */}
                     <div
                       onClick={() => {

@@ -268,16 +268,28 @@ export default function shareFizaaI() {
   // Fetch outfit options when gender changes
   useEffect(() => {
     const fetchOutfitOptions = async () => {
-      if (!formDataSection1.gender) {
-        return;
+      const storedUserData = localStorage.getItem('fizaaiuser');
+
+      let genderrr = 'male';
+
+      if (storedUserData) {
+        try {
+          const userData = JSON.parse(storedUserData);
+          genderrr = userData?.user?.userPreference?.gender;
+          // eslint-disable-next-line no-console
+          //console.log(genderrr);
+        } catch (error) {
+          // Optional: Handle JSON parse errors
+          setError('Corrupted user data in storage');
+
+          return;
+        }
       }
 
       setLoading(true);
 
       try {
-        const response = await api.getRequest(
-          `master-data/outfits/?gender=${formDataSection1.gender}`
-        );
+        const response = await api.getRequest(`master-data/outfits/?gender=${genderrr}`);
 
         if (response.status && response.data) {
           setOutfitOptions(response.data);
@@ -292,6 +304,10 @@ export default function shareFizaaI() {
         setLoading(false);
       }
     };
+
+    // if (currentStep === 1) {
+    //   fetchOutfitOptions();
+    // }
 
     fetchOutfitOptions();
   }, [currentStep, formDataSection1.gender]);

@@ -163,7 +163,10 @@ const allRoutes = [
       // },
 
       { path: '', element: <PublicWrapper Content={FizaAI} showHeader={false} /> },
-      { path: 'share', element: <PublicWrapper Content={ShareFizaai} showHeader={false} /> },
+      {
+        path: '/image_share/aifiza/:id',
+        element: <PublicWrapper Content={ShareFizaai} showHeader={false} />,
+      },
     ],
   },
 ];

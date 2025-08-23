@@ -247,6 +247,8 @@ export default function FizaAI() {
   const [tickedOptions, setTickedOptions] = useState<Set<string>>(new Set());
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [isGeneratingShareLink, setIsGeneratingShareLink] = useState(false);
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);
@@ -325,6 +327,41 @@ export default function FizaAI() {
         break;
     }
     setShowShareModal(false);
+  };
+
+  const handleGenerateShareLink = async () => {
+    if (!currentVersionEntry?.id) {
+      alert('No generated image available to create share link');
+
+      return;
+    }
+
+    setIsGeneratingShareLink(true);
+    setShareLink(null); // reset any existing link
+
+    try {
+      const requestBody = {
+        imageId: currentVersionEntry.id,
+        parameters: ['aifiza'], // add any parameters as needed
+      };
+      // Adjust the API endpoint as per your backend for share link creation
+      const response = await api.postRequest(`link_share/generate`, requestBody);
+
+      if (response.status && response.data?.link) {
+        // Backend returns the direct shareable link here
+        setShareLink(response.data.link);
+      } else {
+        alert('Failed to generate share link');
+        setShareLink(null);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error generating share link:', error);
+      alert('An error occurred while generating share link');
+      setShareLink(null);
+    } finally {
+      setIsGeneratingShareLink(false);
+    }
   };
 
   // Add this useEffect to fetch skin colors when component mounts
@@ -1191,11 +1228,14 @@ export default function FizaAI() {
     const version = currentVersionEntry?.version ?? 1;
     const outfitName = formDataSection234?.selectedOutfit || 'Outfit';
     const fileName = `${outfitName} Version ${version}.jpg`;
+    const ap = process.env.REACT_APP_BASE_API_URL;
+
+    // const ap1 = 'https://app.fizaai.com/';
+    // eslint-disable-next-line no-console
+    console.log(ap);
 
     try {
-      const apiUrl = `https://backend.stage.darzeeapp.com/file/download-file?fileUrl=${encodeURIComponent(
-        generatedImageUrl
-      )}`;
+      const apiUrl = `${ap}file/download-file?fileUrl=${encodeURIComponent(generatedImageUrl)}`;
       const response = await fetch(apiUrl, { mode: 'cors', credentials: 'omit' });
 
       if (!response.ok) {
@@ -2793,6 +2833,42 @@ export default function FizaAI() {
                 >
                   <FaTimes size={20} />
                 </button>
+              </div>
+
+              {/* Generate Share Link Button and Display */}
+              <div className="mb-4">
+                <button
+                  onClick={handleGenerateShareLink}
+                  disabled={isGeneratingShareLink}
+                  className="w-full mb-2 px-4 py-2 bg-[#79539F] text-white rounded-md hover:bg-[#5a3d70] transition-colors"
+                >
+                  {isGeneratingShareLink ? 'Generating...' : 'Generate Share Link'}
+                </button>
+
+                {shareLink && (
+                  <div className="break-words p-2 border border-gray-300 rounded-mdtext-sm bg-gray-100">
+                    <label className="font-semibold">Your Shareable Link:</label>
+                    <div className="flex items-center justify-between mt-1 gap-2">
+                      <a
+                        href={shareLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#4F2945] underline truncate flex-1"
+                      >
+                        {shareLink}
+                      </a>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(shareLink);
+                          alert('Share link copied to clipboard!');
+                        }}
+                        className="px-2 py-1 bg-[#79539F] text-white rounded-md hover:bg-[#5a3d70]"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

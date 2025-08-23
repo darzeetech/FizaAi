@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import BulkImageUploadField from '../../components/FormComponents/BulkImageUploadField';
-// import BulkImageUploadFieldp from '../../components/FormComponents/BulkImageUploadFieldp';
 import './sidebar.css';
 
 //import Image from "next/image"
 import {
   FaArrowRight,
   FaCheckCircle,
-  // FaChevronDown,
   FaMinus,
   FaPlus,
   FaSync,
@@ -24,53 +22,19 @@ import {
 } from 'react-icons/fa';
 
 import aiimage from '../../assets/images/ai.png';
-// import coins from '../../assets/images/coins.png';
 import share from '../../assets/images/share1.png';
 import download from '../../assets/images/download.png';
 import whatapp from '../../assets/images/whatsapp1.png';
 import woman from '../../assets/images/woman.png';
 import preview from '../../assets/images/preview.png';
 import sidebar from '../../assets/images/view_sidebar.png';
-
-// import design from '../../assets/images/design.png';
 import lookbook from '../../assets/images/Style.png';
-//import share from '../../assets/images/share.png';
-// import { FaSyncAlt } from 'react-icons/fa';
+
 import Ai_refresh from '../../assets/icons/Ai_Loader.gif';
 import Ai_refresh1 from '../../assets/icons/AI_Refresh.gif';
 import { api } from '../../utils/apiRequest';
-// import SignupFlow from './signup-flow';
-// import TokenPopup from './TokenPopup';
-// import StudioSidebar from './StudioSidebar';
-// import { auth } from '../../firbase'; // make sure path is correct
-// import { onAuthStateChanged } from 'firebase/auth';
 import { TiArrowLeft } from 'react-icons/ti';
 import { HexColorPicker } from 'react-colorful';
-
-// type SkinColor = {
-//   id: number;
-//   colorCode: string;
-//   red: string;
-//   green: string;
-//   blue: string;
-// };
-
-// type WeightUnit = {
-//   id: number;
-//   weightUnit: string;
-// };
-
-// type HeightUnit = {
-//   id: number;
-//   heightUnit: string;
-// };
-
-// type BodyType = {
-//   id: number;
-//   bodyType: string;
-//   imageUrl: string | null;
-//   genderId: number;
-// };
 
 // Define types for our form data
 type FormDataSection1 = {
@@ -149,16 +113,6 @@ interface VersionData {
   userId: number;
   children?: number | null;
 }
-const versionSample: VersionData = {
-  id: 1,
-  data: 'a', // this should be your full form object, stringified
-  version: 1,
-  parentId: null,
-  createdAt: new Date().toISOString(),
-  imageUrl: 'https://example.com/some-outfit.png', // or real generated image URL
-  userId: 1001,
-  children: null,
-};
 
 // Add color options array after outfitOptions
 const colorOptions = [
@@ -179,37 +133,15 @@ export default function shareFizaaI() {
   const [loadingStitchOptions, setLoadingStitchOptions] = useState(false);
   const [loadingImageVersion, setLoadingImageVersion] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingVersionData, setPendingVersionData] = useState<VersionData | null>(null);
 
   const [outfit_index, setoutfit_index] = useState<number | undefined>(undefined);
 
-  // Add these state variables after the existing useState declarations
-  // const [skinColors, setSkinColors] = useState<SkinColor[]>([]);
-  // const [loadingSkinColors, setLoadingSkinColors] = useState(false);
-
-  // Add these state variables after the existing useState declarations
-  // const [weightUnits, setWeightUnits] = useState<WeightUnit[]>([]);
-  // const [loadingWeightUnits, setLoadingWeightUnits] = useState(false);
-  // const [isWeightUnitDropdownOpen, setIsWeightUnitDropdownOpen] = useState(false);
-
-  // const [heightUnits, setHeightUnits] = useState<HeightUnit[]>([]);
-  // const [loadingHeightUnits, setLoadingHeightUnits] = useState(false);
-  // const [isHeightUnitDropdownOpen, setIsHeightUnitDropdownOpen] = useState(false);
-
-  // const [bodyTypes, setBodyTypes] = useState<BodyType[]>([]);
-  // const [loadingBodyTypes, setLoadingBodyTypes] = useState(false);
-  // const [popup, setpopup] = useState(true);
-  // const [showPopup, setShowPopup] = useState(false);
-  // const [userMobileNumber, setUserMobileNumber] = useState<string>('');
-  // const [coinBalance, setCoinBalance] = useState<number>(0);
   const [showStudio, setShowStudio] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'studio' | 'lookbook'>('studio');
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // const [isLoggedInn, setIsLoggedInn] = useState(false);
   const [sidebarAnimating, setSidebarAnimating] = useState(false);
   const [currentVersionEntry, setCurrentVersionEntry] = useState<VersionData | null>(null);
-  // const [showProfile, setShowProfile] = useState(false);
-  // const [items, setItems] = useState<VersionData[]>([]);
-  // Split state for section 1 (About You)
+
   const [formDataSection1, setFormDataSection1] = useState<FormDataSection1>({
     first_name: '',
     last_name: '',
@@ -241,16 +173,11 @@ export default function shareFizaaI() {
   const [showPickerone, setShowPickerone] = useState(false);
   const toppcolor = formDataSection234.topColor || '#5578dc';
   const bottommcolor = formDataSection234.bottomColor || '#5578dc';
-  // Add these new state variables after the existing useState declarations
   const [topFabric, setTopFabric] = useState<string | null>(null);
   const [bottomFabric, setBottomFabric] = useState<string | null>(null);
-
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
-  // Add this state variable near the other useState declarations
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  // Add this state variable near the other useState declarations
   const [searchTerm, setSearchTerm] = useState('');
-
   const [animationStep, setAnimationStep] = useState<'idle' | 'ticking' | 'loading' | 'complete'>(
     'idle'
   );
@@ -269,188 +196,55 @@ export default function shareFizaaI() {
   const handleShare = (platform: string) => {
     const shareText = `Check out my AI-generated outfit design on Darzee!`;
     const shareUrl = window.location.href;
-    const imageUrl = generatedImageUrl;
 
     switch (platform) {
       case 'whatsapp': {
-        const whatsappText = imageUrl
-          ? `${shareText}\n\nImage: ${imageUrl}\n\n${shareUrl}`
-          : `${shareText}\n\n${shareUrl}`;
+        const whatsappText = `${shareUrl}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(whatsappText)}`, '_blank');
         break;
       }
-      case 'telegram':
-        if (imageUrl) {
-          window.open(
-            `https://telegram.me/share/url?url=${encodeURIComponent(
-              imageUrl
-            )}&text=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`,
-            '_blank'
-          );
-        } else {
-          window.open(
-            `https://telegram.me/share/url?url=${encodeURIComponent(
-              shareUrl
-            )}&text=${encodeURIComponent(shareText)}`,
-            '_blank'
-          );
-        }
+      case 'telegram': {
+        window.open(`https://telegram.me/share/url?url=${encodeURIComponent(shareUrl)}`, '_blank');
         break;
+      }
       case 'email': {
-        const emailBody = imageUrl
-          ? `${shareText}\n\nView the design: ${shareUrl}\n\nImage: ${imageUrl}`
-          : `${shareText}\n\nView the design: ${shareUrl}`;
+        const emailBody = `$${shareUrl}`;
         window.open(
           `mailto:?subject=${encodeURIComponent(
-            'Check out my AI outfit design'
+            'Check out my AI-generated outfit design on Darzee!'
           )}&body=${encodeURIComponent(emailBody)}`,
           '_blank'
         );
         break;
       }
       case 'twitter': {
-        const twitterText = imageUrl ? `${shareText} ${shareUrl}` : `${shareText} ${shareUrl}`;
+        const twitterText = `${shareUrl}`;
         window.open(
           `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}`,
           '_blank'
         );
         break;
       }
-      case 'facebook':
+      case 'facebook': {
         window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
           '_blank'
         );
         break;
+      }
       case 'copy': {
-        const copyText = imageUrl
-          ? `${shareText}\n\nDesign: ${shareUrl}\nImage: ${imageUrl}`
-          : `${shareText}\n\n${shareUrl}`;
+        const copyText = `${shareText} ${shareUrl}`;
         navigator.clipboard.writeText(copyText).then(() => {
-          alert('Link and image URL copied to clipboard!');
+          alert('Link copied to clipboard!');
         });
         break;
       }
       default:
         break;
     }
+
     setShowShareModal(false);
   };
-
-  // Add this useEffect to fetch skin colors when component mounts
-  // useEffect(() => {
-  //   const fetchSkinColors = async () => {
-  //     setLoadingSkinColors(true);
-  //     setError(null);
-  //     try {
-  //       const response = await api.getRequest('master-data/body-colors');
-
-  //       if (response.status && response.data) {
-  //         setSkinColors(response.data);
-  //       } else {
-  //         setError('Failed to fetch skin colors');
-  //       }
-  //     } catch (err) {
-  //       setError('An error occurred while fetching skin colors');
-  //     } finally {
-  //       setLoadingSkinColors(false);
-  //     }
-  //   };
-
-  //   fetchSkinColors();
-  // }, []);
-
-  // Add this useEffect to fetch weight units when component mounts
-  // useEffect(() => {
-  //   const fetchWeightUnits = async () => {
-  //     setLoadingWeightUnits(true);
-  //     setError(null);
-  //     try {
-  //       const response = await api.getRequest('master-data/weight-units');
-
-  //       if (response.status && response.data) {
-  //         setWeightUnits(response.data);
-
-  //         // Set default weight unit to the first option if available
-  //         if (response.data.length > 0 && !formDataSection1.weightUnit) {
-  //           setFormDataSection1((prev) => ({
-  //             ...prev,
-  //             weightUnit: response.data[0].weightUnit,
-  //           }));
-  //         }
-  //       } else {
-  //         setError('Failed to fetch weight units');
-  //       }
-  //     } catch (err) {
-  //       setError('An error occurred while fetching weight units');
-  //     } finally {
-  //       setLoadingWeightUnits(false);
-  //     }
-  //   };
-
-  //   fetchWeightUnits();
-  // }, []);
-
-  // useEffect(() => {
-  //   const fetchHeightUnits = async () => {
-  //     setLoadingHeightUnits(true);
-  //     setError(null);
-  //     try {
-  //       const response = await api.getRequest('master-data/height-units');
-
-  //       if (response.status && response.data) {
-  //         setHeightUnits(response.data);
-
-  //         // Set default height unit to the first option if available
-  //         if (response.data.length > 0 && !formDataSection1.heightUnit) {
-  //           setFormDataSection1((prev) => ({
-  //             ...prev,
-  //             heightUnit: response.data[0].heightUnit,
-  //           }));
-  //         }
-  //       } else {
-  //         setError('Failed to fetch height units');
-  //       }
-  //     } catch (err) {
-  //       setError('An error occurred while fetching height units');
-  //     } finally {
-  //       setLoadingHeightUnits(false);
-  //     }
-  //   };
-
-  //   fetchHeightUnits();
-  // }, []);
-
-  // Add this useEffect to fetch coin balance when component mounts
-
-  // useEffect(() => {
-  //   // Listen to auth changes and set manual login flag
-  //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
-  //     if (user) {
-  //       setIsLoggedIn(true);
-  //       try {
-  //         const token = await user.getIdToken();
-  //         const response = await api.getRequest('coin/balance', {
-  //           Authorization: `Bearer ${token}`,
-  //           Accept: '*/*',
-  //         });
-
-  //         if (response.status && response.data !== null) {
-  //           setCoinBalance(response.data ?? 0);
-  //         } else {
-  //           setCoinBalance(0);
-  //         }
-  //       } catch {
-  //         setCoinBalance(0);
-  //       }
-  //     } else {
-  //       setCoinBalance(0);
-  //       setIsLoggedIn(false);
-  //     }
-  //   });
-
-  //   return () => unsubscribe();
-  // }, [isLoggedIn, generatedImageUrl, formDataSection1.first_name, currentStep]);
 
   // Add this useEffect to update the fabric URLs whenever fabricImageTop or fabricImageBottom changes
   useEffect(() => {
@@ -575,7 +369,6 @@ export default function shareFizaaI() {
     }));
   }, [formDataSection1]);
 
-  // useEffect(() => {
   //   const fetchBodyTypes = async () => {
   //     if (!formDataSection1.gender) {
   //       return;
@@ -778,6 +571,113 @@ export default function shareFizaaI() {
   //   fetchVersions();
   // }, [isLoggedInn, showStudio, generatedImageUrl]);
 
+  const [hashedId, setHashedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Extract hashedId from URL path dynamically
+    const pathSegments = window.location.pathname.split('/');
+    // Path example: ['', 'image_share', 'aifiza', 'df560fe7-af59-4cda-af21-c85b026d9e48']
+    const id = pathSegments[pathSegments.length - 1];
+    setHashedId(id);
+  }, []);
+
+  async function fetchVersionDataAndSelect() {
+    if (!hashedId) {
+      return;
+    }
+    try {
+      const response = await api.getRequest(`link_share/decode?hashedId=${hashedId}`);
+
+      if (response && response.status && response.data) {
+        const entry = response.data as VersionData;
+        const parsedData = JSON.parse(entry.data);
+
+        // Extract gender from version data
+        const gender = parsedData.aboutYou?.gender || 'male';
+
+        // Update gender state for formDataSection1
+        setFormDataSection1((prev) => ({
+          ...prev,
+          gender: gender,
+        }));
+
+        // Fetch outfit options as per this gender
+        const outfitResponse = await api.getRequest(`master-data/outfits/?gender=${gender}`);
+
+        if (outfitResponse && outfitResponse.status && outfitResponse.data) {
+          setOutfitOptions(outfitResponse.data);
+
+          // Find outfit index from parsedData.selectedOutfit (if available)
+          if (parsedData.selectedOutfit) {
+            const selectedOutfit = outfitResponse.data.find(
+              (outfit: any) => outfit.outfit_name === parsedData.selectedOutfit
+            );
+
+            if (selectedOutfit) {
+              setoutfit_index(selectedOutfit.outfit_index);
+
+              // Fetch stitch options for that outfit
+              const stitchResponse = await api.getRequest(
+                `fiza/outfit/${selectedOutfit.outfit_index}/stitch_options`
+              );
+
+              if (stitchResponse && stitchResponse.status && stitchResponse.data) {
+                setStitchOptionGroups(stitchResponse.data);
+
+                // Update stitch options from parsedData
+                if (parsedData.stitchOptions) {
+                  setFormDataSection234((prev) => ({
+                    ...prev,
+                    stitchOptions: parsedData.stitchOptions,
+                    aboutYou: parsedData.aboutYou,
+                    selectedOutfit: parsedData.selectedOutfit,
+                    topColor: parsedData.topColor,
+                    bottomColor: parsedData.bottomColor,
+                    fabricImageTop: parsedData.fabricImageTop,
+                    fabricImageBottom: parsedData.fabricImageBottom,
+                    colorFabricInstructions: parsedData.colorFabricInstructions,
+                    specialInstructions: parsedData.specialInstructions,
+                  }));
+                }
+              }
+            }
+          }
+
+          // Finally call your existing handleVersionSelect for any additional setup/UI updates
+          handleVersionSelect(entry);
+        } else {
+          setError('Failed to fetch outfit options');
+        }
+      } else {
+        setError('Failed to fetch version data');
+      }
+    } catch (err) {
+      setError('Error fetching version data or dependent data');
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }
+
+  useEffect(() => {
+    // const hashedId = '8873096d-36ad-428c-b4e5-4f8b7c1d69c3'; // dynamic or hardcoded
+
+    fetchVersionDataAndSelect();
+  }, [hashedId]);
+
+  useEffect(() => {
+    if (pendingVersionData && outfitOptions.length > 0) {
+      handleVersionSelect(pendingVersionData);
+      setPendingVersionData(null);
+    }
+  }, [pendingVersionData, outfitOptions]);
+
+  useEffect(() => {
+    if (!hashedId) {
+      return;
+    }
+    fetchVersionDataAndSelect();
+  }, [hashedId]);
+
   const handleVersionSelect = (entry: VersionData) => {
     try {
       if (window.innerWidth < 768) {
@@ -869,11 +769,6 @@ export default function shareFizaaI() {
       console.error('Error parsing version data:', error);
     }
   };
-
-  // Update form data for section 1
-  // const updateFormDataSection1 = (field: keyof FormDataSection1, value: any) => {
-  //   setFormDataSection1((prev) => ({ ...prev, [field]: value }));
-  // };
 
   // Update form data for sections 2, 3, and 4
   const updateFormDataSection234 = (
@@ -1054,83 +949,11 @@ export default function shareFizaaI() {
     }
   };
 
-  // eslint-disable-next-line no-console
-  // console.log(generatedImageUrl);
-
   // Find selected outfit details
   const selectedOutfitDetails = outfitOptions.find(
     (outfit) => outfit.outfit_name === formDataSection234.selectedOutfit
   );
 
-  // Add this function before the return statement
-  // const handleRegisterUser = async () => {
-  //   try {
-  //     // Check if we have a mobile number
-  //     if (!userMobileNumber) {
-  //       alert('Mobile number is missing. Please try signing up again.');
-
-  //       return;
-  //     }
-
-  //     // Prepare the request body using form data
-  //     const requestBody = {
-  //       mobileNumber: userMobileNumber,
-  //       userPreference: {
-  //         gender: formDataSection1.gender,
-  //         height: parseFloat(formDataSection1.height),
-  //         heightUnit: formDataSection1.heightUnit,
-  //         weight: parseFloat(formDataSection1.weight),
-  //         weightUnit: formDataSection1.weightUnit,
-  //         bodyType: formDataSection1.bodyType,
-  //         colorCode: formDataSection1.skinColor,
-  //         age: formDataSection1.age,
-  //         profilePicture: formDataSection1.profilePicture?.[0]?.short_lived_url || '',
-  //       },
-  //       first_name: formDataSection1.first_name,
-  //       last_name: formDataSection1.last_name,
-  //     };
-
-  //     // Make the API call using the api utility
-  //     const response = await api.postRequest('auth/user/register', requestBody);
-
-  //     // Handle the response
-  //     if (response.status && response.data) {
-  //       // Store user data in localStorage
-  //       const userData = {
-  //         user: {
-  //           first_name: formDataSection1.first_name,
-  //           last_name: formDataSection1.last_name,
-  //           phoneNumber: userMobileNumber,
-  //           userPreference: {
-  //             gender: formDataSection1.gender,
-  //             age: formDataSection1.age,
-  //             weight: parseFloat(formDataSection1.weight),
-  //             height: parseFloat(formDataSection1.height),
-  //             bodyType: formDataSection1.bodyType,
-  //             colorCode: formDataSection1.skinColor,
-  //             weightUnit: formDataSection1.weightUnit,
-  //             heightUnit: formDataSection1.heightUnit,
-  //             profilePicture: formDataSection1.profilePicture?.[0]?.short_lived_url || '',
-  //           },
-  //         },
-  //       };
-  //       localStorage.setItem('fizaaiuser', JSON.stringify(userData));
-
-  //       // If registration is successful, proceed to the next step
-  //       setShowStudio(false);
-  //       handleNext();
-  //     } else {
-  //       // If there's an error, show an alert or handle it appropriately
-  //       alert('Registration failed. Please try again.');
-  //     }
-  //   } catch (error) {
-  //     // eslint-disable-next-line no-console
-  //     console.error('Error registering user:', error);
-  //     alert('An error occurred during registration. Please try again.');
-  //   }
-  // };
-
-  // Add this function before the return statement
   const isAboutYouSectionValid = () => {
     return (
       formDataSection1.first_name !== '' &&
@@ -1144,48 +967,6 @@ export default function shareFizaaI() {
       formDataSection1.heightUnit !== ''
     );
   };
-
-  // // eslint-disable-next-line no-console
-  // console.log(generatedImageUrl);
-
-  // // eslint-disable-next-line no-console
-  // console.log(formDataSection234);
-
-  // const handleNewOutfit = () => {
-  //   // Check if user is already on a fresh/new outfit
-  //   const isOnNewOutfit =
-  //     currentStep === 1 ||
-  //     (currentStep === 2 && !formDataSection234.selectedOutfit) ||
-  //     (currentStep > 2 && !formDataSection234.selectedOutfit && !generatedImageUrl);
-
-  //   // If already on new outfit, do nothing
-  //   if (isOnNewOutfit) {
-  //     setCurrentStep(2);
-
-  //     return;
-  //   }
-
-  //   // Reset to create new outfit
-  //   setCurrentStep(2); // Start from outfit selection
-  //   setFormDataSection234({
-  //     aboutYou: formDataSection1,
-  //     selectedOutfit: null,
-  //     topColor: null,
-  //     bottomColor: null,
-  //     fabricImageTop: undefined,
-  //     fabricImageBottom: undefined,
-  //     colorFabricInstructions: '',
-  //     specialInstructions: '',
-  //     stitchOptions: {},
-  //   });
-  //   setGeneratedImageUrl(null);
-  //   setCurrentVersionEntry(null);
-  //   setAnimationStep('idle');
-  //   setTickedOptions(new Set());
-  //   setoutfit_index(undefined);
-  //   setStitchOptionGroups([]);
-  //   setShowMobilePreview(false);
-  // };
 
   // Function to download the generated image
   const handleDownloadImage = async () => {
@@ -1242,27 +1023,7 @@ export default function shareFizaaI() {
               setSidebarAnimating(false);
             }
           }}
-        >
-          {/* <StudioSidebar
-            setShowStudio={(value) => {
-              if (!value) {
-                setShowStudio(false);
-              } else {
-                setShowStudio(true);
-              }
-            }}
-            generatedImageUrl={generatedImageUrl}
-            onVersionSelect={handleVersionSelect}
-            showProfile={showProfile}
-            setShowProfile={setShowProfile}
-            items={items}
-            onNewOutfit={handleNewOutfit}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-
-            // This now expects the entire entry object
-          /> */}
-        </div>
+        ></div>
       )}
 
       {/* Main Content Area */}
@@ -1278,18 +1039,6 @@ export default function shareFizaaI() {
         }`}
       >
         {/* signup-popup */}
-        {/* {popup && (
-          <div className="fixed inset-0 z-[900] flex items-center justify-center bg-[#756f6f98]">
-            <div className="md:w-[450px] rounded-lg border bg-white shadow-sm mx-[.5rem]">
-              <SignupFlow
-                popup={popup}
-                setPopup={setpopup}
-                setCurrentStep1={setCurrentStep}
-                onMobileNumberVerified={(mobileNumber) => setUserMobileNumber(mobileNumber)}
-              />
-            </div>
-          </div>
-        )} */}
 
         {/* Header */}
         <header className="w-full  md:px-6 px-4 py-2 border-b border-gray-200 bg-white sticky top-0 z-50">
@@ -1388,331 +1137,19 @@ export default function shareFizaaI() {
             <div className="flex items-center justify-end gap-2 md:gap-4 w-1/2">
               <div className="flex items-center gap-2 md:gap-3 py-1.5 rounded-full cursor-pointer transition-all duration-300">
                 <button
-                  onClick={() => handleVersionSelect(versionSample)}
+                  // onClick={() => handleVersionSelect(versionSample)}
                   className="flex items-center bg-[#79539F] hover:bg-green-700 text-white px-3 py-1 rounded-md text-[.8rem] md:text-[1rem] font-medium transition"
                 >
                   Sign Up
                 </button>
               </div>
-
-              {/* <div className="hidden md:flex items-center gap-2">
-                <img src={share} alt="Share Icon" className="h-5 md:h-6 aspect-auto" />
-                <h1 className="text-[1.1rem] md:text-[1.4rem] font-medium text-black">
-                  Share &kill fast fashion
-                </h1>
-              </div> */}
-
-              {/* Logout */}
-              {/* <div
-                onClick={() => {
-                  localStorage.setItem('token', '');
-                  localStorage.clear();
-                  window.location.reload();
-                }}
-                className="hidden md:flex items-center gap-2 cursor-pointer"
-              >
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#4f2945] flex items-center justify-center text-white sm:text-[1.2rem] font-semibold">
-                  {(() => {
-                    const storedData = localStorage.getItem('fizaaiuser');
-
-                    if (storedData) {
-                      try {
-                        const userData = JSON.parse(storedData);
-                        const firstName = userData?.user?.first_name || '';
-                        const lastName = userData?.user?.last_name || '';
-                        const fullName = `${firstName} ${lastName}`.trim();
-
-                        return fullName.charAt(0).toUpperCase();
-
-                        // Display first letter of full name
-                      } catch {
-                        return 'A'; // Fallback
-                      }
-                    }
-
-                    return 'A'; // Fallback
-                  })()}
-                </div>
-              </div> */}
             </div>
           </div>
         </header>
 
         {/* {showPopup && <TokenPopup onClose={() => setShowPopup(false)} />} */}
 
-        {currentStep === 1 && (
-          <div></div>
-          // <div
-          //   style={{
-          //     scrollbarWidth: 'none',
-          //     msOverflowStyle: 'none',
-          //   }}
-          //   className="w-full md:w-[70%] md:mb-8 mb-[3.5rem] flex flex-col md:gap-4 gap-3  px-4 overflow-y-scroll pt-4"
-          // >
-          //   {/* Profile Picture */}
-          //   <div className="mb-4 relative">
-          //     <label className="block mb-3 font-medium text-sm md:text-base">Profile Picture</label>
-          //     {/* Profile Picture Preview */}
-
-          //     <BulkImageUploadFieldp
-          //       label="Upload Profile Picture"
-          //       placeholder="Upload Profile Picture"
-          //       type="file"
-          //       required={false}
-          //       multiple={true}
-          //       maxUpload={1}
-          //       fileTypeRequired={false}
-          //       value={formDataSection1.profilePicture}
-          //       onChange={(value: any) => {
-          //         updateFormDataSection1('profilePicture', value);
-          //       }}
-          //     />
-          //   </div>
-          //   {/* Gender Selection */}
-          //   <div className="mb-4">
-          //     <label className="block mb-3 font-medium text-sm md:text-base">Gender</label>
-          //     <div className="flex gap-3 md:gap-4">
-          //       <button
-          //         className={`flex-1 md:flex-none md:px-6 px-4 py-2.5 md:py-2 rounded-md text-sm md:text-base font-medium transition-colors ${
-          //           formDataSection1.gender === 'male'
-          //             ? 'bg-[#79539f] text-white'
-          //             : 'bg-white border border-[#79539F] text-[#79539F]'
-          //         }`}
-          //         onClick={() => updateFormDataSection1('gender', 'male')}
-          //       >
-          //         Male
-          //       </button>
-          //       <button
-          //         className={`flex-1 md:flex-none md:px-6 px-4 py-2.5 md:py-2 rounded-md text-sm md:text-base font-medium transition-colors ${
-          //           formDataSection1.gender === 'female'
-          //             ? 'bg-[#79539f] text-white'
-          //             : 'bg-white border border-[#79539F] text-[#79539F]'
-          //         }`}
-          //         onClick={() => updateFormDataSection1('gender', 'female')}
-          //       >
-          //         Female
-          //       </button>
-          //     </div>
-          //   </div>
-
-          //   {/* First Name and Last Name */}
-          //   <div className="flex flex-col md:flex-row md:gap-6 gap-4">
-          //     <div className="flex-1">
-          //       <label className="block mb-2 font-medium text-sm md:text-base">First Name</label>
-          //       <input
-          //         type="text"
-          //         className="w-full px-3 md:px-4 py-2.5 md:py-2 border border-[#79539F] rounded-md text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-[#79539F] focus:border-transparent"
-          //         value={formDataSection1.first_name}
-          //         onChange={(e) => updateFormDataSection1('first_name', e.target.value)}
-          //         placeholder="Enter your first name"
-          //       />
-          //     </div>
-          //     <div className="flex-1">
-          //       <label className="block mb-2 font-medium text-sm md:text-base">Last Name</label>
-          //       <input
-          //         type="text"
-          //         className="w-full px-3 md:px-4 py-2.5 md:py-2 border border-[#79539F] rounded-md text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-[#79539F] focus:border-transparent"
-          //         value={formDataSection1.last_name}
-          //         onChange={(e) => updateFormDataSection1('last_name', e.target.value)}
-          //         placeholder="Enter your last name"
-          //       />
-          //     </div>
-          //   </div>
-
-          //   {/* Age and Weight */}
-          //   <div className="flex flex-col md:flex-row md:gap-6 gap-4">
-          //     <div className="flex-1">
-          //       <label className="block mb-2 font-medium text-sm md:text-base">Age</label>
-          //       <input
-          //         type="text"
-          //         className="w-full px-3 md:px-4 py-2.5 md:py-2 border border-[#79539F] rounded-md text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-[#79539F] focus:border-transparent"
-          //         value={formDataSection1.age}
-          //         onChange={(e) => updateFormDataSection1('age', e.target.value)}
-          //         placeholder="Enter your age"
-          //       />
-          //     </div>
-          //     <div className="flex-1">
-          //       <label className="block mb-2 font-medium text-sm md:text-base">Weight</label>
-          //       <div className="flex">
-          //         <input
-          //           type="text"
-          //           className="w-full px-3 md:px-4 py-2.5 md:py-2 border border-[#79539F] rounded-l-md text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-[#79539F] focus:border-transparent"
-          //           value={formDataSection1.weight}
-          //           onChange={(e) => updateFormDataSection1('weight', e.target.value)}
-          //           placeholder="Enter your weight"
-          //         />
-          //         <div className="relative">
-          //           <button
-          //             type="button"
-          //             className="flex items-center px-2 md:px-3 py-2.5 md:py-2 border border-l-0 border-[#79539F] rounded-r-md bg-white hover:bg-gray-50 min-w-[80px] md:min-w-[100px] text-sm md:text-base"
-          //             onClick={() => setIsWeightUnitDropdownOpen(!isWeightUnitDropdownOpen)}
-          //             disabled={loadingWeightUnits}
-          //           >
-          //             <span className="mr-1 md:mr-2 truncate">
-          //               {loadingWeightUnits ? '...' : formDataSection1.weightUnit || 'Select'}
-          //             </span>
-          //             <FaChevronDown size={12} className="md:w-4 md:h-4 flex-shrink-0" />
-          //           </button>
-          //           {isWeightUnitDropdownOpen && !loadingWeightUnits && (
-          //             <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-20 max-h-40 overflow-y-auto">
-          //               {weightUnits.map((unit) => (
-          //                 <button
-          //                   key={unit.id}
-          //                   type="button"
-          //                   className="w-full px-3 py-2 text-left hover:bg-gray-50 first:rounded-t-md last:rounded-b-md text-sm md:text-base"
-          //                   onClick={() => {
-          //                     updateFormDataSection1('weightUnit', unit.weightUnit);
-          //                     setIsWeightUnitDropdownOpen(false);
-          //                   }}
-          //                 >
-          //                   {unit.weightUnit}
-          //                 </button>
-          //               ))}
-          //             </div>
-          //           )}
-          //         </div>
-          //       </div>
-          //     </div>
-          //   </div>
-
-          //   {/* Height */}
-          //   <div className="mb-4">
-          //     <label className="block mb-2 font-medium text-sm md:text-base">Height</label>
-          //     <div className="flex">
-          //       <input
-          //         type="text"
-          //         className="w-full px-3 md:px-4 py-2.5 md:py-2 border border-[#79539F] rounded-l-md text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-[#79539F] focus:border-transparent"
-          //         value={formDataSection1.height}
-          //         onChange={(e) => updateFormDataSection1('height', e.target.value)}
-          //         placeholder="Enter your height"
-          //       />
-          //       <div className="relative">
-          //         <button
-          //           type="button"
-          //           className="flex items-center px-2 md:px-3 py-2.5 md:py-2 border border-l-0 border-[#79539F] rounded-r-md bg-white hover:bg-gray-50 min-w-[80px] md:min-w-[100px] text-sm md:text-base"
-          //           onClick={() => setIsHeightUnitDropdownOpen(!isHeightUnitDropdownOpen)}
-          //           disabled={loadingHeightUnits}
-          //         >
-          //           <span className="mr-1 md:mr-2 truncate">
-          //             {loadingHeightUnits ? '...' : formDataSection1.heightUnit || 'Select'}
-          //           </span>
-          //           <FaChevronDown size={12} className="md:w-4 md:h-4 flex-shrink-0" />
-          //         </button>
-          //         {isHeightUnitDropdownOpen && !loadingHeightUnits && (
-          //           <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-20 max-h-40 overflow-y-auto">
-          //             {heightUnits.map((unit) => (
-          //               <button
-          //                 key={unit.id}
-          //                 type="button"
-          //                 className="w-full px-3 py-2 text-left hover:bg-gray-50 first:rounded-t-md last:rounded-b-md text-sm md:text-base"
-          //                 onClick={() => {
-          //                   updateFormDataSection1('heightUnit', unit.heightUnit);
-          //                   setIsHeightUnitDropdownOpen(false);
-          //                 }}
-          //               >
-          //                 {unit.heightUnit}
-          //               </button>
-          //             ))}
-          //           </div>
-          //         )}
-          //       </div>
-          //     </div>
-          //   </div>
-
-          //   {/* Body Type Selection */}
-          //   <div className="mb-4">
-          //     <label className="block mb-3 font-medium text-sm md:text-base">
-          //       Select body type
-          //     </label>
-          //     {loadingBodyTypes ? (
-          //       <div className="flex justify-center items-center h-16">
-          //         <div className="animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-t-2 border-b-2 border-[#79539f]"></div>
-          //       </div>
-          //     ) : (
-          //       <div
-          //         className="flex gap-3 md:gap-4 overflow-x-auto pb-2"
-          //         style={{
-          //           scrollbarWidth: 'none',
-          //           msOverflowStyle: 'none',
-          //         }}
-          //       >
-          //         {bodyTypes.map((bodyType) => (
-          //           <button
-          //             key={bodyType.id}
-          //             className={`px-6 py-2 rounded-md flex flex-col items-center justify-center text-[1rem] font-light relative ${
-          //               formDataSection1.bodyType === bodyType.bodyType
-          //                 ? 'bg-[#79539f  border-2 border-[#79539F]  text-black shadow-md '
-          //                 : 'bg-white border border-[#79539F] '
-          //             }`}
-          //             onClick={() => updateFormDataSection1('bodyType', bodyType.bodyType)}
-          //           >
-          //             {/* Checkmark for selected state */}
-          //             {formDataSection1.bodyType === bodyType.bodyType && (
-          //               <div className="absolute top-1 md:top-2 right-1 md:right-2 w-4 h-4 md:w-6 md:h-6 bg-white rounded-full flex items-center justify-center">
-          //                 <FaCheckCircle className="text-[#79539f] text-xs md:text-sm" />
-          //               </div>
-          //             )}
-          //             <img
-          //               src={bodyType.imageUrl || ''}
-          //               alt={bodyType.bodyType}
-          //               className="h-16 w-12 md:min-h-[115px] md:min-w-[90px] object-contain mb-1 md:mb-2"
-          //             />
-          //             <span className="text-center leading-tight">{bodyType.bodyType}</span>
-          //           </button>
-          //         ))}
-          //       </div>
-          //     )}
-          //   </div>
-
-          //   {/* Skin Color Selection */}
-          //   <div className="md:mb-1 mb-[4rem]">
-          //     <label className="block  font-medium text-sm md:text-base">Select skin color</label>
-          //     {loadingSkinColors ? (
-          //       <div className="flex justify-center items-center h-16">
-          //         <div className="animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-t-2 border-b-2 border-[#79539f]"></div>
-          //       </div>
-          //     ) : (
-          //       <div
-          //         className="flex gap-3 md:gap-4 overflow-x-auto h-fit py-8 px-2 "
-          //         style={{
-          //           scrollbarWidth: 'none',
-          //           msOverflowStyle: 'none',
-          //         }}
-          //       >
-          //         {skinColors.map((color) => (
-          //           <button
-          //             key={color.id}
-          //             className={`flex-shrink-0 w-10 h-10 md:w-10 md:h-10 rounded-full border-2 transition-all ${
-          //               formDataSection1.skinColor === color.colorCode
-          //                 ? 'border-[#79539f] ring-1 ring-offset-1 ring-[#79539f] scale-110'
-          //                 : 'border-gray-300 hover:border-[#79539f]'
-          //             }`}
-          //             style={{ backgroundColor: color.colorCode }}
-          //             onClick={() => updateFormDataSection1('skinColor', color.colorCode)}
-          //             title={`Skin tone ${color.id}`}
-          //           />
-          //         ))}
-          //       </div>
-          //     )}
-          //   </div>
-
-          //   {/* Next Button */}
-          //   <div className="fixed bottom-0 left-0 right-0 md:relative md:bottom-auto md:left-auto md:right-auto bg-white md:bg-transparent border-t md:border-t-0 border-gray-200 md:border-gray-0 p-4 md:p-0 z-30">
-          //     <button
-          //       onClick={currentStep === 1 ? handleRegisterUser : handleNext}
-          //       disabled={currentStep === 1 && !isAboutYouSectionValid()}
-          //       className={`flex items-center justify-center w-full md:max-w-xs md:mx-auto px-6 py-3 md:py-3 rounded-md text-sm md:text-base font-medium transition-colors ${
-          //         currentStep === 1 && !isAboutYouSectionValid()
-          //           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          //           : 'bg-[#4f2945] text-white hover:bg-[#3d1f35]'
-          //       }`}
-          //     >
-          //       <span>Save</span>
-          //       <FaArrowRight className="ml-2" size={16} />
-          //     </button>
-          //   </div>
-          // </div>
-        )}
+        {currentStep === 1 && <div></div>}
 
         <div className="flex flex-1 w-full ">
           {/* Left side - Form (50%) */}

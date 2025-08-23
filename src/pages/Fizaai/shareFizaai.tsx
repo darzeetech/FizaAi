@@ -344,9 +344,13 @@ export default function shareFizaaI() {
           });
 
           // Update the form data with initial stitch options
+          // Only reset if the outfit type changes, otherwise preserve selection
           setFormDataSection234((prev) => ({
             ...prev,
-            stitchOptions: initialStitchOptions,
+            stitchOptions:
+              prev.selectedOutfit !== formDataSection234.selectedOutfit
+                ? initialStitchOptions
+                : prev.stitchOptions,
           }));
         } else {
           setError('Failed to fetch stitch options');

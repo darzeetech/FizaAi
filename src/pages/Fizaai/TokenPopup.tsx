@@ -216,7 +216,7 @@ const TokenPopup: React.FC<TokenPopupProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center px-2 sm:px-4">
+    <div className="fixed inset-0 z-[500] bg-black bg-opacity-50 flex justify-center items-center px-2 sm:px-4">
       <div className="bg-white rounded-xl w-full max-w-[95%] sm:max-w-md p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}

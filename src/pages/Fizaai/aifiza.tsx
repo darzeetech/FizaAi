@@ -253,6 +253,8 @@ export default function FizaAI() {
   const [isGeneratingShareLink, setIsGeneratingShareLink] = useState(false);
   // const [shareStep, setShareStep] = useState<'ready' | 'generating' | 'done'>('ready');
   const [showShareSuccessModal, setShowShareSuccessModal] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);
@@ -324,10 +326,23 @@ export default function FizaAI() {
     setIsGeneratingShareLink(true);
     setShareLink(null); // reset any existing link
 
+    let outfitName = '';
+
+    if (formDataSection234 && formDataSection234.selectedOutfit) {
+      outfitName = formDataSection234.selectedOutfit;
+    } else if (currentVersionEntry.data) {
+      try {
+        const parsed = JSON.parse(currentVersionEntry.data);
+        outfitName = parsed.selectedOutfit || '';
+      } catch {
+        outfitName = '';
+      }
+    }
+
     try {
       const requestBody = {
         imageId: currentVersionEntry.id,
-        parameters: ['aifiza'], // add any parameters as needed
+        parameters: [`outfit_${outfitName}`], // add any parameters as needed
       };
       // Adjust the API endpoint as per your backend for share link creation
       const response = await api.postRequest(`link_share/generate`, requestBody);
@@ -352,6 +367,10 @@ export default function FizaAI() {
       setIsGeneratingShareLink(false);
     }
   };
+
+  useEffect(() => {
+    setIsImageLoaded(false);
+  }, [generatedImageUrl]);
 
   // Add this useEffect to fetch skin colors when component mounts
   useEffect(() => {
@@ -1212,6 +1231,8 @@ export default function FizaAI() {
       return;
     }
 
+    setIsDownloading(true);
+
     // setIsDownloading(true); // Show loader
 
     const version = currentVersionEntry?.version ?? 1;
@@ -1244,6 +1265,7 @@ export default function FizaAI() {
       alert('Could not force download – image opened in a new tab instead.');
     } finally {
       // setIsDownloading(false); // Hide loader
+      setIsDownloading(false);
     }
   };
 
@@ -2451,26 +2473,54 @@ export default function FizaAI() {
                   />
                   <h2 className="text-xl font-medium ">Preview</h2>
                 </div>
-                <div className="flex items-center md:gap-7 gap-4">
-                  <img
-                    src={share}
-                    alt="Share outfit"
-                    className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                    onClick={() => setShowShareModal(true)}
-                  />
-                  <img
-                    src={download}
-                    alt="Download outfit"
-                    className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                    onClick={handleDownloadImage}
-                  />
-                  <img
-                    onClick={() => handleShare('whatsapp')}
-                    src={whatapp}
-                    alt=""
-                    className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                  />
-                </div>
+                {isImageLoaded && (
+                  <div className="flex items-center md:gap-7 gap-4">
+                    <img
+                      src={share}
+                      alt="Share outfit"
+                      className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                      onClick={() => setShowShareModal(true)}
+                    />
+                    {isDownloading ? (
+                      <div className="md:h-8 h-6 flex items-center justify-center">
+                        <svg
+                          className="animate-spin h-6 w-6 "
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="#79539F"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="#79539F"
+                            d="M4 12a8 8 0 018-8v8H4z"
+                          ></path>
+                        </svg>
+                      </div>
+                    ) : (
+                      <img
+                        src={download}
+                        alt="Download outfit"
+                        className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                        onClick={handleDownloadImage}
+                      />
+                    )}
+
+                    <img
+                      onClick={() => handleShare('whatsapp')}
+                      src={whatapp}
+                      alt=""
+                      className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="border border-gray-200 rounded-3xl min-h-[calc(100vh-192px)] max-h-[calc(100vh-152px)] flex flex-col items-center justify-center py-4 flex-wrap overflow-y-scroll md:pt-[4rem custom-scrollbar">
@@ -2629,6 +2679,8 @@ export default function FizaAI() {
                             <img
                               src={generatedImageUrl}
                               alt="Generated outfit preview"
+                              onLoad={() => setIsImageLoaded(true)}
+                              onError={() => setIsImageLoaded(false)}
                               className="w-full max-w-full h-auto max-h-[calc(100vh-250px)] object-contain rounded-lg"
                             />
                             <div className="text-sm text-gray-600 mb-4">
@@ -2814,12 +2866,19 @@ export default function FizaAI() {
 
         {/* Share Modal */}
         {showShareModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[500] px-4">
             {/* White card container */}
-            <div className="bg-white rounded-2xl shadow-lg flex flex-col items-center w-[430px] max-w-full px-6 py-6">
+            <div className="bg-white rounded-2xl shadow-lg flex flex-col items-center max-w-[430px] w-full px-4 sm:px-6 py-6">
               {/* Title */}
-              <div className="w-full text-left font-medium text-[17px] mb-6">
-                Share public link to chat
+              {/* Title + Close Button */}
+              <div className="w-full flex items-center justify-between mb-6">
+                <div className="text-left font-medium text-[17px]">Share public link to chat</div>
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  <FaTimes size={20} />
+                </button>
               </div>
 
               {/* Warning Banner */}
@@ -2854,7 +2913,7 @@ export default function FizaAI() {
                     setShowShareSuccessModal(true);
                   }
                 }}
-                className="flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-full bg-[#493041] hover:bg-[#2d1b26] text-white text-[14px] font-medium transition disabled:opacity-70"
+                className="flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-full bg-[#493041] hover:bg-[#2d1b26] text-white text-[14px] font-medium transition disabled:opacity-70 mx-auto"
                 disabled={isGeneratingShareLink}
               >
                 <LuLink size={20} className="mr-1" />
@@ -2863,10 +2922,9 @@ export default function FizaAI() {
             </div>
           </div>
         )}
-
         {showShareSuccessModal && shareLink && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[500]">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[500] px-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Share Your Design</h3>
                 <button
@@ -2874,6 +2932,28 @@ export default function FizaAI() {
                   className="text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   <FaTimes size={20} />
+                </button>
+              </div>
+
+              {/* Share Link with copy button */}
+              <div className="flex items-center border border-gray-300 rounded-md p-2 mb-6">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareLink}
+                  className="flex-grow border-none focus:outline-none text-gray-700 text-sm px-2 truncate"
+                  aria-label="Share link"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(shareLink);
+                    alert('Link copied to clipboard!');
+                  }}
+                  className="ml-2 p-2 rounded bg-[#79539F] hover:bg-[#633a84] text-white transition"
+                  title="Copy share link"
+                  aria-label="Copy share link"
+                >
+                  <FaCopy size={18} />
                 </button>
               </div>
 
@@ -2885,7 +2965,6 @@ export default function FizaAI() {
                   <img src={whatapp} alt="WhatsApp" className="h-6 w-6" />
                   <span>WhatsApp</span>
                 </button>
-
                 <button
                   onClick={() => handleShare('telegram')}
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -2893,7 +2972,6 @@ export default function FizaAI() {
                   <FaTelegramPlane className="h-6 w-6 text-[#79539F]" />
                   <span>Telegram</span>
                 </button>
-
                 <button
                   onClick={() => handleShare('email')}
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -2901,7 +2979,6 @@ export default function FizaAI() {
                   <FaEnvelope className="h-6 w-6 text-[#79539F]" />
                   <span>Email</span>
                 </button>
-
                 <button
                   onClick={() => handleShare('twitter')}
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -2909,7 +2986,6 @@ export default function FizaAI() {
                   <FaTwitter className="h-6 w-6 text-[#79539F]" />
                   <span>Twitter</span>
                 </button>
-
                 <button
                   onClick={() => handleShare('facebook')}
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -2917,7 +2993,6 @@ export default function FizaAI() {
                   <FaFacebookF className="h-6 w-6 text-[#79539F]" />
                   <span>Facebook</span>
                 </button>
-
                 <button
                   onClick={() => handleShare('copy')}
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"

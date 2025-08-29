@@ -185,6 +185,7 @@ export default function shareFizaaI() {
   const [tickedOptions, setTickedOptions] = useState<Set<string>>(new Set());
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const navigate = useNavigate();
 
   const handleShowStudio = () => {
@@ -196,7 +197,7 @@ export default function shareFizaaI() {
   };
 
   const handleShare = (platform: string) => {
-    const shareText = `Check out my AI-generated outfit design on Darzee!`;
+    // const shareText = `Check out my AI-generated outfit design on Darzee!`;
     const shareUrl = window.location.href;
 
     switch (platform) {
@@ -235,7 +236,7 @@ export default function shareFizaaI() {
         break;
       }
       case 'copy': {
-        const copyText = `${shareText} ${shareUrl}`;
+        const copyText = `${shareUrl}`;
         navigator.clipboard.writeText(copyText).then(() => {
           alert('Link copied to clipboard!');
         });
@@ -358,208 +359,6 @@ export default function shareFizaaI() {
       aboutYou: formDataSection1,
     }));
   }, [formDataSection1]);
-
-  //   const fetchBodyTypes = async () => {
-  //     if (!formDataSection1.gender) {
-  //       return;
-  //     }
-
-  //     setLoadingBodyTypes(true);
-  //     setError(null);
-  //     try {
-  //       const genderId = formDataSection1.gender === 'male' ? 1 : 2;
-  //       const response = await api.getRequest(`master-data/body-types/gender?genderId=${genderId}`);
-
-  //       if (response.status && response.data) {
-  //         setBodyTypes(response.data);
-  //         // Only reset bodyType if it's not valid for the current gender
-  //         // Check if current bodyType exists in the new data
-  //         const currentBodyType = formDataSection1.bodyType;
-  //         const isCurrentBodyTypeValid = response.data.some(
-  //           (bt: BodyType) => bt.bodyType === currentBodyType
-  //         );
-
-  //         if (!isCurrentBodyTypeValid && currentBodyType !== '') {
-  //           // Reset bodyType only if it's not valid for the current gender
-  //           setFormDataSection1((prev) => ({
-  //             ...prev,
-  //             bodyType: '',
-  //           }));
-  //         }
-  //       } else {
-  //         setError('Failed to fetch body types');
-  //       }
-  //     } catch (err) {
-  //       setError('An error occurred while fetching body types');
-  //     } finally {
-  //       setLoadingBodyTypes(false);
-  //     }
-  //   };
-
-  //   fetchBodyTypes();
-  // }, [formDataSection1.gender]);
-
-  // Group all effects
-  // useEffect(() => {
-  //   if (popup) {
-  //     document.body.style.overflow = 'hidden';
-  //   } else {
-  //     document.body.style.overflow = 'unset';
-  //   }
-  // }, [popup]);
-
-  // Add this useEffect after your other useEffect hooks
-  // useEffect(() => {
-  //   // Try to get user data from localStorage
-  //   try {
-  //     const storedUserData = localStorage.getItem('fizaaiuser');
-
-  //     if (storedUserData) {
-  //       const userData = JSON.parse(storedUserData);
-
-  //       if (userData.user) {
-  //         // Update formDataSection1 with the user data
-  //         setFormDataSection1((prevData) => ({
-  //           ...prevData,
-  //           first_name: userData.user.first_name || '',
-  //           last_name: userData.user.last_name || '',
-  //           gender: userData.user.userPreference?.gender || 'male',
-  //           age: userData.user.userPreference?.age || '',
-  //           weight: userData.user.userPreference?.weight?.toString() || '',
-  //           height: userData.user.userPreference?.height?.toString() || '',
-  //           bodyType: userData.user.userPreference?.bodyType || '',
-  //           skinColor: userData.user.userPreference?.colorCode || '',
-  //           weightUnit: userData.user.userPreference?.weightUnit || '',
-  //           heightUnit: userData.user.userPreference?.heightUnit || '',
-  //           profilePicture: userData.user.userPreference?.profilePicture
-  //             ? [{ short_lived_url: userData.user.userPreference.profilePicture }]
-  //             : undefined,
-  //         }));
-
-  //         // If you need to set the mobile number as well
-  //         if (userData.user.phoneNumber) {
-  //           setUserMobileNumber(userData.user.phoneNumber);
-  //         }
-  //       }
-  //     }
-  //   } catch (error) {
-  //     // eslint-disable-next-line no-console
-  //     console.error('Error loading user data from localStorage:', error);
-  //   }
-  // }, [showStudio]);
-
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     if (user) {
-  //       setIsLoggedInn(true);
-  //     } else {
-  //       setItems([]); // Clear versions on logout
-  //       setIsLoggedInn(false);
-  //     }
-  //   });
-
-  //   return () => unsubscribe();
-  // }, []);
-
-  // ? Step 2: When logged in, fetch versions
-  // useEffect(() => {
-  //   if (!isLoggedInn) {
-  //     return;
-  //   }
-
-  //   const fetchVersions = async () => {
-  //     let zone = 'Asia/Kolkata'; // default fallback
-
-  //     try {
-  //       // 1?? Try to get data from localStorage first
-  //       const savedData = localStorage.getItem('ipapidata');
-
-  //       if (savedData) {
-  //         const ipData = JSON.parse(savedData);
-
-  //         if (ipData?.timezone) {
-  //           zone = ipData.timezone;
-  //         }
-  //       } else {
-  //         // 2?? Not in localStorage — fetch from API
-  //         const ipRes = await fetch('https://ipapi.co/json/');
-
-  //         if (ipRes.ok) {
-  //           const ipData = await ipRes.json();
-  //           // Save full response for future use
-  //           localStorage.setItem('ipapidata', JSON.stringify(ipData));
-  //           // eslint-disable-next-line no-console
-  //           console.log('User timezone:', zone);
-
-  //           if (ipData?.timezone) {
-  //             zone = ipData.timezone;
-  //           }
-  //         }
-  //       }
-  //     } catch (ipError) {
-  //       // eslint-disable-next-line no-console
-  //       console.warn('Failed to get timezone, using default:', ipError);
-  //     }
-
-  //     // You can now use `zone`
-
-  //     try {
-  //       const user = auth.currentUser;
-
-  //       if (!user) {
-  //         return;
-  //       }
-
-  //       const token = await user.getIdToken();
-
-  //       // Fetch parent versions
-  //       const parentRes = await api.getRequest(
-  //         'fiza/image/versions?pageNo=0&pageSize=100&sortBy=id&sortDir=DESC',
-  //         {
-  //           Authorization: `Bearer ${token}`,
-  //           Accept: '*/*',
-  //           'time-zone': zone,
-  //         }
-  //       );
-
-  //       const parents: VersionData[] = parentRes?.data?.content || [];
-
-  //       // Fetch child versions
-  //       const childrenRequests = parents
-  //         .filter((p) => p.children && p.children > 0)
-  //         .map((parent) =>
-  //           api
-  //             .getRequest(
-  //               `fiza/image/fetch_by_parent?pageNo=0&pageSize=100&sortBy=id&sortDir=ASC&parentId=${parent.id}`,
-  //               {
-  //                 Authorization: `Bearer ${token}`,
-  //                 Accept: '*/*',
-  //                 'time-zone': zone,
-  //               }
-  //             )
-  //             .then((res) => res?.data?.content || [])
-  //         );
-
-  //       const allChildren = await Promise.all(childrenRequests);
-  //       const children: VersionData[] = allChildren.flat();
-
-  //       // ? Final version list
-  //       setItems([...parents, ...children]);
-  //     } catch (err) {
-  //       // eslint-disable-next-line no-console
-  //       console.error('Failed to fetch versions:', err);
-
-  //       // Check if it's a network error vs other error
-  //       if (err instanceof TypeError && err.message === 'Failed to fetch') {
-  //         // eslint-disable-next-line no-console
-  //         console.warn('Network connectivity issue - API server may be unreachable');
-  //       }
-
-  //       setItems([]);
-  //     }
-  //   };
-
-  //   fetchVersions();
-  // }, [isLoggedInn, showStudio, generatedImageUrl]);
 
   const [hashedId, setHashedId] = useState<string | null>(null);
 
@@ -982,16 +781,21 @@ export default function shareFizaaI() {
       return;
     }
 
+    setIsDownloading(true);
+
     // setIsDownloading(true); // Show loader
 
     const version = currentVersionEntry?.version ?? 1;
     const outfitName = formDataSection234?.selectedOutfit || 'Outfit';
     const fileName = `${outfitName} Version ${version}.jpg`;
+    const ap = process.env.REACT_APP_BASE_API_URL;
+
+    // const ap1 = 'https://app.fizaai.com/';
+    // eslint-disable-next-line no-console
+    console.log(ap);
 
     try {
-      const apiUrl = `https://backend.stage.darzeeapp.com/file/download-file?fileUrl=${encodeURIComponent(
-        generatedImageUrl
-      )}`;
+      const apiUrl = `${ap}file/download-file?fileUrl=${encodeURIComponent(generatedImageUrl)}`;
       const response = await fetch(apiUrl, { mode: 'cors', credentials: 'omit' });
 
       if (!response.ok) {
@@ -1011,6 +815,7 @@ export default function shareFizaaI() {
       alert('Could not force download – image opened in a new tab instead.');
     } finally {
       // setIsDownloading(false); // Hide loader
+      setIsDownloading(false);
     }
   };
 
@@ -1891,12 +1696,33 @@ export default function shareFizaaI() {
                   className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
                   onClick={() => setShowShareModal(true)}
                 />
-                <img
-                  src={download}
-                  alt="Download outfit"
-                  className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                  onClick={handleDownloadImage}
-                />
+                {isDownloading ? (
+                  <div className="md:h-8 h-6 flex items-center justify-center">
+                    <svg
+                      className="animate-spin h-6 w-6 "
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="#79539F"
+                        strokeWidth="4"
+                      ></circle>
+                      <path className="opacity-75" fill="#79539F" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                  </div>
+                ) : (
+                  <img
+                    src={download}
+                    alt="Download outfit"
+                    className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                    onClick={handleDownloadImage}
+                  />
+                )}
                 <img
                   onClick={() => handleShare('whatsapp')}
                   src={whatapp}

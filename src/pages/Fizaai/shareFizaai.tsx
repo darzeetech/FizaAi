@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import BulkImageUploadField from '../../components/FormComponents/BulkImageUploadField';
 import './sidebar.css';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 //import Image from "next/image"
 import {
@@ -238,7 +239,7 @@ export default function shareFizaaI() {
       case 'copy': {
         const copyText = `${shareUrl}`;
         navigator.clipboard.writeText(copyText).then(() => {
-          alert('Link copied to clipboard!');
+          toast.success('Link copied to clipboard!');
         });
         break;
       }
@@ -2074,6 +2075,27 @@ export default function shareFizaaI() {
                   className="text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   <FaTimes size={20} />
+                </button>
+              </div>
+
+              <div className="flex items-center border border-gray-300 rounded-md p-2 mb-6">
+                <input
+                  type="text"
+                  readOnly
+                  value={window.location.href}
+                  className="flex-grow border-none focus:outline-none text-gray-700 text-sm px-2 truncate"
+                  aria-label="Share link"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success('Link copied to clipboard!');
+                  }}
+                  className="ml-2 p-2 rounded bg-[#79539F] hover:bg-[#633a84] text-white transition"
+                  title="Copy share link"
+                  aria-label="Copy share link"
+                >
+                  <FaCopy size={18} />
                 </button>
               </div>
 

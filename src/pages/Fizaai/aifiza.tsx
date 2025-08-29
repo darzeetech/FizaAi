@@ -47,6 +47,7 @@ import { auth } from '../../firbase'; // make sure path is correct
 import { onAuthStateChanged } from 'firebase/auth';
 import { TiArrowLeft } from 'react-icons/ti';
 import { HexColorPicker } from 'react-colorful';
+import { toast } from 'react-toastify';
 
 type SkinColor = {
   id: number;
@@ -306,7 +307,7 @@ export default function FizaAI() {
       case 'copy': {
         const copyText = `${shareUrl}`;
         navigator.clipboard.writeText(copyText).then(() => {
-          alert('Link copied to clipboard!');
+          toast.success('Link copied to clipboard!');
         });
         break;
       }
@@ -2947,7 +2948,7 @@ export default function FizaAI() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(shareLink);
-                    alert('Link copied to clipboard!');
+                    toast.success('Link copied to clipboard!');
                   }}
                   className="ml-2 p-2 rounded bg-[#79539F] hover:bg-[#633a84] text-white transition"
                   title="Copy share link"

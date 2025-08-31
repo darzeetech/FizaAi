@@ -1396,10 +1396,14 @@ export default function FizaAI() {
                     selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
                   }`}
                 >
-                  <img src={lookbook} alt="Lookbook Icon" className="h-6 md:h-10 aspect-auto" />
+                  <img
+                    src={lookbook}
+                    alt="Lookbook Icon"
+                    className="h-6 md:h-10 aspect-auto hidden"
+                  />
                   <h1
-                    className={`text-[.9rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
-                      selectedTab === 'lookbook' ? 'block' : 'hidden md:block'
+                    className={`text-[.9rem] md:text-[1.4rem] font-semibold text-[#4F2945]   ${
+                      selectedTab === 'lookbook' ? 'hidden ' : 'hidden '
                     }`}
                   >
                     Lookbook

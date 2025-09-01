@@ -3,7 +3,17 @@ import './sidebar.css';
 import location from '../../assets/images/location_on.png';
 import person from '../../assets/images/Vector1.png';
 import male from '../../assets/images/male.png';
+import qr from '../../assets/images/qr_code_scanner.png';
+import share from '../../assets/images/share.png';
+import copy from '../../assets/images/content_copy.png';
 import female from '../../assets/images/Group.png';
+import facebook from '../../assets/images/facebook.png';
+import whatapp from '../../assets/images/whatsapp3.png';
+import glove from '../../assets/images/Vector3.png';
+import insta from '../../assets/images/Clip path group.png';
+import upi from '../../assets/images/Frame 1000010260.png';
+import map from '../../assets/images/google-maps.png';
+
 import { api } from '../../utils/apiRequest';
 
 export type Portfolio = {
@@ -219,28 +229,46 @@ export default function Lookbook({
           <div className="w-full h-full flex flex-col md:flex-row gap-8">
             {/* Left: owner & meta */}
             <div className="md:w-1/3 w-full flex flex-col gap-4">
-              <div className="flex items-center gap-3 p-3 borde rounded-lg bg-gray-50 shadow shadow-[#00000040]">
+              <div className="flex flex-col w-full items-center gap-3 p-3 borde rounded-lg bg-gray-50 shadow shadow-[#00000040]">
                 {/* <img
                   src={selected.profilePictureUrl || '/placeholder-avatar.png'}
                   alt={`${selected.tailorName} owner`}
                   className="w-14 h-14 rounded-full object-cover"
                 /> */}
-                {detail?.base_info?.profile_picture_url ? (
-                  <img
-                    src={detail?.base_info?.profile_picture_url}
-                    alt="profile"
-                    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-semibold text-gray-700">
-                      {(selected.tailorName && selected.tailorName.charAt(0).toUpperCase()) || '?'}
-                    </span>
+                <div className="flex items-center gap-3 w-full ">
+                  {detail?.base_info?.profile_picture_url ? (
+                    <img
+                      src={detail?.base_info?.profile_picture_url}
+                      alt="profile"
+                      className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-semibold text-gray-700">
+                        {(selected.tailorName && selected.tailorName.charAt(0).toUpperCase()) ||
+                          '?'}
+                      </span>
+                    </div>
+                  )}
+                  <div className=" w-full flex  items-center justify-between   ">
+                    <div>
+                      <div className="font-semibold text-nowrap">{selected.tailorName}</div>
+                      <div className="text-sm text-gray-500">{selected.userName}</div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <img src={copy} alt="copy" className="h-3 md:h-4 aspect-auto" />
+                      <img src={share} alt="share" className="h-3 md:h-4 aspect-auto" />
+                      <img src={qr} alt="qr" className="h-3 md:h-4 aspect-auto" />
+                    </div>
                   </div>
-                )}
-                <div>
-                  <div className="font-semibold">{selected.tailorName}</div>
-                  <div className="text-sm text-gray-500">{selected.userName}</div>
+                </div>
+                <div className="flex items-center gap-4 w-full justify-center">
+                  <img src={facebook} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  <img src={insta} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  <img src={glove} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  <img src={whatapp} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  <img src={upi} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  <img src={map} alt="copy" className="h-4 md:h-5 aspect-auto" />
                 </div>
               </div>
               {/* About */}

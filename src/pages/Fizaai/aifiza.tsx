@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import BulkImageUploadField from '../../components/FormComponents/BulkImageUploadField';
 import BulkImageUploadFieldp from '../../components/FormComponents/BulkImageUploadFieldp';
 import './sidebar.css';
+import Lookbook, { Portfolio as LookbookPortfolio } from './Lookbook';
+
+// Use the Portfolio type from Lookbook
+type Portfolio = LookbookPortfolio;
 
 //import Image from "next/image"
 import {
@@ -256,6 +260,10 @@ export default function FizaAI() {
   const [showShareSuccessModal, setShowShareSuccessModal] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [loadingPortfolios, setLoadingPortfolios] = useState(false);
+  const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);
@@ -814,6 +822,43 @@ export default function FizaAI() {
 
     fetchVersions();
   }, [isLoggedInn, showStudio, generatedImageUrl]);
+
+  // Fetch portfolios when user switches to Lookbook tab
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      // if (selectedTab !== 'lookbook') {
+      //   return;
+      // }
+      setLoadingPortfolios(true);
+      setError(null);
+      try {
+        const res = await api.getRequest('portfolio/fetch-all?pageNo=0&pageSize=10');
+
+        if (res.status && res.data && Array.isArray(res.data.content)) {
+          setPortfolios(res.data.content);
+          // set first item selected by default
+
+          if (res.data.content.length > 0) {
+            setSelectedPortfolio(res.data.content[0]);
+          } else {
+            setSelectedPortfolio(null);
+          }
+        } else {
+          setPortfolios([]);
+          setSelectedPortfolio(null);
+        }
+      } catch (err) {
+        setPortfolios([]);
+        setSelectedPortfolio(null);
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch portfolios', err);
+      } finally {
+        setLoadingPortfolios(false);
+      }
+    };
+
+    fetchPortfolios();
+  }, [selectedTab]);
 
   const handleVersionSelect = (entry: VersionData) => {
     try {
@@ -1740,200 +1785,387 @@ export default function FizaAI() {
           </div>
         )}
 
-        {currentStep > 1 && (
-          <div className="flex flex-1 w-full ">
-            {/* Left side - Form (50%) */}
-            <div
-              className={`${
-                showMobilePreview ? 'hidden md:block md:w-1/2' : 'md:w-1/2 w-full'
-              } overflow-auto max-h-[calc(100vh-72px)] md:p-4 p-1 custom-scrollbar `}
-            >
-              <div className="md:px-6 py-4 px-3 font-semibold md:mb-1 mb-[2rem] relative">
-                {/* Steps */}
-                <div className="flex w-full items-center justify-between md:mb-6 mb-3 md:px-4 px-0 ">
-                  <div
-                    className="flex items-center md:ml-4 ml-1 cursor-pointer"
-                    onClick={() => {
-                      // Allow direct navigation to step 2
-                      setCurrentStep(2);
-                    }}
-                  >
+        {currentStep > 1 &&
+          (selectedTab === 'studio' ? (
+            <div className="flex flex-1 w-full ">
+              {/* Left side - Form (50%) */}
+              <div
+                className={`${
+                  showMobilePreview ? 'hidden md:block md:w-1/2' : 'md:w-1/2 w-full'
+                } overflow-auto max-h-[calc(100vh-72px)] md:p-4 p-1 custom-scrollbar `}
+              >
+                <div className="md:px-6 py-4 px-3 font-semibold md:mb-1 mb-[2rem] relative">
+                  {/* Steps */}
+                  <div className="flex w-full items-center justify-between md:mb-6 mb-3 md:px-4 px-0 ">
                     <div
-                      className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
-                        currentStep > 2
-                          ? 'bg-green-500'
-                          : currentStep === 2
-                            ? 'bg-[#79539f]'
-                            : 'bg-gray-200'
-                      } ${
-                        currentStep >= 2 ? 'text-white' : 'text-gray-500'
-                      } flex items-center justify-center`}
+                      className="flex items-center md:ml-4 ml-1 cursor-pointer"
+                      onClick={() => {
+                        // Allow direct navigation to step 2
+                        setCurrentStep(2);
+                      }}
                     >
-                      {currentStep > 2 ? <FaCheckCircle size={16} /> : '1'}
-                    </div>
-                    <span
-                      className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
-                        currentStep > 2
-                          ? 'text-green-500'
-                          : currentStep === 2
-                            ? 'font-semibold'
-                            : 'text-gray-500'
-                      }`}
-                    >
-                      Select Outfit
-                    </span>
-                  </div>
-                  <div
-                    className="flex items-center md:ml-4 ml-1 cursor-pointer"
-                    onClick={() => {
-                      // Allow direct navigation to step 3
-                      setCurrentStep(3);
-                    }}
-                  >
-                    <div
-                      className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
-                        currentStep > 3
-                          ? 'bg-green-500'
-                          : currentStep === 3
-                            ? 'bg-[#79539f]'
-                            : 'bg-gray-200'
-                      } ${
-                        currentStep >= 3 ? 'text-white' : 'text-gray-500'
-                      } flex items-center justify-center`}
-                    >
-                      {currentStep > 3 ? <FaCheckCircle size={16} /> : '2'}
-                    </div>
-                    <span
-                      className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
-                        currentStep > 3
-                          ? 'text-green-500'
-                          : currentStep === 3
-                            ? 'font-medium'
-                            : 'text-gray-500'
-                      }`}
-                    >
-                      Color
-                    </span>
-                  </div>
-                  <div
-                    className="flex items-center md:ml-4 ml-1 cursor-pointer"
-                    onClick={() => {
-                      // Allow direct navigation to step 4
-                      setCurrentStep(4);
-                    }}
-                  >
-                    <div
-                      className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
-                        currentStep === 4 ? 'bg-[#79539f]' : 'bg-gray-200'
-                      } ${
-                        currentStep === 4 ? 'text-white' : 'text-gray-500'
-                      } flex items-center justify-center`}
-                    >
-                      3
-                    </div>
-                    <span
-                      className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
-                        currentStep === 4 ? 'font-medium' : 'text-gray-500'
-                      }`}
-                    >
-                      Stitch Options
-                    </span>
-                  </div>
-                </div>
-
-                {currentStep === 2 && (
-                  <div className=" md:mb-8 mb-[3.5rem] flex flex-col gap-2">
-                    <div>
-                      <h2 className="md:text-[1.3rem] text-[1rem] font-medium md:mb-4 mb-2">
-                        Select Outfit Type
-                      </h2>
-                      <div className="relative md:mb-6 mb-3">
-                        <input
-                          type="text"
-                          placeholder="Search Outfit"
-                          className="w-full px-4 py-2 pl-10 bg-gray-100 border-none rounded-md"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <FaSearch className="absolute left-3 top-2.5 text-gray-500" size={18} />
+                      <div
+                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
+                          currentStep > 2
+                            ? 'bg-green-500'
+                            : currentStep === 2
+                              ? 'bg-[#79539f]'
+                              : 'bg-gray-200'
+                        } ${
+                          currentStep >= 2 ? 'text-white' : 'text-gray-500'
+                        } flex items-center justify-center`}
+                      >
+                        {currentStep > 2 ? <FaCheckCircle size={16} /> : '1'}
                       </div>
-
-                      {loading ? (
-                        <div className="flex justify-center items-center h-40">
-                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#79539f]"></div>
-                        </div>
-                      ) : error ? (
-                        <div className="text-red-500 text-center p-4">{error}</div>
-                      ) : (
-                        <>
-                          <div className="grid grid-cols-3 md:gap-7 gap-3 mb-12">
-                            {filteredOutfitOptions.map((outfit) => (
-                              <div
-                                key={outfit.outfit_index}
-                                className={`md:p-7 p-3 border rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all ${
-                                  formDataSection234.selectedOutfit === outfit.outfit_name
-                                    ? 'border-[#79539f]'
-                                    : 'border-gray-200 shadow-md shadow-[#C1C7D899] hover:border-gray-300'
-                                }`}
-                                onClick={() => {
-                                  handleOutfitSelect(outfit.outfit_name);
-                                  setoutfit_index(outfit.outfit_index);
-                                }}
-                              >
-                                <div className="w-12 h-12 mb-2">
-                                  <img
-                                    src={outfit.outfit_link}
-                                    alt={outfit.outfit_details_title}
-                                    width={64}
-                                    height={64}
-                                    className="object-contain w-full h-full"
-                                  />
-                                </div>
-                                <span className="text-sm text-center">
-                                  {outfit.outfit_details_title}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                          {filteredOutfitOptions.length === 0 && searchTerm && (
-                            <div className="text-center py-8 text-gray-500">
-                              <p>No outfits found matching {searchTerm}</p>
-                              <p className="text-sm mt-2">Try searching with different keywords</p>
-                            </div>
-                          )}
-                        </>
-                      )}
+                      <span
+                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
+                          currentStep > 2
+                            ? 'text-green-500'
+                            : currentStep === 2
+                              ? 'font-semibold'
+                              : 'text-gray-500'
+                        }`}
+                      >
+                        Select Outfit
+                      </span>
+                    </div>
+                    <div
+                      className="flex items-center md:ml-4 ml-1 cursor-pointer"
+                      onClick={() => {
+                        // Allow direct navigation to step 3
+                        setCurrentStep(3);
+                      }}
+                    >
+                      <div
+                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
+                          currentStep > 3
+                            ? 'bg-green-500'
+                            : currentStep === 3
+                              ? 'bg-[#79539f]'
+                              : 'bg-gray-200'
+                        } ${
+                          currentStep >= 3 ? 'text-white' : 'text-gray-500'
+                        } flex items-center justify-center`}
+                      >
+                        {currentStep > 3 ? <FaCheckCircle size={16} /> : '2'}
+                      </div>
+                      <span
+                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
+                          currentStep > 3
+                            ? 'text-green-500'
+                            : currentStep === 3
+                              ? 'font-medium'
+                              : 'text-gray-500'
+                        }`}
+                      >
+                        Color
+                      </span>
+                    </div>
+                    <div
+                      className="flex items-center md:ml-4 ml-1 cursor-pointer"
+                      onClick={() => {
+                        // Allow direct navigation to step 4
+                        setCurrentStep(4);
+                      }}
+                    >
+                      <div
+                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
+                          currentStep === 4 ? 'bg-[#79539f]' : 'bg-gray-200'
+                        } ${
+                          currentStep === 4 ? 'text-white' : 'text-gray-500'
+                        } flex items-center justify-center`}
+                      >
+                        3
+                      </div>
+                      <span
+                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
+                          currentStep === 4 ? 'font-medium' : 'text-gray-500'
+                        }`}
+                      >
+                        Stitch Options
+                      </span>
                     </div>
                   </div>
-                )}
 
-                {currentStep === 3 && (
-                  <div className=" md:mb-8 mb-[2.5rem] flex flex-col gap-1">
-                    <div className="mb-10">
-                      <h2 className="text-xl font-medium mb-4">Select Color</h2>
+                  {currentStep === 2 && (
+                    <div className=" md:mb-8 mb-[3.5rem] flex flex-col gap-2">
+                      <div>
+                        <h2 className="md:text-[1.3rem] text-[1rem] font-medium md:mb-4 mb-2">
+                          Select Outfit Type
+                        </h2>
+                        <div className="relative md:mb-6 mb-3">
+                          <input
+                            type="text"
+                            placeholder="Search Outfit"
+                            className="w-full px-4 py-2 pl-10 bg-gray-100 border-none rounded-md"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                          <FaSearch className="absolute left-3 top-2.5 text-gray-500" size={18} />
+                        </div>
 
-                      {selectedOutfitDetails && selectedOutfitDetails.pieces > 1 ? (
-                        <>
-                          {/* Top Color */}
+                        {loading ? (
+                          <div className="flex justify-center items-center h-40">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#79539f]"></div>
+                          </div>
+                        ) : error ? (
+                          <div className="text-red-500 text-center p-4">{error}</div>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-3 md:gap-7 gap-3 mb-12">
+                              {filteredOutfitOptions.map((outfit) => (
+                                <div
+                                  key={outfit.outfit_index}
+                                  className={`md:p-7 p-3 border rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all ${
+                                    formDataSection234.selectedOutfit === outfit.outfit_name
+                                      ? 'border-[#79539f]'
+                                      : 'border-gray-200 shadow-md shadow-[#C1C7D899] hover:border-gray-300'
+                                  }`}
+                                  onClick={() => {
+                                    handleOutfitSelect(outfit.outfit_name);
+                                    setoutfit_index(outfit.outfit_index);
+                                  }}
+                                >
+                                  <div className="w-12 h-12 mb-2">
+                                    <img
+                                      src={outfit.outfit_link}
+                                      alt={outfit.outfit_details_title}
+                                      width={64}
+                                      height={64}
+                                      className="object-contain w-full h-full"
+                                    />
+                                  </div>
+                                  <span className="text-sm text-center">
+                                    {outfit.outfit_details_title}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                            {filteredOutfitOptions.length === 0 && searchTerm && (
+                              <div className="text-center py-8 text-gray-500">
+                                <p>No outfits found matching {searchTerm}</p>
+                                <p className="text-sm mt-2">
+                                  Try searching with different keywords
+                                </p>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 3 && (
+                    <div className=" md:mb-8 mb-[2.5rem] flex flex-col gap-1">
+                      <div className="mb-10">
+                        <h2 className="text-xl font-medium mb-4">Select Color</h2>
+
+                        {selectedOutfitDetails && selectedOutfitDetails.pieces > 1 ? (
+                          <>
+                            {/* Top Color */}
+                            <div className="mb-6">
+                              <div className="flex items-center gap-5 mb-5 ">
+                                <label className="block mb-3 font-medium">Top</label>
+                                <div className="flex gap-3 items-center">
+                                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                                    <div
+                                      onClick={() => setShowPicker(!showPicker)}
+                                      style={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: '0.375rem', // same as Tailwind's rounded
+                                        cursor: 'pointer',
+                                        backgroundColor: toppcolor,
+                                        border: '1px solid #ccc',
+                                      }}
+                                      title="Select color"
+                                    />
+
+                                    {showPicker && (
+                                      <div
+                                        style={{
+                                          position: 'absolute',
+                                          top: 'calc(100% + 8px)',
+                                          left: 0,
+                                          zIndex: 1000,
+                                          boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                                          borderRadius: 8,
+                                          backgroundColor: '#fff',
+                                          padding: 8,
+                                        }}
+                                      >
+                                        <HexColorPicker
+                                          color={toppcolor}
+                                          onChange={(newColor) =>
+                                            updateFormDataSection234('topColor', newColor)
+                                          }
+                                        />
+                                        <button
+                                          onClick={() => setShowPicker(false)}
+                                          style={{
+                                            marginTop: 8,
+                                            padding: '4px 8px',
+                                            border: 'none',
+                                            background: '#357edd',
+                                            color: 'white',
+                                            borderRadius: 4,
+                                            cursor: 'pointer',
+                                            width: '100%',
+                                          }}
+                                        >
+                                          Close
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <span className="ml-2 text-sm">
+                                    {formDataSection234.topColor}
+                                  </span>
+                                </div>
+                              </div>
+                              {/* Keep the existing color options as presets */}
+                              <div className="flex gap-3 ">
+                                {colorOptions.map((color) => (
+                                  <div
+                                    key={`top-${color.id}`}
+                                    className={`w-8 h-8 rounded cursor-pointer ${
+                                      formDataSection234.topColor === color.color
+                                        ? 'ring-2 ring-offset-2 ring-[#79539f]'
+                                        : ''
+                                    }`}
+                                    style={{
+                                      backgroundColor: color.color,
+                                      border:
+                                        color.color === '#ffffff' ? '1px solid #e2e8f0' : 'none',
+                                    }}
+                                    onClick={() =>
+                                      updateFormDataSection234('topColor', color.color)
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Bottom Color */}
+                            <div className="mb-6">
+                              <div className="flex items-center gap-5 mb-5 ">
+                                <label className="block mb-3 font-medium">Bottom</label>
+                                <div className="flex gap-3 items-center">
+                                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                                    {/* Color preview box to open picker */}
+                                    <div
+                                      onClick={() => setShowPickerone(!showPicker)}
+                                      style={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: '0.375rem', // rounded corners similar to Tailwind 'rounded'
+                                        cursor: 'pointer',
+                                        backgroundColor: bottommcolor,
+                                        border: '1px solid #ccc',
+                                        display: 'inline-block',
+                                      }}
+                                      title="Select bottom color"
+                                    />
+
+                                    {/* Pop-up color picker */}
+                                    {showPickerone && (
+                                      <div
+                                        style={{
+                                          position: 'absolute',
+                                          top: 'calc(100% + 8px)',
+                                          left: 0,
+                                          zIndex: 1000,
+                                          boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                                          borderRadius: 8,
+                                          backgroundColor: '#fff',
+                                          padding: 8,
+                                        }}
+                                      >
+                                        <HexColorPicker
+                                          color={bottommcolor}
+                                          onChange={(newColor) =>
+                                            updateFormDataSection234('bottomColor', newColor)
+                                          }
+                                        />
+                                        <button
+                                          onClick={() => setShowPickerone(false)}
+                                          style={{
+                                            marginTop: 8,
+                                            padding: '4px 8px',
+                                            border: 'none',
+                                            background: '#357edd',
+                                            color: 'white',
+                                            borderRadius: 4,
+                                            cursor: 'pointer',
+                                            width: '100%',
+                                          }}
+                                        >
+                                          Close
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <span className="ml-2 text-sm">
+                                    {formDataSection234.bottomColor}
+                                  </span>
+                                </div>
+                              </div>
+                              {/* Keep the existing color options as presets */}
+                              <div className="flex gap-3">
+                                {colorOptions.map((color) => (
+                                  <div
+                                    key={`bottom-${color.id}`}
+                                    className={`w-8 h-8 rounded cursor-pointer ${
+                                      formDataSection234.bottomColor === color.color
+                                        ? 'ring-2 ring-offset-2 ring-[#79539f]'
+                                        : ''
+                                    }`}
+                                    style={{
+                                      backgroundColor: color.color,
+                                      border:
+                                        color.color === '#ffffff' ? '1px solid #e2e8f0' : 'none',
+                                    }}
+                                    onClick={() =>
+                                      updateFormDataSection234('bottomColor', color.color)
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          /* Single Color for one-piece outfits */
                           <div className="mb-6">
                             <div className="flex items-center gap-5 mb-5 ">
-                              <label className="block mb-3 font-medium">Top</label>
+                              <label className="block mb-3 font-medium">
+                                {selectedOutfitDetails?.outfit_type === 'BOTTOM' ? 'Bottom' : 'Top'}
+                              </label>
                               <div className="flex gap-3 items-center">
                                 <div style={{ position: 'relative', display: 'inline-block' }}>
                                   <div
-                                    onClick={() => setShowPicker(!showPicker)}
+                                    onClick={() =>
+                                      selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                        ? setShowPickerone(!showPickerone)
+                                        : setShowPicker(!showPicker)
+                                    }
                                     style={{
                                       width: 40,
                                       height: 40,
-                                      borderRadius: '0.375rem', // same as Tailwind's rounded
+                                      borderRadius: '0.375rem',
                                       cursor: 'pointer',
-                                      backgroundColor: toppcolor,
+                                      backgroundColor:
+                                        selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                          ? bottommcolor
+                                          : toppcolor,
                                       border: '1px solid #ccc',
                                     }}
                                     title="Select color"
                                   />
 
-                                  {showPicker && (
+                                  {((selectedOutfitDetails?.outfit_type === 'BOTTOM' &&
+                                    showPickerone) ||
+                                    (selectedOutfitDetails?.outfit_type !== 'BOTTOM' &&
+                                      showPicker)) && (
                                     <div
                                       style={{
                                         position: 'absolute',
@@ -1947,96 +2179,23 @@ export default function FizaAI() {
                                       }}
                                     >
                                       <HexColorPicker
-                                        color={toppcolor}
+                                        color={
+                                          selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                            ? bottommcolor
+                                            : toppcolor
+                                        }
                                         onChange={(newColor) =>
-                                          updateFormDataSection234('topColor', newColor)
+                                          selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                            ? updateFormDataSection234('bottomColor', newColor)
+                                            : updateFormDataSection234('topColor', newColor)
                                         }
                                       />
                                       <button
-                                        onClick={() => setShowPicker(false)}
-                                        style={{
-                                          marginTop: 8,
-                                          padding: '4px 8px',
-                                          border: 'none',
-                                          background: '#357edd',
-                                          color: 'white',
-                                          borderRadius: 4,
-                                          cursor: 'pointer',
-                                          width: '100%',
-                                        }}
-                                      >
-                                        Close
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                                <span className="ml-2 text-sm">{formDataSection234.topColor}</span>
-                              </div>
-                            </div>
-                            {/* Keep the existing color options as presets */}
-                            <div className="flex gap-3 ">
-                              {colorOptions.map((color) => (
-                                <div
-                                  key={`top-${color.id}`}
-                                  className={`w-8 h-8 rounded cursor-pointer ${
-                                    formDataSection234.topColor === color.color
-                                      ? 'ring-2 ring-offset-2 ring-[#79539f]'
-                                      : ''
-                                  }`}
-                                  style={{
-                                    backgroundColor: color.color,
-                                    border:
-                                      color.color === '#ffffff' ? '1px solid #e2e8f0' : 'none',
-                                  }}
-                                  onClick={() => updateFormDataSection234('topColor', color.color)}
-                                />
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Bottom Color */}
-                          <div className="mb-6">
-                            <div className="flex items-center gap-5 mb-5 ">
-                              <label className="block mb-3 font-medium">Bottom</label>
-                              <div className="flex gap-3 items-center">
-                                <div style={{ position: 'relative', display: 'inline-block' }}>
-                                  {/* Color preview box to open picker */}
-                                  <div
-                                    onClick={() => setShowPickerone(!showPicker)}
-                                    style={{
-                                      width: 40,
-                                      height: 40,
-                                      borderRadius: '0.375rem', // rounded corners similar to Tailwind 'rounded'
-                                      cursor: 'pointer',
-                                      backgroundColor: bottommcolor,
-                                      border: '1px solid #ccc',
-                                      display: 'inline-block',
-                                    }}
-                                    title="Select bottom color"
-                                  />
-
-                                  {/* Pop-up color picker */}
-                                  {showPickerone && (
-                                    <div
-                                      style={{
-                                        position: 'absolute',
-                                        top: 'calc(100% + 8px)',
-                                        left: 0,
-                                        zIndex: 1000,
-                                        boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                                        borderRadius: 8,
-                                        backgroundColor: '#fff',
-                                        padding: 8,
-                                      }}
-                                    >
-                                      <HexColorPicker
-                                        color={bottommcolor}
-                                        onChange={(newColor) =>
-                                          updateFormDataSection234('bottomColor', newColor)
+                                        onClick={() =>
+                                          selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                            ? setShowPickerone(false)
+                                            : setShowPicker(false)
                                         }
-                                      />
-                                      <button
-                                        onClick={() => setShowPickerone(false)}
                                         style={{
                                           marginTop: 8,
                                           padding: '4px 8px',
@@ -2054,17 +2213,21 @@ export default function FizaAI() {
                                   )}
                                 </div>
                                 <span className="ml-2 text-sm">
-                                  {formDataSection234.bottomColor}
+                                  {selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                    ? formDataSection234.bottomColor
+                                    : formDataSection234.topColor}
                                 </span>
                               </div>
                             </div>
                             {/* Keep the existing color options as presets */}
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 ">
                               {colorOptions.map((color) => (
                                 <div
-                                  key={`bottom-${color.id}`}
+                                  key={`single-${color.id}`}
                                   className={`w-8 h-8 rounded cursor-pointer ${
-                                    formDataSection234.bottomColor === color.color
+                                    (selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                      ? formDataSection234.bottomColor
+                                      : formDataSection234.topColor) === color.color
                                       ? 'ring-2 ring-offset-2 ring-[#79539f]'
                                       : ''
                                   }`}
@@ -2074,527 +2237,455 @@ export default function FizaAI() {
                                       color.color === '#ffffff' ? '1px solid #e2e8f0' : 'none',
                                   }}
                                   onClick={() =>
-                                    updateFormDataSection234('bottomColor', color.color)
+                                    selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                      ? updateFormDataSection234('bottomColor', color.color)
+                                      : updateFormDataSection234('topColor', color.color)
                                   }
                                 />
                               ))}
                             </div>
                           </div>
-                        </>
-                      ) : (
-                        /* Single Color for one-piece outfits */
-                        <div className="mb-6">
-                          <div className="flex items-center gap-5 mb-5 ">
-                            <label className="block mb-3 font-medium">
-                              {selectedOutfitDetails?.outfit_type === 'BOTTOM' ? 'Bottom' : 'Top'}
-                            </label>
-                            <div className="flex gap-3 items-center">
-                              <div style={{ position: 'relative', display: 'inline-block' }}>
-                                <div
-                                  onClick={() =>
-                                    selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                      ? setShowPickerone(!showPickerone)
-                                      : setShowPicker(!showPicker)
-                                  }
-                                  style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: '0.375rem',
-                                    cursor: 'pointer',
-                                    backgroundColor:
-                                      selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                        ? bottommcolor
-                                        : toppcolor,
-                                    border: '1px solid #ccc',
-                                  }}
-                                  title="Select color"
-                                />
+                        )}
 
-                                {((selectedOutfitDetails?.outfit_type === 'BOTTOM' &&
-                                  showPickerone) ||
-                                  (selectedOutfitDetails?.outfit_type !== 'BOTTOM' &&
-                                    showPicker)) && (
-                                  <div
-                                    style={{
-                                      position: 'absolute',
-                                      top: 'calc(100% + 8px)',
-                                      left: 0,
-                                      zIndex: 1000,
-                                      boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                                      borderRadius: 8,
-                                      backgroundColor: '#fff',
-                                      padding: 8,
-                                    }}
-                                  >
-                                    <HexColorPicker
-                                      color={
-                                        selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                          ? bottommcolor
-                                          : toppcolor
-                                      }
-                                      onChange={(newColor) =>
-                                        selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                          ? updateFormDataSection234('bottomColor', newColor)
-                                          : updateFormDataSection234('topColor', newColor)
-                                      }
-                                    />
-                                    <button
-                                      onClick={() =>
-                                        selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                          ? setShowPickerone(false)
-                                          : setShowPicker(false)
-                                      }
-                                      style={{
-                                        marginTop: 8,
-                                        padding: '4px 8px',
-                                        border: 'none',
-                                        background: '#357edd',
-                                        color: 'white',
-                                        borderRadius: 4,
-                                        cursor: 'pointer',
-                                        width: '100%',
-                                      }}
-                                    >
-                                      Close
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                              <span className="ml-2 text-sm">
-                                {selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                  ? formDataSection234.bottomColor
-                                  : formDataSection234.topColor}
-                              </span>
-                            </div>
-                          </div>
-                          {/* Keep the existing color options as presets */}
-                          <div className="flex gap-3 ">
-                            {colorOptions.map((color) => (
-                              <div
-                                key={`single-${color.id}`}
-                                className={`w-8 h-8 rounded cursor-pointer ${
-                                  (selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                    ? formDataSection234.bottomColor
-                                    : formDataSection234.topColor) === color.color
-                                    ? 'ring-2 ring-offset-2 ring-[#79539f]'
-                                    : ''
-                                }`}
-                                style={{
-                                  backgroundColor: color.color,
-                                  border: color.color === '#ffffff' ? '1px solid #e2e8f0' : 'none',
+                        {/* Fabric Image */}
+                        <div className="mb-6">
+                          <label className="block mb-3 font-medium">Fabric Image</label>
+                          <p className="text-sm text-gray-500 mb-3">
+                            If you have the fabric upload image
+                          </p>
+                          <BulkImageUploadField
+                            label="Upload Fabric Images"
+                            placeholder="Upload Fabric Images"
+                            type="file"
+                            required={false}
+                            multiple={true}
+                            maxUpload={1}
+                            fileTypeRequired={false}
+                            value={formDataSection234.fabricImageTop}
+                            onChange={(value: any) => {
+                              updateFormDataSection234('fabricImageTop', value);
+                            }}
+                          />
+
+                          {selectedOutfitDetails && selectedOutfitDetails.pieces > 1 && (
+                            <div className="mt-4">
+                              <label className="block mb-3 font-medium">Bottom Fabric Image</label>
+                              <BulkImageUploadField
+                                label="Upload Bottom Fabric Images"
+                                placeholder="Upload Bottom Fabric Images"
+                                type="file"
+                                required={false}
+                                multiple={true}
+                                maxUpload={1}
+                                fileTypeRequired={false}
+                                value={formDataSection234.fabricImageBottom}
+                                onChange={(value: any) => {
+                                  updateFormDataSection234('fabricImageBottom', value);
                                 }}
-                                onClick={() =>
-                                  selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                    ? updateFormDataSection234('bottomColor', color.color)
-                                    : updateFormDataSection234('topColor', color.color)
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Color and Fabric Instructions */}
+                        <div>
+                          <label className="block mb-3 font-medium">
+                            Color and Fabric Instructions
+                          </label>
+                          <textarea
+                            className="w-full p-4 border border-gray-200 rounded-lg resize-none h-24 bg-gray-50 text-gray-500"
+                            placeholder="Add any color and fabric instructions here..."
+                            value={formDataSection234.colorFabricInstructions}
+                            onChange={(e) =>
+                              updateFormDataSection234('colorFabricInstructions', e.target.value)
+                            }
+                          />
+                          <p className="text-xs text-gray-400 mt-1">
+                            This section is not mandatory
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 4 && (
+                    <div className=" md:mb-8 mb-[2rem] flex flex-col gap-1">
+                      {loadingStitchOptions ? (
+                        <div className="flex justify-center items-center h-40">
+                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#79539f]"></div>
+                        </div>
+                      ) : error ? (
+                        <div className="text-red-500 text-center p-4">{error}</div>
+                      ) : (
+                        <>
+                          {generatedImageUrl && (
+                            <div className=" w-full md:hidden flex gap-2 items-center justify-end">
+                              <img src={woman} alt="" className="h-12 aspect-auto pb-2  " />
+                              <button
+                                onClick={() => {
+                                  setShowMobilePreview(true);
+                                }}
+                                className="bg-[#4F2945] text-[.8rem] font-semibold px-3 py-1.5 text-white flex items-center rounded-xl gap-2"
+                              >
+                                Preview <img src={preview} alt="" className="h-4 aspect-auto " />
+                              </button>
+                            </div>
+                          )}
+                          {stitchOptionGroups.map((group, groupIndex) => (
+                            <div key={groupIndex} className="md:mb-8 mb-2">
+                              <h2 className="text-xl font-medium md:mb-4 mb-3">{group.side}</h2>
+
+                              {group.stitch_options.map((option, optionIndex) => (
+                                <div key={optionIndex} className="mb-6">
+                                  <label className="block md:mb-3 mb-2 font-semibold ">
+                                    {option.label}
+                                  </label>
+
+                                  {option.type === 'radio' && (
+                                    <div className="flex flex-wrap gap-3">
+                                      {option.options.map((choice, choiceIndex) => {
+                                        // Check if this option is selected
+                                        const isSelected =
+                                          formDataSection234.stitchOptions[option.label] !== null &&
+                                          String(formDataSection234.stitchOptions[option.label]) ===
+                                            String(choice.value);
+
+                                        return (
+                                          <button
+                                            key={choiceIndex}
+                                            className={`md:px-4 px-3 md:py-2 py-1.5 rounded-full text-sm font-medium ${
+                                              isSelected
+                                                ? 'bg-[#79539f] text-white'
+                                                : 'bg-white border border-gray-300 hover:bg-gray-50'
+                                            }`}
+                                            onClick={() =>
+                                              updateStitchOption(option.label, choice.value)
+                                            }
+                                          >
+                                            {choice.label}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+
+                                  {option.type === 'counter' && (
+                                    <div className="flex items-center">
+                                      <button
+                                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-l-md bg-gray-50"
+                                        onClick={() => {
+                                          // Initialize to min_value if null
+                                          if (
+                                            formDataSection234.stitchOptions[option.label] === null
+                                          ) {
+                                            updateStitchOption(
+                                              option.label,
+                                              parseInt(option.min_value || '0')
+                                            );
+                                          } else {
+                                            decrementCounter(option.label, option.min_value);
+                                          }
+                                        }}
+                                      >
+                                        <FaMinus size={16} />
+                                      </button>
+                                      <div className="w-16 h-10 flex items-center justify-center border-t border-b border-gray-300">
+                                        {formDataSection234.stitchOptions[option.label] !== null
+                                          ? formDataSection234.stitchOptions[option.label]
+                                          : '-'}
+                                      </div>
+                                      <button
+                                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-r-md bg-gray-50"
+                                        onClick={() => {
+                                          // Initialize to min_value if null
+                                          if (
+                                            formDataSection234.stitchOptions[option.label] === null
+                                          ) {
+                                            updateStitchOption(
+                                              option.label,
+                                              parseInt(option.min_value || '0')
+                                            );
+                                          } else {
+                                            incrementCounter(option.label, option.max_value);
+                                          }
+                                        }}
+                                      >
+                                        <FaPlus size={16} />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+
+                          {/* Special Instructions */}
+                          <div className="mb-8">
+                            <label className="block mb-3 font-medium">Special Instructions</label>
+                            <div className="relative">
+                              <div className="absolute top-1 left-2 text-[#8227ff]">
+                                <img src={aiimage} alt="" className=" h-8 mt-2 aspect-auto " />
+                              </div>
+                              <textarea
+                                className="w-full p-4 pl-12 border border-gray-200 rounded-lg resize-none h-24 md:mb-1 mb-6"
+                                placeholder="Add any special instructions here..."
+                                value={formDataSection234.specialInstructions}
+                                onChange={(e) =>
+                                  updateFormDataSection234('specialInstructions', e.target.value)
                                 }
                               />
-                            ))}
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div
+                            className={`fixed flex items-center justify-between md:bottom-1 bottom-2 left-0 gap-4 bg-transparent py-4 px-6 transition-all duration-500 ease-in-out w-full ${
+                              showStudio
+                                ? 'md:w-[calc(58%-300px)] md:ml-[300px]'
+                                : 'md:w-1/2 md:ml-0'
+                            }`}
+                          >
+                            <button
+                              className="flex-1 flex items-center md:text-[1rem] text-[.9rem] justify-center gap-2 px-6 py-3 bg-[#fef6ea] text-[#4f2945] rounded-md"
+                              onClick={handleClearAll}
+                            >
+                              <FaSync className="md:block hidden" size={18} />
+                              <span>Clear All</span>
+                            </button>
+                            <button
+                              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#4f2945] text-white rounded-md"
+                              onClick={() =>
+                                handleGeneratePreview(currentVersionEntry || undefined)
+                              }
+                              // disabled={isGeneratingImage || animationStep !== 'idle'}
+                            >
+                              {animationStep === 'ticking' ? (
+                                <>
+                                  {/* <div className="animate-pulse h-5 w-5 bg-green-500 rounded-full"></div> */}
+                                  <span>Processing...</span>
+                                </>
+                              ) : isGeneratingImage || animationStep === 'loading' ? (
+                                <>
+                                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                                  <span>Generating...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <FaEye className="md:block hidden" size={18} />
+                                  <span className="md:text-[1rem] text-[.9rem] leading-5 text-nowrap">
+                                    Generate Preview
+                                  </span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Next Button - Only show if not on the last step */}
+                  {currentStep < 4 && (
+                    <div
+                      className={`fixed md:bottom-1 bottom-2 left-0 w-full bg-transparent py-4 px-6 z-10 transition-all duration-500 ease-in-out ${
+                        showStudio ? 'md:w-[calc(100%-350px)] ' : 'md:w-1/2 md:ml-0'
+                      }`}
+                    >
+                      <button
+                        onClick={handleNext}
+                        disabled={
+                          (currentStep === 1 && !isAboutYouSectionValid()) ||
+                          (currentStep === 2 && !formDataSection234.selectedOutfit)
+                        }
+                        className={`flex items-center justify-center w-full max-w-xs mx-auto px-6 py-3 rounded-md ${
+                          (currentStep === 1 && !isAboutYouSectionValid()) ||
+                          (currentStep === 2 && !formDataSection234.selectedOutfit)
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-[#4f2945] text-white'
+                        }`}
+                      >
+                        <span>Next</span>
+                        <FaArrowRight className="ml-2" size={18} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Vertical divider */}
+              <div
+                className={`w-1 bg-[#FEF6EA] ${showMobilePreview ? 'hidden' : 'md:block hidden'}`}
+              ></div>
+
+              {/* Right side - Preview (50%) */}
+              <div
+                className={`${
+                  showMobilePreview ? 'w-full md:w-1/2' : 'w-1/2 md:block hidden'
+                } md:p-6 p-4 sticky top-0 min-h-[calc(100vh-72px)] overflow-y-scroll`}
+              >
+                <div className="flex items-center justify-between md:mb-6 mb-3">
+                  <div className="flex items-center">
+                    <TiArrowLeft
+                      onClick={() => {
+                        setShowMobilePreview(false);
+                      }}
+                      className={`${
+                        showMobilePreview ? ' block' : ' hidden'
+                      } size-8 cursor-pointer`}
+                    />
+                    <h2 className="text-xl font-medium ">Preview</h2>
+                  </div>
+                  {isImageLoaded && (
+                    <div className="flex items-center md:gap-7 gap-4">
+                      <img
+                        src={share}
+                        alt="Share outfit"
+                        className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                        onClick={() => setShowShareModal(true)}
+                      />
+                      {isDownloading ? (
+                        <div className="md:h-8 h-6 flex items-center justify-center">
+                          <svg
+                            className="animate-spin h-6 w-6 "
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="#79539F"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="#79539F"
+                              d="M4 12a8 8 0 018-8v8H4z"
+                            ></path>
+                          </svg>
+                        </div>
+                      ) : (
+                        <img
+                          src={download}
+                          alt="Download outfit"
+                          className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                          onClick={handleDownloadImage}
+                        />
+                      )}
+
+                      <img
+                        onClick={() => handleShare('whatsapp')}
+                        src={whatapp}
+                        alt=""
+                        className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="border border-gray-200 rounded-3xl min-h-[calc(100vh-192px)] max-h-[calc(100vh-152px)] flex flex-col items-center justify-center py-4 flex-wrap overflow-y-scroll md:pt-[4rem custom-scrollbar">
+                  {currentStep === 2 && !formDataSection234.selectedOutfit && (
+                    <>
+                      <div className="relative mb-4">
+                        <div className="bg-white border border-[#79539F] rounded-xl p-4 flex items-center gap-3 max-w-xs">
+                          <img src={woman} alt="" className="h-12 aspect-auto " />
+                          <div className="font-medium">Let&apos;s build your look</div>
+                        </div>
+                        <div className="absolute  -bottom-4 left-6 w-0 h-0 border-l-[2px] border-l-transparent border-t-[16px] border-t-[#79539F] border-r-[12px] border-r-transparent rotate-"></div>
+                      </div>
+                      <div className="text-center mt-8">
+                        <h3 className="text-3xl font-bold mb-2">Start selecting</h3>
+                        <h3 className="text-3xl font-bold mb-2">options to visualize</h3>
+                        <h3 className="text-3xl font-bold">your dream outfit</h3>
+                      </div>
+                    </>
+                  )}
+
+                  {currentStep === 2 && formDataSection234.selectedOutfit && (
+                    <div className="w-full flex flex-col items-center justify-between">
+                      <div className="flex items-center gap-3 mb-6">
+                        <img src={woman} alt="" className=" h-12 aspect-auto " />
+                        <div className="font-medium text-xl">
+                          {selectedOutfitDetails?.outfit_details_title ||
+                            formDataSection234.selectedOutfit}
+                        </div>
+                      </div>
+
+                      {selectedOutfitDetails && (
+                        <div className="space-y-6">
+                          <div>
+                            <h3 className="font-medium mb-2">Details:</h3>
+                            <ul className="space-y-1 text-sm">
+                              <li>- {selectedOutfitDetails.pieces} piece(s)</li>
+                              <li>
+                                -{' '}
+                                {selectedOutfitDetails.stitch_options_exist
+                                  ? 'Has stitch options'
+                                  : 'No stitch options'}
+                              </li>
+                              <li>
+                                -{' '}
+                                {selectedOutfitDetails.portfolio_eligible
+                                  ? 'Portfolio eligible'
+                                  : 'Not portfolio eligible'}
+                              </li>
+                            </ul>
                           </div>
                         </div>
                       )}
-
-                      {/* Fabric Image */}
-                      <div className="mb-6">
-                        <label className="block mb-3 font-medium">Fabric Image</label>
-                        <p className="text-sm text-gray-500 mb-3">
-                          If you have the fabric upload image
-                        </p>
-                        <BulkImageUploadField
-                          label="Upload Fabric Images"
-                          placeholder="Upload Fabric Images"
-                          type="file"
-                          required={false}
-                          multiple={true}
-                          maxUpload={1}
-                          fileTypeRequired={false}
-                          value={formDataSection234.fabricImageTop}
-                          onChange={(value: any) => {
-                            updateFormDataSection234('fabricImageTop', value);
-                          }}
-                        />
-
-                        {selectedOutfitDetails && selectedOutfitDetails.pieces > 1 && (
-                          <div className="mt-4">
-                            <label className="block mb-3 font-medium">Bottom Fabric Image</label>
-                            <BulkImageUploadField
-                              label="Upload Bottom Fabric Images"
-                              placeholder="Upload Bottom Fabric Images"
-                              type="file"
-                              required={false}
-                              multiple={true}
-                              maxUpload={1}
-                              fileTypeRequired={false}
-                              value={formDataSection234.fabricImageBottom}
-                              onChange={(value: any) => {
-                                updateFormDataSection234('fabricImageBottom', value);
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Color and Fabric Instructions */}
-                      <div>
-                        <label className="block mb-3 font-medium">
-                          Color and Fabric Instructions
-                        </label>
-                        <textarea
-                          className="w-full p-4 border border-gray-200 rounded-lg resize-none h-24 bg-gray-50 text-gray-500"
-                          placeholder="Add any color and fabric instructions here..."
-                          value={formDataSection234.colorFabricInstructions}
-                          onChange={(e) =>
-                            updateFormDataSection234('colorFabricInstructions', e.target.value)
-                          }
-                        />
-                        <p className="text-xs text-gray-400 mt-1">This section is not mandatory</p>
-                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {currentStep === 4 && (
-                  <div className=" md:mb-8 mb-[2rem] flex flex-col gap-1">
-                    {loadingStitchOptions ? (
-                      <div className="flex justify-center items-center h-40">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#79539f]"></div>
-                      </div>
-                    ) : error ? (
-                      <div className="text-red-500 text-center p-4">{error}</div>
-                    ) : (
-                      <>
-                        {generatedImageUrl && (
-                          <div className=" w-full md:hidden flex gap-2 items-center justify-end">
-                            <img src={woman} alt="" className="h-12 aspect-auto pb-2  " />
-                            <button
-                              onClick={() => {
-                                setShowMobilePreview(true);
-                              }}
-                              className="bg-[#4F2945] text-[.8rem] font-semibold px-3 py-1.5 text-white flex items-center rounded-xl gap-2"
-                            >
-                              Preview <img src={preview} alt="" className="h-4 aspect-auto " />
-                            </button>
-                          </div>
-                        )}
-                        {stitchOptionGroups.map((group, groupIndex) => (
-                          <div key={groupIndex} className="md:mb-8 mb-2">
-                            <h2 className="text-xl font-medium md:mb-4 mb-3">{group.side}</h2>
-
-                            {group.stitch_options.map((option, optionIndex) => (
-                              <div key={optionIndex} className="mb-6">
-                                <label className="block md:mb-3 mb-2 font-semibold ">
-                                  {option.label}
-                                </label>
-
-                                {option.type === 'radio' && (
-                                  <div className="flex flex-wrap gap-3">
-                                    {option.options.map((choice, choiceIndex) => {
-                                      // Check if this option is selected
-                                      const isSelected =
-                                        formDataSection234.stitchOptions[option.label] !== null &&
-                                        String(formDataSection234.stitchOptions[option.label]) ===
-                                          String(choice.value);
-
-                                      return (
-                                        <button
-                                          key={choiceIndex}
-                                          className={`md:px-4 px-3 md:py-2 py-1.5 rounded-full text-sm font-medium ${
-                                            isSelected
-                                              ? 'bg-[#79539f] text-white'
-                                              : 'bg-white border border-gray-300 hover:bg-gray-50'
-                                          }`}
-                                          onClick={() =>
-                                            updateStitchOption(option.label, choice.value)
-                                          }
-                                        >
-                                          {choice.label}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-
-                                {option.type === 'counter' && (
-                                  <div className="flex items-center">
-                                    <button
-                                      className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-l-md bg-gray-50"
-                                      onClick={() => {
-                                        // Initialize to min_value if null
-                                        if (
-                                          formDataSection234.stitchOptions[option.label] === null
-                                        ) {
-                                          updateStitchOption(
-                                            option.label,
-                                            parseInt(option.min_value || '0')
-                                          );
-                                        } else {
-                                          decrementCounter(option.label, option.min_value);
-                                        }
-                                      }}
-                                    >
-                                      <FaMinus size={16} />
-                                    </button>
-                                    <div className="w-16 h-10 flex items-center justify-center border-t border-b border-gray-300">
-                                      {formDataSection234.stitchOptions[option.label] !== null
-                                        ? formDataSection234.stitchOptions[option.label]
-                                        : '-'}
-                                    </div>
-                                    <button
-                                      className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-r-md bg-gray-50"
-                                      onClick={() => {
-                                        // Initialize to min_value if null
-                                        if (
-                                          formDataSection234.stitchOptions[option.label] === null
-                                        ) {
-                                          updateStitchOption(
-                                            option.label,
-                                            parseInt(option.min_value || '0')
-                                          );
-                                        } else {
-                                          incrementCounter(option.label, option.max_value);
-                                        }
-                                      }}
-                                    >
-                                      <FaPlus size={16} />
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ))}
-
-                        {/* Special Instructions */}
-                        <div className="mb-8">
-                          <label className="block mb-3 font-medium">Special Instructions</label>
-                          <div className="relative">
-                            <div className="absolute top-1 left-2 text-[#8227ff]">
-                              <img src={aiimage} alt="" className=" h-8 mt-2 aspect-auto " />
-                            </div>
-                            <textarea
-                              className="w-full p-4 pl-12 border border-gray-200 rounded-lg resize-none h-24 md:mb-1 mb-6"
-                              placeholder="Add any special instructions here..."
-                              value={formDataSection234.specialInstructions}
-                              onChange={(e) =>
-                                updateFormDataSection234('specialInstructions', e.target.value)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div
-                          className={`fixed flex items-center justify-between md:bottom-1 bottom-2 left-0 gap-4 bg-transparent py-4 px-6 transition-all duration-500 ease-in-out w-full ${
-                            showStudio ? 'md:w-[calc(58%-300px)] md:ml-[300px]' : 'md:w-1/2 md:ml-0'
-                          }`}
-                        >
-                          <button
-                            className="flex-1 flex items-center md:text-[1rem] text-[.9rem] justify-center gap-2 px-6 py-3 bg-[#fef6ea] text-[#4f2945] rounded-md"
-                            onClick={handleClearAll}
-                          >
-                            <FaSync className="md:block hidden" size={18} />
-                            <span>Clear All</span>
-                          </button>
-                          <button
-                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#4f2945] text-white rounded-md"
-                            onClick={() => handleGeneratePreview(currentVersionEntry || undefined)}
-                            // disabled={isGeneratingImage || animationStep !== 'idle'}
-                          >
-                            {animationStep === 'ticking' ? (
-                              <>
-                                {/* <div className="animate-pulse h-5 w-5 bg-green-500 rounded-full"></div> */}
-                                <span>Processing...</span>
-                              </>
-                            ) : isGeneratingImage || animationStep === 'loading' ? (
-                              <>
-                                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                                <span>Generating...</span>
-                              </>
-                            ) : (
-                              <>
-                                <FaEye className="md:block hidden" size={18} />
-                                <span className="md:text-[1rem] text-[.9rem] leading-5 text-nowrap">
-                                  Generate Preview
-                                </span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {/* Next Button - Only show if not on the last step */}
-                {currentStep < 4 && (
-                  <div
-                    className={`fixed md:bottom-1 bottom-2 left-0 w-full bg-transparent py-4 px-6 z-10 transition-all duration-500 ease-in-out ${
-                      showStudio ? 'md:w-[calc(100%-350px)] ' : 'md:w-1/2 md:ml-0'
-                    }`}
-                  >
-                    <button
-                      onClick={handleNext}
-                      disabled={
-                        (currentStep === 1 && !isAboutYouSectionValid()) ||
-                        (currentStep === 2 && !formDataSection234.selectedOutfit)
-                      }
-                      className={`flex items-center justify-center w-full max-w-xs mx-auto px-6 py-3 rounded-md ${
-                        (currentStep === 1 && !isAboutYouSectionValid()) ||
-                        (currentStep === 2 && !formDataSection234.selectedOutfit)
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-[#4f2945] text-white'
-                      }`}
-                    >
-                      <span>Next</span>
-                      <FaArrowRight className="ml-2" size={18} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Vertical divider */}
-            <div
-              className={`w-1 bg-[#FEF6EA] ${showMobilePreview ? 'hidden' : 'md:block hidden'}`}
-            ></div>
-
-            {/* Right side - Preview (50%) */}
-            <div
-              className={`${
-                showMobilePreview ? 'w-full md:w-1/2' : 'w-1/2 md:block hidden'
-              } md:p-6 p-4 sticky top-0 min-h-[calc(100vh-72px)] overflow-y-scroll`}
-            >
-              <div className="flex items-center justify-between md:mb-6 mb-3">
-                <div className="flex items-center">
-                  <TiArrowLeft
-                    onClick={() => {
-                      setShowMobilePreview(false);
-                    }}
-                    className={`${showMobilePreview ? ' block' : ' hidden'} size-8 cursor-pointer`}
-                  />
-                  <h2 className="text-xl font-medium ">Preview</h2>
-                </div>
-                {isImageLoaded && (
-                  <div className="flex items-center md:gap-7 gap-4">
-                    <img
-                      src={share}
-                      alt="Share outfit"
-                      className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                      onClick={() => setShowShareModal(true)}
-                    />
-                    {isDownloading ? (
-                      <div className="md:h-8 h-6 flex items-center justify-center">
-                        <svg
-                          className="animate-spin h-6 w-6 "
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="#79539F"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="#79539F"
-                            d="M4 12a8 8 0 018-8v8H4z"
-                          ></path>
-                        </svg>
-                      </div>
-                    ) : (
-                      <img
-                        src={download}
-                        alt="Download outfit"
-                        className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                        onClick={handleDownloadImage}
-                      />
-                    )}
-
-                    <img
-                      onClick={() => handleShare('whatsapp')}
-                      src={whatapp}
-                      alt=""
-                      className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="border border-gray-200 rounded-3xl min-h-[calc(100vh-192px)] max-h-[calc(100vh-152px)] flex flex-col items-center justify-center py-4 flex-wrap overflow-y-scroll md:pt-[4rem custom-scrollbar">
-                {currentStep === 2 && !formDataSection234.selectedOutfit && (
-                  <>
-                    <div className="relative mb-4">
-                      <div className="bg-white border border-[#79539F] rounded-xl p-4 flex items-center gap-3 max-w-xs">
+                  {currentStep === 3 && (
+                    <div className="w-full flex flex-col items-center justify-between">
+                      <div className="flex items-center gap-3 mb-6">
                         <img src={woman} alt="" className="h-12 aspect-auto " />
-                        <div className="font-medium">Let&apos;s build your look</div>
-                      </div>
-                      <div className="absolute  -bottom-4 left-6 w-0 h-0 border-l-[2px] border-l-transparent border-t-[16px] border-t-[#79539F] border-r-[12px] border-r-transparent rotate-"></div>
-                    </div>
-                    <div className="text-center mt-8">
-                      <h3 className="text-3xl font-bold mb-2">Start selecting</h3>
-                      <h3 className="text-3xl font-bold mb-2">options to visualize</h3>
-                      <h3 className="text-3xl font-bold">your dream outfit</h3>
-                    </div>
-                  </>
-                )}
-
-                {currentStep === 2 && formDataSection234.selectedOutfit && (
-                  <div className="w-full flex flex-col items-center justify-between">
-                    <div className="flex items-center gap-3 mb-6">
-                      <img src={woman} alt="" className=" h-12 aspect-auto " />
-                      <div className="font-medium text-xl">
-                        {selectedOutfitDetails?.outfit_details_title ||
-                          formDataSection234.selectedOutfit}
-                      </div>
-                    </div>
-
-                    {selectedOutfitDetails && (
-                      <div className="space-y-6">
-                        <div>
-                          <h3 className="font-medium mb-2">Details:</h3>
-                          <ul className="space-y-1 text-sm">
-                            <li>- {selectedOutfitDetails.pieces} piece(s)</li>
-                            <li>
-                              -{' '}
-                              {selectedOutfitDetails.stitch_options_exist
-                                ? 'Has stitch options'
-                                : 'No stitch options'}
-                            </li>
-                            <li>
-                              -{' '}
-                              {selectedOutfitDetails.portfolio_eligible
-                                ? 'Portfolio eligible'
-                                : 'Not portfolio eligible'}
-                            </li>
-                          </ul>
+                        <div className="font-medium text-xl">
+                          {selectedOutfitDetails?.outfit_details_title ||
+                            formDataSection234.selectedOutfit}
                         </div>
                       </div>
-                    )}
-                  </div>
-                )}
 
-                {currentStep === 3 && (
-                  <div className="w-full flex flex-col items-center justify-between">
-                    <div className="flex items-center gap-3 mb-6">
-                      <img src={woman} alt="" className="h-12 aspect-auto " />
-                      <div className="font-medium text-xl">
-                        {selectedOutfitDetails?.outfit_details_title ||
-                          formDataSection234.selectedOutfit}
-                      </div>
-                    </div>
+                      <div className="space-y-6">
+                        {selectedOutfitDetails && selectedOutfitDetails.pieces > 1 ? (
+                          <>
+                            <div>
+                              <h3 className="font-medium mb-2">Top:</h3>
+                              <ul className="space-y-1 text-sm">
+                                <li className="flex items-center mt-2">
+                                  - Color:{' '}
+                                  <span
+                                    className="ml-2 w-4 h-4 inline-block rounded"
+                                    style={{
+                                      backgroundColor: formDataSection234.topColor || '#cccccc',
+                                    }}
+                                  ></span>
+                                </li>
+                              </ul>
+                            </div>
 
-                    <div className="space-y-6">
-                      {selectedOutfitDetails && selectedOutfitDetails.pieces > 1 ? (
-                        <>
+                            <div>
+                              <h3 className="font-medium mb-2">Bottom:</h3>
+                              <ul className="space-y-1 text-sm">
+                                <li className="flex items-center mt-2">
+                                  - Color:{' '}
+                                  <span
+                                    className="ml-2 w-4 h-4 inline-block rounded"
+                                    style={{
+                                      backgroundColor: formDataSection234.bottomColor || '#cccccc',
+                                    }}
+                                  ></span>
+                                </li>
+                              </ul>
+                            </div>
+                          </>
+                        ) : (
                           <div>
-                            <h3 className="font-medium mb-2">Top:</h3>
+                            <h3 className="font-medium mb-2">Color:</h3>
                             <ul className="space-y-1 text-sm">
                               <li className="flex items-center mt-2">
-                                - Color:{' '}
                                 <span
                                   className="ml-2 w-4 h-4 inline-block rounded"
                                   style={{
@@ -2604,266 +2695,270 @@ export default function FizaAI() {
                               </li>
                             </ul>
                           </div>
+                        )}
 
-                          <div>
-                            <h3 className="font-medium mb-2">Bottom:</h3>
-                            <ul className="space-y-1 text-sm">
-                              <li className="flex items-center mt-2">
-                                - Color:{' '}
-                                <span
-                                  className="ml-2 w-4 h-4 inline-block rounded"
-                                  style={{
-                                    backgroundColor: formDataSection234.bottomColor || '#cccccc',
-                                  }}
-                                ></span>
-                              </li>
-                            </ul>
-                          </div>
-                        </>
-                      ) : (
-                        <div>
-                          <h3 className="font-medium mb-2">Color:</h3>
-                          <ul className="space-y-1 text-sm">
-                            <li className="flex items-center mt-2">
-                              <span
-                                className="ml-2 w-4 h-4 inline-block rounded"
-                                style={{
-                                  backgroundColor: formDataSection234.topColor || '#cccccc',
-                                }}
-                              ></span>
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-
-                      {formDataSection234.colorFabricInstructions && (
-                        <div className="w-fulL h-fit ">
-                          <h3 className="font-medium mb-2">Color and Fabric Instructions:</h3>
-                          <p className="text-sm italic flex flex-wrap h-fit text-wrap ">
-                            {formDataSection234.colorFabricInstructions}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {currentStep === 4 && (
-                  <div className="w-full flex flex-col items-center justify-between">
-                    {animationStep === 'loading' || isGeneratingImage ? (
-                      // Show loader while generating image
-                      <div className="flex flex-col items-center justify-center h-[400px]">
-                        <img
-                          src={Ai_refresh}
-                          alt="Loading..."
-                          className="h-[15rem] w-[15rem] mb-4"
-                        />
-                        <p className="text-lg font-medium text-gray-700">Adding Final Details...</p>
-                        <p className="text-sm text-gray-500 mt-2">This may take a moment</p>
-                      </div>
-                    ) : animationStep === 'complete' && generatedImageUrl ? (
-                      // Display the generated image when available
-                      <div className="w-full flex flex-col items-center justify-center">
-                        {loadingImageVersion ? (
-                          // Show loader while image version is changing
-                          <div className="flex flex-col items-center justify-center">
-                            <img
-                              src={Ai_refresh}
-                              alt="Loading new version..."
-                              className="h-[15rem] w-[15rem] mb-4"
-                            />
-                            <p className="text-lg font-medium text-gray-700">Loading version...</p>
-                            <p className="text-sm text-gray-500 mt-2">Please wait</p>
-                          </div>
-                        ) : (
-                          <div className="w-full h-full object-contain flex flex-col items-center ">
-                            <img
-                              src={generatedImageUrl}
-                              alt="Generated outfit preview"
-                              onLoad={() => setIsImageLoaded(true)}
-                              onError={() => setIsImageLoaded(false)}
-                              className="w-full max-w-full h-auto max-h-[calc(100vh-250px)] object-contain rounded-lg"
-                            />
-                            <div className="text-sm text-gray-600 mb-4">
-                              AI-generated preview based on your selections
-                            </div>
+                        {formDataSection234.colorFabricInstructions && (
+                          <div className="w-fulL h-fit ">
+                            <h3 className="font-medium mb-2">Color and Fabric Instructions:</h3>
+                            <p className="text-sm italic flex flex-wrap h-fit text-wrap ">
+                              {formDataSection234.colorFabricInstructions}
+                            </p>
                           </div>
                         )}
                       </div>
-                    ) : (
-                      // Show the regular preview content with animated ticks
-                      <>
-                        <div className="w-full flex flex-col items-center justify-between">
-                          <div className="flex items-center gap-3 mb-6">
-                            <img src={woman} alt="" className="h-12 aspect-auto " />
-                            <div className="font-medium text-xl">
-                              {selectedOutfitDetails?.outfit_details_title ||
-                                formDataSection234.selectedOutfit}
+                    </div>
+                  )}
+
+                  {currentStep === 4 && (
+                    <div className="w-full flex flex-col items-center justify-between">
+                      {animationStep === 'loading' || isGeneratingImage ? (
+                        // Show loader while generating image
+                        <div className="flex flex-col items-center justify-center h-[400px]">
+                          <img
+                            src={Ai_refresh}
+                            alt="Loading..."
+                            className="h-[15rem] w-[15rem] mb-4"
+                          />
+                          <p className="text-lg font-medium text-gray-700">
+                            Adding Final Details...
+                          </p>
+                          <p className="text-sm text-gray-500 mt-2">This may take a moment</p>
+                        </div>
+                      ) : animationStep === 'complete' && generatedImageUrl ? (
+                        // Display the generated image when available
+                        <div className="w-full flex flex-col items-center justify-center">
+                          {loadingImageVersion ? (
+                            // Show loader while image version is changing
+                            <div className="flex flex-col items-center justify-center">
+                              <img
+                                src={Ai_refresh}
+                                alt="Loading new version..."
+                                className="h-[15rem] w-[15rem] mb-4"
+                              />
+                              <p className="text-lg font-medium text-gray-700">
+                                Loading version...
+                              </p>
+                              <p className="text-sm text-gray-500 mt-2">Please wait</p>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="w-full h-full object-contain flex flex-col items-center ">
+                              <img
+                                src={generatedImageUrl}
+                                alt="Generated outfit preview"
+                                onLoad={() => setIsImageLoaded(true)}
+                                onError={() => setIsImageLoaded(false)}
+                                className="w-full max-w-full h-auto max-h-[calc(100vh-250px)] object-contain rounded-lg"
+                              />
+                              <div className="text-sm text-gray-600 mb-4">
+                                AI-generated preview based on your selections
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        // Show the regular preview content with animated ticks
+                        <>
+                          <div className="w-full flex flex-col items-center justify-between">
+                            <div className="flex items-center gap-3 mb-6">
+                              <img src={woman} alt="" className="h-12 aspect-auto " />
+                              <div className="font-medium text-xl">
+                                {selectedOutfitDetails?.outfit_details_title ||
+                                  formDataSection234.selectedOutfit}
+                              </div>
+                            </div>
 
-                          <div className=" pb-8">
-                            {stitchOptionGroups.map((group, groupIndex) => (
-                              <div key={groupIndex}>
-                                <h3 className="font-medium mb-2">{group.side}:</h3>
-                                <ul className="space-y-1 text-sm">
-                                  {group.stitch_options.map((option, optionIndex) => {
-                                    // Find the label for radio options
-                                    let displayValue =
-                                      formDataSection234.stitchOptions[option.label];
-                                    const isSelected = displayValue !== null;
-                                    const isAnimatingTick =
-                                      animationStep === 'ticking' &&
-                                      tickedOptions.has(option.label);
+                            <div className=" pb-8">
+                              {stitchOptionGroups.map((group, groupIndex) => (
+                                <div key={groupIndex}>
+                                  <h3 className="font-medium mb-2">{group.side}:</h3>
+                                  <ul className="space-y-1 text-sm">
+                                    {group.stitch_options.map((option, optionIndex) => {
+                                      // Find the label for radio options
+                                      let displayValue =
+                                        formDataSection234.stitchOptions[option.label];
+                                      const isSelected = displayValue !== null;
+                                      const isAnimatingTick =
+                                        animationStep === 'ticking' &&
+                                        tickedOptions.has(option.label);
 
-                                    // Only render if the option is selected
-                                    if (!isSelected) {
-                                      return null;
-                                    }
-
-                                    if (option.type === 'radio') {
-                                      const selectedOption = option.options.find(
-                                        (opt) => String(opt.value) === String(displayValue)
-                                      );
-
-                                      if (selectedOption) {
-                                        displayValue = selectedOption.label;
+                                      // Only render if the option is selected
+                                      if (!isSelected) {
+                                        return null;
                                       }
-                                    }
 
-                                    return (
-                                      <li
-                                        key={optionIndex}
-                                        className="flex items-center justify-between gap-8 "
-                                      >
-                                        <span className="flex-1">
-                                          - {option.label}: {displayValue}
-                                        </span>
-                                        <div className="ml-2 flex items-center">
-                                          <div className="flex items-center">
-                                            {/* Animated tick */}
-                                            {isAnimatingTick ? (
-                                              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-                                                <FaCheckCircle className="text-white text-xs" />
-                                              </div>
-                                            ) : animationStep === 'idle' ? (
-                                              <div className="w-5 h-5 bg-green-500 rounded-full fle items-center justify-center hidden">
-                                                <FaCheckCircle className="text-white text-xs" />
-                                              </div>
-                                            ) : (
-                                              <div className="w-6 h-6 bg-transparent rounded-full flex items-center justify-center">
-                                                <img
-                                                  src={Ai_refresh1}
-                                                  alt="Loading..."
-                                                  className="h-5 w-5 "
-                                                />
-                                              </div>
-                                            )}
+                                      if (option.type === 'radio') {
+                                        const selectedOption = option.options.find(
+                                          (opt) => String(opt.value) === String(displayValue)
+                                        );
+
+                                        if (selectedOption) {
+                                          displayValue = selectedOption.label;
+                                        }
+                                      }
+
+                                      return (
+                                        <li
+                                          key={optionIndex}
+                                          className="flex items-center justify-between gap-8 "
+                                        >
+                                          <span className="flex-1">
+                                            - {option.label}: {displayValue}
+                                          </span>
+                                          <div className="ml-2 flex items-center">
+                                            <div className="flex items-center">
+                                              {/* Animated tick */}
+                                              {isAnimatingTick ? (
+                                                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                                                  <FaCheckCircle className="text-white text-xs" />
+                                                </div>
+                                              ) : animationStep === 'idle' ? (
+                                                <div className="w-5 h-5 bg-green-500 rounded-full fle items-center justify-center hidden">
+                                                  <FaCheckCircle className="text-white text-xs" />
+                                                </div>
+                                              ) : (
+                                                <div className="w-6 h-6 bg-transparent rounded-full flex items-center justify-center">
+                                                  <img
+                                                    src={Ai_refresh1}
+                                                    alt="Loading..."
+                                                    className="h-5 w-5 "
+                                                  />
+                                                </div>
+                                              )}
+                                            </div>
                                           </div>
+                                        </li>
+                                      );
+                                    })}
+                                    {group.side === 'Top' && (
+                                      <li className="flex items-center mt-2 justify-between">
+                                        <span className="flex-1">
+                                          - Color:{' '}
+                                          <span
+                                            className="ml-2 w-4 h-4 inline-block rounded"
+                                            style={{
+                                              backgroundColor:
+                                                formDataSection234.topColor || '#cccccc',
+                                            }}
+                                          ></span>
+                                        </span>
+                                        <div className="ml-2">
+                                          {tickedOptions.has('topColor') &&
+                                          animationStep === 'ticking' ? (
+                                            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                                              <FaCheckCircle className="text-white text-xs" />
+                                            </div>
+                                          ) : animationStep === 'idle' ? (
+                                            <div className="w-5 h-5 bg-green-500 rounded-full fle hidden items-center justify-center">
+                                              <FaCheckCircle className="text-white text-xs" />
+                                            </div>
+                                          ) : (
+                                            <div className="w-6 h-6 bg-transparent rounded-full flex items-center justify-center">
+                                              <img
+                                                src={Ai_refresh1}
+                                                alt="Loading..."
+                                                className="h-5 w-5 "
+                                              />
+                                            </div>
+                                          )}
                                         </div>
                                       </li>
-                                    );
-                                  })}
-                                  {group.side === 'Top' && (
-                                    <li className="flex items-center mt-2 justify-between">
-                                      <span className="flex-1">
-                                        - Color:{' '}
-                                        <span
-                                          className="ml-2 w-4 h-4 inline-block rounded"
-                                          style={{
-                                            backgroundColor:
-                                              formDataSection234.topColor || '#cccccc',
-                                          }}
-                                        ></span>
-                                      </span>
-                                      <div className="ml-2">
-                                        {tickedOptions.has('topColor') &&
-                                        animationStep === 'ticking' ? (
-                                          <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-                                            <FaCheckCircle className="text-white text-xs" />
-                                          </div>
-                                        ) : animationStep === 'idle' ? (
-                                          <div className="w-5 h-5 bg-green-500 rounded-full fle hidden items-center justify-center">
-                                            <FaCheckCircle className="text-white text-xs" />
-                                          </div>
-                                        ) : (
-                                          <div className="w-6 h-6 bg-transparent rounded-full flex items-center justify-center">
-                                            <img
-                                              src={Ai_refresh1}
-                                              alt="Loading..."
-                                              className="h-5 w-5 "
-                                            />
-                                          </div>
-                                        )}
-                                      </div>
-                                    </li>
-                                  )}
-                                  {group.side === 'Bottom' && (
-                                    <li className="flex items-center mt-2 justify-between">
-                                      <span className="flex-1">
-                                        - Color:{' '}
-                                        <span
-                                          className="ml-2 w-4 h-4 inline-block rounded"
-                                          style={{
-                                            backgroundColor:
-                                              formDataSection234.bottomColor || '#cccccc',
-                                          }}
-                                        ></span>
-                                      </span>
-                                      <div className="ml-2">
-                                        {tickedOptions.has('bottomColor') &&
-                                        animationStep === 'ticking' ? (
-                                          <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-                                            <FaCheckCircle className="text-white text-xs" />
-                                          </div>
-                                        ) : animationStep === 'idle' ? (
-                                          <div className="w-5 h-5 bg-green-500 rounded-full fle hidden items-center justify-center">
-                                            <FaCheckCircle className="text-white text-xs" />
-                                          </div>
-                                        ) : (
-                                          <div className="w-6 h-6 bg-transparent rounded-full flex items-center justify-center">
-                                            <img
-                                              src={Ai_refresh1}
-                                              alt="Loading..."
-                                              className="h-5 w-5 "
-                                            />
-                                          </div>
-                                        )}
-                                      </div>
-                                    </li>
-                                  )}
-                                </ul>
-                              </div>
-                            ))}
-                          </div>
+                                    )}
+                                    {group.side === 'Bottom' && (
+                                      <li className="flex items-center mt-2 justify-between">
+                                        <span className="flex-1">
+                                          - Color:{' '}
+                                          <span
+                                            className="ml-2 w-4 h-4 inline-block rounded"
+                                            style={{
+                                              backgroundColor:
+                                                formDataSection234.bottomColor || '#cccccc',
+                                            }}
+                                          ></span>
+                                        </span>
+                                        <div className="ml-2">
+                                          {tickedOptions.has('bottomColor') &&
+                                          animationStep === 'ticking' ? (
+                                            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                                              <FaCheckCircle className="text-white text-xs" />
+                                            </div>
+                                          ) : animationStep === 'idle' ? (
+                                            <div className="w-5 h-5 bg-green-500 rounded-full fle hidden items-center justify-center">
+                                              <FaCheckCircle className="text-white text-xs" />
+                                            </div>
+                                          ) : (
+                                            <div className="w-6 h-6 bg-transparent rounded-full flex items-center justify-center">
+                                              <img
+                                                src={Ai_refresh1}
+                                                alt="Loading..."
+                                                className="h-5 w-5 "
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+                                      </li>
+                                    )}
+                                  </ul>
+                                </div>
+                              ))}
+                            </div>
 
-                          <div className="md:w-[500px] h-fit overflow-x-hidden gap-5 mb-[2rem]">
-                            {formDataSection234.colorFabricInstructions && (
-                              <div className="w-fulL h-fit ">
-                                <h3 className="font-medium mb-2">Color and Fabric Instructions:</h3>
-                                <p className="text-sm italic flex flex-wrap h-fit text-wrap ">
-                                  {formDataSection234.colorFabricInstructions}
-                                </p>
-                              </div>
-                            )}
-                            {formDataSection234.specialInstructions && (
-                              <div>
-                                <h3 className="font-medium mb-2">Special Instructions:</h3>
-                                <p className="text-sm italic flex flex-wrap h-fit text-wrap">
-                                  {formDataSection234.specialInstructions}
-                                </p>
-                              </div>
-                            )}
+                            <div className="md:w-[500px] h-fit overflow-x-hidden gap-5 mb-[2rem]">
+                              {formDataSection234.colorFabricInstructions && (
+                                <div className="w-fulL h-fit ">
+                                  <h3 className="font-medium mb-2">
+                                    Color and Fabric Instructions:
+                                  </h3>
+                                  <p className="text-sm italic flex flex-wrap h-fit text-wrap ">
+                                    {formDataSection234.colorFabricInstructions}
+                                  </p>
+                                </div>
+                              )}
+                              {formDataSection234.specialInstructions && (
+                                <div>
+                                  <h3 className="font-medium mb-2">Special Instructions:</h3>
+                                  <p className="text-sm italic flex flex-wrap h-fit text-wrap">
+                                    {formDataSection234.specialInstructions}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          ) : selectedTab === 'lookbook' ? (
+            <div className="flex flex-1 w-full ">
+              <Lookbook
+                portfolios={portfolios}
+                loading={loadingPortfolios}
+                selected={selectedPortfolio}
+                onSelect={(p) => setSelectedPortfolio(p)}
+                onRefresh={() => {
+                  // optional: re-fetch portfolios
+                  setLoadingPortfolios(true);
+
+                  api
+                    .getRequest('portfolio/fetch-all?pageNo=0&pageSize=10')
+                    .then((res) => {
+                      if (res.status && res.data?.content) {
+                        setPortfolios(res.data.content);
+                      }
+                    })
+                    .finally(() => setLoadingPortfolios(false));
+                }}
+                onLoadMore={() => {
+                  /* implement paging fetch if needed */
+                }}
+                searchTerm={searchTerm}
+                onSearchChange={(v) => setSearchTerm(v)}
+                pageInfo={{ currentPage: 0, totalPages: 1, totalItems: portfolios.length }}
+              />
+            </div>
+          ) : null)}
 
         {/* Share Modal */}
         {showShareModal && (

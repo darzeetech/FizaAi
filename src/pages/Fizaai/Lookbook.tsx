@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+// ...existing code...
+import React, { useEffect, useState, useRef } from 'react';
 import './sidebar.css';
 import location from '../../assets/images/location_on.png';
 import person from '../../assets/images/Vector1.png';
@@ -32,11 +33,13 @@ type PageInfo = {
   currentPage?: number;
   totalPages?: number;
   totalItems?: number;
+  lastPage?: boolean;
 };
 
 type Props = {
   portfolios: Portfolio[];
   loading?: boolean;
+  loadingMore?: boolean;
   selected?: Portfolio | null;
   onSelect: (p: Portfolio) => void;
   onRefresh?: () => void;
@@ -50,19 +53,63 @@ type Props = {
 export default function Lookbook({
   portfolios,
   loading = false,
+  loadingMore = false,
   selected = null,
   onSelect,
   onRefresh,
   onLoadMore,
-  searchTerm = '',
   onSearchChange,
   pageInfo,
+  searchTerm = '',
   className = '',
 }: Props) {
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const scrollDebounceRef = useRef<number | null>(null);
   const [detail, setDetail] = useState<any | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [lastFetchedUsername, setLastFetchedUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const el = listRef.current;
+
+    if (!el || !onLoadMore) {
+      return;
+    }
+
+    const handleScroll = () => {
+      if (loading || loadingMore) {
+        return;
+      } // avoid duplicate calls
+
+      if (!pageInfo || pageInfo.lastPage) {
+        return;
+      }
+
+      // When user scrolls within 150px of bottom, request more
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 150) {
+        onLoadMore();
+      }
+    };
+
+    const debounced = () => {
+      if (scrollDebounceRef.current) {
+        window.clearTimeout(scrollDebounceRef.current);
+      }
+      // small debounce to avoid rapid calls
+      scrollDebounceRef.current = window.setTimeout(handleScroll, 120) as unknown as number;
+    };
+
+    el.addEventListener('scroll', debounced);
+
+    return () => {
+      el.removeEventListener('scroll', debounced);
+
+      if (scrollDebounceRef.current) {
+        window.clearTimeout(scrollDebounceRef.current);
+      }
+    };
+  }, [onLoadMore, loading, loadingMore, pageInfo?.lastPage]);
 
   // reset detail when a different portfolio is selected so user can fetch fresh data by clicking right pane
   useEffect(() => {
@@ -108,7 +155,10 @@ export default function Lookbook({
 
   return (
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
-      <aside className="md:w-1/3 w-full max-h-[calc(100vh-72px)] custom-scrollbar overflow-y-auto border rounded-lg p-3 bg-white">
+      <aside
+        ref={listRef}
+        className="md:w-1/3 w-full max-h-[calc(100vh-72px)] custom-scrollbar overflow-y-auto border rounded-lg p-3 bg-white"
+      >
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Designers</h3>
           <div className="flex items-center gap-2">
@@ -133,7 +183,7 @@ export default function Lookbook({
           />
         </div>
 
-        {loading ? (
+        {loading && portfolios.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-[#79539f] rounded-full" />
           </div>
@@ -208,19 +258,31 @@ export default function Lookbook({
           </div>
         )}
 
-        {onLoadMore && pageInfo && pageInfo.currentPage! < (pageInfo.totalPages || 1) && (
-          <div className="mt-3 text-center">
-            <button
-              onClick={onLoadMore}
-              className="px-4 py-2 bg-[#79539f] text-white rounded-md text-sm"
-            >
-              Load more
-            </button>
+        {/* show loading more indicator when appending */}
+        {loadingMore && portfolios.length > 0 && (
+          <div className="flex items-center justify-center py-3">
+            <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-[#79539f] rounded-full" />
+            <div className="ml-2 text-sm text-gray-600">Loading more...</div>
           </div>
         )}
+
+        {/* Manual load more fallback */}
+        {onLoadMore &&
+          pageInfo &&
+          (pageInfo.currentPage ?? 0) < (pageInfo.totalPages ?? 1) &&
+          !pageInfo.lastPage && (
+            <div className="mt-3 text-center hidden">
+              <button
+                onClick={onLoadMore}
+                className="px-4 py-2 bg-[#79539f] text-white rounded-md text-sm"
+              >
+                Load more
+              </button>
+            </div>
+          )}
       </aside>
 
-      <section className="flex-1 border rounded-lg p-4 bg-white max-h-[calc(100vh-72px)] custom-scrollbar overflow-y-auto ">
+      <section className="flex-1 border rounded-lg p-4 bg-white max-h-[calc(100vh-72px)] custom-scrollbar overflow-y-auto">
         {!selected ? (
           <div className="flex items-center justify-center h-full text-gray-500">
             Select a portfolio on the left to view details
@@ -230,11 +292,6 @@ export default function Lookbook({
             {/* Left: owner & meta */}
             <div className="md:w-1/3 w-full flex flex-col gap-4">
               <div className="flex flex-col w-full items-center gap-3 p-3 borde rounded-lg bg-gray-50 shadow shadow-[#00000040]">
-                {/* <img
-                  src={selected.profilePictureUrl || '/placeholder-avatar.png'}
-                  alt={`${selected.tailorName} owner`}
-                  className="w-14 h-14 rounded-full object-cover"
-                /> */}
                 <div className="flex items-center gap-3 w-full ">
                   {detail?.base_info?.profile_picture_url ? (
                     <img
@@ -271,6 +328,7 @@ export default function Lookbook({
                   <img src={map} alt="copy" className="h-4 md:h-5 aspect-auto" />
                 </div>
               </div>
+
               {/* About */}
               {detail?.info?.about && (
                 <div>
@@ -312,9 +370,15 @@ export default function Lookbook({
                   <img src={location} alt="location" className="h-4 md:h-4 aspect-auto" />
                   Location
                 </div>
-                <div className="text-[1rem] text-[#41423C] font-semibold">
+                <div className="text-[.9rem] text-[#41423C] font-semibold">
                   {detail?.address_details?.address ? (
                     <>
+                      {detail?.address_details?.address?.addressLine1
+                        ? detail?.address_details?.address?.addressLine1 + ', '
+                        : ''}
+                      {detail?.address_details?.address?.addressLine2
+                        ? detail?.address_details?.address?.addressLine2 + ', '
+                        : ''}
                       {detail?.address_details?.address?.city
                         ? detail?.address_details?.address?.city + ', '
                         : ''}
@@ -336,16 +400,8 @@ export default function Lookbook({
             </div>
 
             {/* Right: gallery + fetchable backend details */}
-            <div
-              className="md:w-2/3 w-full"
-              //   onClick={() => {
-              //     // call backend API when user clicks the right-side panel (per request)
-              //     if (selected?.userName) {
-              //       fetchByUsername(selected.userName);
-              //     }
-              //   }}
-            >
-              <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidde">
+            <div className="md:w-2/3 w-full">
+              <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
                 {selected.coverPictureUrl ? (
                   <img
                     src={selected.coverPictureUrl}

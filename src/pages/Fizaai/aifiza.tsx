@@ -263,6 +263,10 @@ export default function FizaAI() {
 
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loadingPortfolios, setLoadingPortfolios] = useState(false);
+  const [loadingPortfoliosMore, setLoadingPortfoliosMore] = useState(false);
+  const [portfoliosPage, setPortfoliosPage] = useState<number>(0);
+  const [portfoliosTotalPages, setPortfoliosTotalPages] = useState<number>(1);
+  const [portfoliosLastPage, setPortfoliosLastPage] = useState<boolean>(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
 
   const handleShowStudio = () => {
@@ -825,40 +829,26 @@ export default function FizaAI() {
 
   // Fetch portfolios when user switches to Lookbook tab
   useEffect(() => {
-    const fetchPortfolios = async () => {
-      // if (selectedTab !== 'lookbook') {
-      //   return;
-      // }
-      setLoadingPortfolios(true);
-      setError(null);
-      try {
-        const res = await api.getRequest('portfolio/fetch-all?pageNo=0&pageSize=10');
-
-        if (res.status && res.data && Array.isArray(res.data.content)) {
-          setPortfolios(res.data.content);
-          // set first item selected by default
-
-          if (res.data.content.length > 0) {
-            setSelectedPortfolio(res.data.content[0]);
-          } else {
-            setSelectedPortfolio(null);
-          }
-        } else {
-          setPortfolios([]);
-          setSelectedPortfolio(null);
-        }
-      } catch (err) {
-        setPortfolios([]);
-        setSelectedPortfolio(null);
-        // eslint-disable-next-line no-console
-        console.error('Failed to fetch portfolios', err);
-      } finally {
-        setLoadingPortfolios(false);
-      }
-    };
-
-    fetchPortfolios();
+    if (selectedTab !== 'lookbook') {
+      return;
+    }
+    fetchPortfolios(0, false);
   }, [selectedTab]);
+
+  const handleLoadMorePortfolios = () => {
+    if (loadingPortfolios || loadingPortfoliosMore || portfoliosLastPage) {
+      return;
+    }
+
+    const nextPage = portfoliosPage + 1;
+    // guard: don't request beyond totalPages (if known)
+
+    if (portfoliosTotalPages && nextPage >= portfoliosTotalPages && portfoliosLastPage) {
+      return;
+    }
+
+    fetchPortfolios(nextPage, true);
+  };
 
   const handleVersionSelect = (entry: VersionData) => {
     try {
@@ -949,6 +939,60 @@ export default function FizaAI() {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error parsing version data:', error);
+    }
+  };
+
+  // Fetch portfolios (supports paging and append)
+  const fetchPortfolios = async (pageNo = 0, append = false) => {
+    try {
+      if (append) {
+        setLoadingPortfoliosMore(true);
+      } else {
+        setLoadingPortfolios(true);
+      }
+      setError(null);
+
+      const res = await api.getRequest(`portfolio/fetch-all?pageNo=${pageNo}&pageSize=5`);
+
+      if (res.status && res.data && Array.isArray(res.data.content)) {
+        const content = res.data.content as Portfolio[];
+        const lastPage = Boolean(res.data.lastPage);
+        const currentPage =
+          typeof res.data.currentPage === 'number' ? res.data.currentPage : pageNo;
+        const totalPages = typeof res.data.totalPages === 'number' ? res.data.totalPages : 1;
+
+        if (append) {
+          setPortfolios((prev) => [...prev, ...content]);
+        } else {
+          setPortfolios(content);
+          // set first item selected by default
+
+          if (content.length > 0) {
+            setSelectedPortfolio(content[0]);
+          } else {
+            setSelectedPortfolio(null);
+          }
+        }
+
+        setPortfoliosPage(currentPage);
+        setPortfoliosTotalPages(totalPages);
+        setPortfoliosLastPage(lastPage);
+      } else {
+        if (!append) {
+          setPortfolios([]);
+          setSelectedPortfolio(null);
+        }
+      }
+    } catch (err) {
+      if (!append) {
+        setPortfolios([]);
+        setSelectedPortfolio(null);
+      }
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch portfolios', err);
+    } finally {
+      setLoadingPortfolios(false);
+      setLoadingPortfoliosMore(false);
     }
   };
 
@@ -2935,27 +2979,22 @@ export default function FizaAI() {
               <Lookbook
                 portfolios={portfolios}
                 loading={loadingPortfolios}
+                loadingMore={loadingPortfoliosMore}
                 selected={selectedPortfolio}
                 onSelect={(p) => setSelectedPortfolio(p)}
                 onRefresh={() => {
                   // optional: re-fetch portfolios
-                  setLoadingPortfolios(true);
-
-                  api
-                    .getRequest('portfolio/fetch-all?pageNo=0&pageSize=10')
-                    .then((res) => {
-                      if (res.status && res.data?.content) {
-                        setPortfolios(res.data.content);
-                      }
-                    })
-                    .finally(() => setLoadingPortfolios(false));
+                  fetchPortfolios(0, false);
                 }}
-                onLoadMore={() => {
-                  /* implement paging fetch if needed */
-                }}
+                onLoadMore={handleLoadMorePortfolios}
                 searchTerm={searchTerm}
                 onSearchChange={(v) => setSearchTerm(v)}
-                pageInfo={{ currentPage: 0, totalPages: 1, totalItems: portfolios.length }}
+                pageInfo={{
+                  currentPage: portfoliosPage,
+                  totalPages: portfoliosTotalPages,
+                  totalItems: portfolios.length,
+                  lastPage: portfoliosLastPage,
+                }}
               />
             </div>
           ) : null)}

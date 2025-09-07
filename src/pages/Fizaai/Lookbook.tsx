@@ -290,7 +290,7 @@ export default function Lookbook({
         ) : (
           <div className="w-full h-full flex flex-col md:flex-row gap-8">
             {/* Left: owner & meta */}
-            <div className="md:w-1/3 w-full flex flex-col gap-4">
+            <div className="md:w-[40%] w-full flex flex-col gap-4">
               <div className="flex flex-col w-full items-center gap-3 p-3 borde rounded-lg bg-gray-50 shadow shadow-[#00000040]">
                 <div className="flex items-center gap-3 w-full ">
                   {detail?.base_info?.profile_picture_url ? (
@@ -400,7 +400,7 @@ export default function Lookbook({
             </div>
 
             {/* Right: gallery + fetchable backend details */}
-            <div className="md:w-2/3 w-full">
+            <div className="md:w-[60%] w-full">
               <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
                 {selected.coverPictureUrl ? (
                   <img

@@ -6,6 +6,8 @@ import BulkImageUploadFieldp from '../../components/FormComponents/BulkImageUplo
 import './sidebar.css';
 import Lookbook, { Portfolio as LookbookPortfolio } from './Lookbook';
 
+import Collective from './Collective';
+
 // Use the Portfolio type from Lookbook
 type Portfolio = LookbookPortfolio;
 
@@ -51,6 +53,9 @@ import { auth } from '../../firbase'; // make sure path is correct
 import { onAuthStateChanged } from 'firebase/auth';
 import { TiArrowLeft } from 'react-icons/ti';
 import { HexColorPicker } from 'react-colorful';
+import designerone from '../../assets/icons/designerone.png';
+import designertwo from '../../assets/icons/designertwo.png';
+import designerthree from '../../assets/icons/designerthree.png';
 import { toast } from 'react-toastify';
 
 type SkinColor = {
@@ -154,6 +159,8 @@ interface VersionData {
   imageUrl: string;
   userId: number;
   children?: number | null;
+  collective: boolean;
+  likeCount: number | null;
 }
 
 // Add color options array after outfitOptions
@@ -268,6 +275,12 @@ export default function FizaAI() {
   const [portfoliosTotalPages, setPortfoliosTotalPages] = useState<number>(1);
   const [portfoliosLastPage, setPortfoliosLastPage] = useState<boolean>(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
+  const [collectiveLoading, setCollectiveLoading] = useState(false);
+  const [collectiveItems, setCollectiveItems] = useState([]);
+  const [loadingCollective, setLoadingCollective] = useState(false);
+  const [collectivePage, setCollectivePage] = useState(0);
+  const [collectiveTotalPages, setCollectiveTotalPages] = useState(1);
+  const [collectiveLastPage, setCollectiveLastPage] = useState(false);
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);
@@ -827,12 +840,49 @@ export default function FizaAI() {
     fetchVersions();
   }, [isLoggedInn, showStudio, generatedImageUrl]);
 
+  const fetchCollective = async (pageNo = 0, append = false) => {
+    setLoadingCollective(true);
+    try {
+      const response = await api.getRequest(
+        `fiza/collective/list?pageNo=${pageNo}&pageSize=10&sortBy=id&sortDir=DESC`
+      );
+
+      if (response.status && response.data && Array.isArray(response.data.content)) {
+        const content = response.data.content;
+        const lastPage = Boolean(response.data.lastPage);
+        const currentPage =
+          typeof response.data.currentPage === 'number' ? response.data.currentPage : pageNo;
+        const totalPages =
+          typeof response.data.totalPages === 'number' ? response.data.totalPages : 1;
+
+        setCollectiveItems(append ? [...collectiveItems, ...content] : content);
+        setCollectivePage(currentPage);
+        setCollectiveTotalPages(totalPages);
+        setCollectiveLastPage(lastPage);
+      } else {
+        if (!append) {
+          setCollectiveItems([]);
+        }
+      }
+    } finally {
+      setLoadingCollective(false);
+    }
+  };
+
+  const handleLoadMoreCollective = () => {
+    if (loadingCollective || collectiveLastPage) {
+      return;
+    }
+    fetchCollective(collectivePage + 1, true);
+  };
+
   // Fetch portfolios when user switches to Lookbook tab
   useEffect(() => {
     if (selectedTab !== 'lookbook') {
       return;
     }
     fetchPortfolios(0, false);
+    fetchCollective(0, false);
   }, [selectedTab]);
 
   const handleLoadMorePortfolios = () => {
@@ -939,6 +989,43 @@ export default function FizaAI() {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error parsing version data:', error);
+    }
+  };
+
+  const handleCollectiveToggle = async () => {
+    if (!currentVersionEntry) {
+      return;
+    }
+    setCollectiveLoading(true);
+
+    try {
+      const user = auth.currentUser;
+      const token = user && (await user.getIdToken());
+      const imageVersionId = currentVersionEntry.id;
+      const addToCollective = !currentVersionEntry.collective;
+
+      const apiUrl = addToCollective
+        ? `fiza/collective/mark_as_collective?imageVersionId=${imageVersionId}`
+        : `fiza/collective/remove_from_collective?imageVersionId=${imageVersionId}`;
+
+      const response = await api.putRequest(
+        apiUrl,
+        {}, // Empty body for PUT
+        false,
+        { Authorization: `Bearer ${token}`, Accept: '*/*' }
+      );
+
+      if (response.status) {
+        // Update local state
+        setCurrentVersionEntry({ ...currentVersionEntry, collective: addToCollective });
+        toast.success(addToCollective ? 'Added to Collective' : 'Removed from Collective');
+      } else {
+        throw new Error('API error');
+      }
+    } catch (error) {
+      // toast.error('There is Already An Image Added To Collective.');
+    } finally {
+      setCollectiveLoading(false);
     }
   };
 
@@ -1160,6 +1247,8 @@ export default function FizaAI() {
               imageUrl: response.data.img,
               userId: response.data.userId,
               children: response.data.children || null,
+              collective: response.data.collective || false,
+              likeCount: response.data.likeCount || null,
             });
           }
         } else {
@@ -2796,6 +2885,61 @@ export default function FizaAI() {
                               <div className="text-sm text-gray-600 mb-4">
                                 AI-generated preview based on your selections
                               </div>
+                              <div className="flex items-center w-full max-w-md justify-between mt-2 p-2 ">
+                                {/* Avatars */}
+                                <div className="flex items-center ">
+                                  <div className="flex -space-x-2">
+                                    <img
+                                      src={designerone}
+                                      alt="Designer 1"
+                                      className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                                    />
+                                    <img
+                                      src={designertwo}
+                                      alt="Designer 2"
+                                      className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                                    />
+                                    <img
+                                      src={designerthree}
+                                      alt="Designer 3"
+                                      className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                                    />
+                                  </div>
+                                  <span className="ml-4 font-semibold text-base">
+                                    500 designers available
+                                  </span>
+                                </div>
+
+                                {/* Collective Toggle */}
+                                <div
+                                  className="flex items-center px-4 py-2 rounded-xl bg-[#FCF7F4] ml-2"
+                                  style={{ minWidth: 185 }}
+                                >
+                                  <span className="relative w-2 h-2 mr-2"></span>
+                                  <span className="font-medium text-gray-900 text-[15px] pr-2">
+                                    Add to collective
+                                  </span>
+                                  <button
+                                    disabled={collectiveLoading}
+                                    type="button"
+                                    aria-pressed={!!currentVersionEntry?.collective}
+                                    className={`relative w-[46px] h-[26px] rounded-full ml-2 transition-all duration-200 
+        ${currentVersionEntry?.collective ? 'bg-[#79539f]' : 'bg-[#e5e5e5]'}
+        ${collectiveLoading ? 'opacity-60 pointer-events-none' : ''}`}
+                                    style={{ boxShadow: '0px 2px 4px #0001' }}
+                                    onClick={handleCollectiveToggle}
+                                  >
+                                    <span
+                                      className="block absolute top-1/2 left-[6px] w-5 h-5 rounded-full bg-white transition-transform duration-200"
+                                      style={{
+                                        transform: currentVersionEntry?.collective
+                                          ? 'translate(20px, -50%)'
+                                          : 'translate(0px, -50%)',
+                                      }}
+                                    />
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -2976,26 +3120,82 @@ export default function FizaAI() {
             </div>
           ) : selectedTab === 'lookbook' ? (
             <div className="flex flex-1 w-full ">
-              <Lookbook
-                portfolios={portfolios}
-                loading={loadingPortfolios}
-                loadingMore={loadingPortfoliosMore}
-                selected={selectedPortfolio}
-                onSelect={(p) => setSelectedPortfolio(p)}
-                onRefresh={() => {
-                  // optional: re-fetch portfolios
-                  fetchPortfolios(0, false);
-                }}
-                onLoadMore={handleLoadMorePortfolios}
-                searchTerm={searchTerm}
-                onSearchChange={(v) => setSearchTerm(v)}
-                pageInfo={{
-                  currentPage: portfoliosPage,
-                  totalPages: portfoliosTotalPages,
-                  totalItems: portfolios.length,
-                  lastPage: portfoliosLastPage,
-                }}
-              />
+              {(() => {
+                switch (selectlookbook) {
+                  case 'Explore Designers':
+                    return (
+                      <Lookbook
+                        portfolios={portfolios}
+                        loading={loadingPortfolios}
+                        loadingMore={loadingPortfoliosMore}
+                        selected={selectedPortfolio}
+                        onSelect={(p) => setSelectedPortfolio(p)}
+                        onRefresh={() => fetchPortfolios(0, false)}
+                        onLoadMore={handleLoadMorePortfolios}
+                        searchTerm={searchTerm}
+                        onSearchChange={(v) => setSearchTerm(v)}
+                        pageInfo={{
+                          currentPage: portfoliosPage,
+                          totalPages: portfoliosTotalPages,
+                          totalItems: portfolios.length,
+                          lastPage: portfoliosLastPage,
+                        }}
+                      />
+                    );
+                  case 'Outfits':
+                    return (
+                      <div>
+                        {/* Add your Outfits component or UI here */}
+                        <p>Outfits section coming soon...</p>
+                      </div>
+                    );
+                  case 'Collective':
+                    return (
+                      <Collective
+                        data={collectiveItems}
+                        loading={loadingCollective}
+                        onLoadMore={handleLoadMoreCollective}
+                        pageInfo={{
+                          currentPage: collectivePage,
+                          totalPages: collectiveTotalPages,
+                          lastPage: collectiveLastPage,
+                          totalItems: collectiveItems.length,
+                        }}
+                      />
+                    );
+
+                  case 'My Designs':
+                    return (
+                      <div>
+                        {/* Add your My Designs component or UI here */}
+                        <p>My Designs section coming soon...</p>
+                      </div>
+                    );
+                  case 'Favorites':
+                    return (
+                      <div>
+                        {/* Add your Favorites component or UI here */}
+                        <p>Favorites section coming soon...</p>
+                      </div>
+                    );
+                  case 'Brought to life':
+                    return (
+                      <div>
+                        {/* Add your Brought to life component or UI here */}
+                        <p>Brought to life section coming soon...</p>
+                      </div>
+                    );
+                  case 'Awaiting Artisan':
+                    return (
+                      <div>
+                        {/* Add your Awaiting Artisan component or UI here */}
+                        <p>Awaiting Artisan section coming soon...</p>
+                      </div>
+                    );
+                  default:
+                    return null;
+                }
+              })()}
             </div>
           ) : null)}
 

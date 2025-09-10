@@ -42,6 +42,8 @@ interface VersionData {
   imageUrl: string;
   userId: number;
   children?: number | null;
+  collective: boolean;
+  likeCount: number | null;
 }
 
 const StudioSidebar: React.FC<StudioSidebarProps> = ({

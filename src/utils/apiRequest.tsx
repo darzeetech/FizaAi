@@ -71,12 +71,16 @@ const makeApiRequest = async (url: string, config: any) => {
     const response = await fetch(baseUrl + url, updatedConfig);
     const { status, statusText } = response;
     const contentType = response.headers.get('Content-Type');
+    3;
 
     let data = null;
     let rawHex: string | null = null;
     let rawBuffer: ArrayBuffer | null = null;
 
-    if (contentType && contentType.includes('application/json')) {
+    if (
+      contentType &&
+      (contentType.includes('application/json') || contentType.includes('application/problem+json'))
+    ) {
       data = await response.json();
     } else {
       // For ESC/POS (thermal printer)
@@ -93,7 +97,7 @@ const makeApiRequest = async (url: string, config: any) => {
         toasts('success', data.message, 'success');
       }
     } else if (status >= 400) {
-      toasts('error', data?.message || statusText, 'api-error');
+      toasts('error', data?.message || data?.detail || statusText, 'api-error');
     }
 
     const responseData = {

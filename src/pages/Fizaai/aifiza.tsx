@@ -161,6 +161,7 @@ interface VersionData {
   children?: number | null;
   collective: boolean;
   likeCount: number | null;
+  likedByCurrentUser: boolean;
 }
 
 // Add color options array after outfitOptions
@@ -844,7 +845,7 @@ export default function FizaAI() {
     setLoadingCollective(true);
     try {
       const response = await api.getRequest(
-        `fiza/collective/list?pageNo=${pageNo}&pageSize=10&sortBy=id&sortDir=DESC`
+        `fiza/collective/list?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`
       );
 
       if (response.status && response.data && Array.isArray(response.data.content)) {
@@ -1249,6 +1250,7 @@ export default function FizaAI() {
               children: response.data.children || null,
               collective: response.data.collective || false,
               likeCount: response.data.likeCount || null,
+              likedByCurrentUser: response.data.likedByCurrentUser || null,
             });
           }
         } else {

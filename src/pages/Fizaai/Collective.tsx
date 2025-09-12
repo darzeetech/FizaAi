@@ -161,8 +161,8 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
             key={item.id}
             className="flex flex-col md:flex-row bg-white shadow-md transition-shadow hover:shadow-lg mx-auto"
             style={{
-              width: '1113px',
-              height: '897px',
+              width: '903px',
+              height: '797px',
               borderRadius: '30px',
               borderWidth: '2px',
               borderStyle: 'solid',
@@ -174,8 +174,8 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
               {/* Left Image External Wrapper */}
               <div
                 style={{
-                  width: '424px',
-                  height: '475px',
+                  width: '324px',
+                  height: '375px',
                   borderRadius: '30px',
                   borderWidth: '5px',
                   borderStyle: 'solid',
@@ -190,8 +190,8 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
                   src={item.imageUrl}
                   alt={outfitName}
                   style={{
-                    width: '397px',
-                    height: '420px',
+                    width: '297px',
+                    height: '320px',
                     objectFit: 'contain',
                   }}
                 />

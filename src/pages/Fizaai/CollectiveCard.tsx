@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import coins from '../../assets/images/coins.png'; // Coin icon example
 import Ai_refresh from '../../assets/icons/Ai_Loader.gif';
+import { api } from '../../utils/apiRequest';
 
 export interface CollectiveItem {
   id: number;
@@ -60,16 +61,19 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item }) => {
 
   const handleLikeToggle = async () => {
     try {
-      // Example: requires your token/proper authorization management here
       const token = localStorage.getItem('userToken') || '';
       const endpoint = liked
-        ? `https://backend.stage.darzeeapp.com/fiza/collective/dislike?id=${item.id}`
-        : `https://backend.stage.darzeeapp.com/fiza/collective/like?id=${item.id}`;
-      const res = await fetch(endpoint, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
+        ? `fiza/collective/dislike?id=${item.id}`
+        : `fiza/collective/like?id=${item.id}`;
+
+      const res = await api.putRequest(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      const data = await res.json();
+
+      // Assuming response structure similar to fetch example
+      const data = res.data;
       const updatedCount = Number(data.msg.replace(/[^0-9]/g, ''));
       setLikeCount(updatedCount);
       setLiked(!liked);

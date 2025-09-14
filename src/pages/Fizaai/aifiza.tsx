@@ -162,6 +162,7 @@ interface VersionData {
   collective: boolean;
   likeCount: number | null;
   likedByCurrentUser: boolean;
+  prof_pic: string | null;
 }
 
 // Add color options array after outfitOptions
@@ -1251,6 +1252,7 @@ export default function FizaAI() {
               collective: response.data.collective || false,
               likeCount: response.data.likeCount || null,
               likedByCurrentUser: response.data.likedByCurrentUser || null,
+              prof_pic: response.data.prof_pic || null,
             });
           }
         } else {

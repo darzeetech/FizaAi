@@ -3,17 +3,19 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import coins from '../../assets/images/coins.png'; // Coin icon example
 import Ai_refresh from '../../assets/icons/Ai_Loader.gif';
 import { api } from '../../utils/apiRequest';
+import { useNavigate } from 'react-router-dom';
 
 export interface CollectiveItem {
   id: number;
   imageUrl: string;
   title: string;
+  designerName: string;
   likeCount: number;
+  profileInitial: string;
   data: string;
   createdAt: string;
   likedByCurrentUser: boolean;
   version: number;
-  prof_pic: string;
 } // Or wherever CollectiveItem interface is
 
 interface CollectiveCardProps {
@@ -57,29 +59,37 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item }) => {
     item.title;
   const [liked, setLiked] = useState(item.likedByCurrentUser);
   const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
+  const navigate = useNavigate();
 
   const handleLikeToggle = async () => {
-    try {
-      const token = localStorage.getItem('userToken') || '';
-      const endpoint = liked
-        ? `fiza/collective/dislike?id=${item.id}`
-        : `fiza/collective/like?id=${item.id}`;
+    let x = 0;
+    navigate('/');
 
-      const res = await api.putRequest(endpoint, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    if (x == 1) {
+      x = 2;
+      try {
+        const token = localStorage.getItem('userToken') || '';
+        const endpoint = liked
+          ? `fiza/collective/dislike?id=${item.id}`
+          : `fiza/collective/like?id=${item.id}`;
 
-      // Assuming response structure similar to fetch example
-      const data = res.data;
-      const updatedCount = Number(data.msg.replace(/[^0-9]/g, ''));
-      setLikeCount(updatedCount);
-      setLiked(!liked);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Error toggling like', e);
+        const res = await api.putRequest(endpoint, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Assuming response structure similar to fetch example
+        const data = res.data;
+        const updatedCount = Number(data.msg.replace(/[^0-9]/g, ''));
+        setLikeCount(updatedCount);
+        setLiked(!liked);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Error toggling like', e);
+      }
     }
+    //Mock toggle for demo purposes
   };
 
   return (
@@ -97,11 +107,23 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item }) => {
     >
       {/* Left side */}
       <div className="flex flex-col">
-        <div>
+        <div
+          style={{
+            width: '324px',
+            height: '375px',
+            borderRadius: '30px',
+            borderWidth: '5px',
+            borderStyle: 'solid',
+            borderColor: '#FEF6EA',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <img
             src={item.imageUrl}
             alt={outfitName}
-            style={{ width: '324px', height: '324px', objectFit: 'contain', borderRadius: '30px' }}
+            style={{ width: '297px', height: '320px', objectFit: 'contain' }}
           />
         </div>
         <div className="flex items-center gap-2 mt-6 text-xl font-semibold">
@@ -131,12 +153,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item }) => {
           <div>
             <div className="font-semibold text-[11px] text-gray-500 tracking-wide">DESIGNED BY</div>
             <div className="flex items-center gap-2 mt-1">
-              <img
-                src={item.prof_pic}
-                alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-
+              <span className="bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold text-gray-600">
+                {item.profileInitial}
+              </span>
               <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
                 {(() => {
                   try {
@@ -145,9 +164,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item }) => {
                     const firstName = about.first_name || '';
                     const lastName = about.last_name || '';
 
-                    return `${firstName} ${lastName}`.trim();
+                    return `${firstName} ${lastName}`.trim() || item.designerName;
                   } catch {
-                    return 'Unknown Designer';
+                    return item.designerName;
                   }
                 })()}
               </span>

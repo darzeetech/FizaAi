@@ -45,6 +45,7 @@ interface VersionData {
   collective: boolean;
   likeCount: number | null;
   likedByCurrentUser: boolean;
+  prof_pic: string | null;
 }
 
 const StudioSidebar: React.FC<StudioSidebarProps> = ({

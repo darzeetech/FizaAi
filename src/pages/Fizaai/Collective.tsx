@@ -5,14 +5,12 @@ export interface CollectiveItem {
   id: number;
   imageUrl: string;
   title: string;
-  designerName: string;
-
   likeCount: number;
-  profileInitial: string;
   data: string;
   createdAt: string;
   likedByCurrentUser: boolean;
   version: number;
+  prof_pic: string;
 }
 
 interface CollectiveProps {

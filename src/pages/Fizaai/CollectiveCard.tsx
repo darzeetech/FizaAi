@@ -1,5 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import CollectiveCard from './CollectiveCard'; // Adjust this path
+import React, { useState, useEffect } from 'react';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import coins from '../../assets/images/coins.png';
+import Ai_refresh from '../../assets/icons/Ai_Loader.gif';
+import { api } from '../../utils/apiRequest';
 
 export interface CollectiveItem {
   id: number;
@@ -13,87 +17,280 @@ export interface CollectiveItem {
   prof_pic: string;
 }
 
-interface CollectiveProps {
-  data: CollectiveItem[];
-  loading: boolean;
-  onLoadMore?: () => void;
-  pageInfo?: {
-    currentPage: number;
-    totalPages: number;
-    lastPage: boolean;
-    totalItems: number;
-  };
+interface CollectiveCardProps {
+  item: CollectiveItem;
+  onShowInfoChange?: (isShown: boolean) => void;
 }
 
-const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, pageInfo }) => {
-  const listRef = useRef<HTMLDivElement | null>(null);
-  const scrollDebounceRef = useRef<number | null>(null);
-  const [isAnyInfoShown, setIsAnyInfoShown] = useState(false);
+const formatTimeline = (createdAt: string): string => {
+  const createdDate = new Date(createdAt);
+  const now = new Date();
+  const diffMs = now.getTime() - createdDate.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  const handleShowInfoChange = (isShown: boolean) => {
-    setIsAnyInfoShown(isShown);
+  if (diffHours < 1) {
+    return `Prompt Created - just now`;
+  }
+
+  if (diffDays < 1) {
+    return `Prompt Created - ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  }
+
+  if (diffDays < 30) {
+    return `Prompt Created - ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  }
+
+  const diffMonths = Math.floor(diffDays / 30);
+
+  return `Prompt Created - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
+};
+
+const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange }) => {
+  let parsed: any = {};
+  try {
+    parsed = item.data ? JSON.parse(item.data) : {};
+  } catch {
+    // eslint-disable-next-line no-console
+    console.error('Error parsing item data JSON', item.data);
+  }
+
+  const outfitName =
+    parsed?.selectedOutfit?.replace(/_/g, ' ')?.replace(/\b\w/g, (c: string) => c.toUpperCase()) ||
+    item.title;
+
+  const [liked, setLiked] = useState(item.likedByCurrentUser);
+  const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
+  const [showInfo, setShowInfo] = useState(false);
+
+  useEffect(() => {
+    setLiked(item.likedByCurrentUser);
+    setLikeCount(item.likeCount ?? 0);
+  }, [item.likedByCurrentUser, item.likeCount]);
+
+  // Inside CollectiveCard component
+  const setShowInfoAndNotify = (val: boolean) => {
+    setShowInfo(val);
+    onShowInfoChange?.(val);
   };
 
   useEffect(() => {
-    const el = listRef.current;
+    let timer: NodeJS.Timeout;
 
-    if (!el || !onLoadMore) {
-      return;
+    if (showInfo) {
+      timer = setTimeout(() => setShowInfoAndNotify(false), 3000);
     }
 
-    const handleScroll = () => {
-      if (loading || !pageInfo || pageInfo.lastPage) {
-        return;
-      }
+    return () => clearTimeout(timer);
+  }, [showInfo]);
 
-      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 150) {
-        onLoadMore();
-      }
-    };
+  const handleLikeToggle = async () => {
+    try {
+      const token = localStorage.getItem('userToken') || '';
+      const endpoint = liked
+        ? `fiza/collective/dislike?id=${item.id}`
+        : `fiza/collective/like?id=${item.id}`;
 
-    const debounced = () => {
-      if (scrollDebounceRef.current) {
-        window.clearTimeout(scrollDebounceRef.current);
-      }
-      scrollDebounceRef.current = window.setTimeout(handleScroll, 120) as unknown as number;
-    };
+      const res = await api.putRequest(endpoint, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    el.addEventListener('scroll', debounced);
+      const data = res.data;
 
-    return () => {
-      el.removeEventListener('scroll', debounced);
-
-      if (scrollDebounceRef.current) {
-        window.clearTimeout(scrollDebounceRef.current);
-      }
-    };
-  }, [onLoadMore, loading, pageInfo?.lastPage]);
+      const updatedCount = Number(data.msg.replace(/[^0-9]/g, ''));
+      setLikeCount(updatedCount);
+      setLiked(!liked);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Error toggling like', e);
+    }
+  };
 
   return (
-    <div className="relative max-h-[calc(100vh-72px)] overflow-y-auto px-6 py-6 w-full">
-      {/* Overlay covering whole page when info shown */}
-      {isAnyInfoShown && (
-        <div className="fixed inset-0 bg-black opacity-25 z-50 pointer-events-none" />
-      )}
+    <motion.div
+      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[903px]   ${
+        showInfo ? ' bg-black bg-opacity-25' : ''
+      }`}
+      style={{
+        borderRadius: '30px',
+        borderWidth: '2px',
+        borderColor: '#F3D7AC',
+        padding: '20px',
+      }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+    >
+      {/* Circle Button only visible on phone */}
+      <button
+        onClick={() => setShowInfoAndNotify(true)}
+        className="absolute top-4 right-4 w-6 h-6 border border-gray-400 rounded-full md:hidden"
+      />
 
-      <div ref={listRef} className=" flex flex-col gap-10 ">
-        {loading && data.length === 0 && (
-          <div className="w-full flex justify-center py-12">Loading...</div>
+      {/* Mobile Animated Overlay */}
+      <AnimatePresence>
+        {showInfo && (
+          <>
+            {/* Designed By */}
+            <motion.div
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ duration: 0.6 }}
+              className="absolute top-4 left-5 right-6 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+            >
+              DESIGNED BY
+              <div className="flex items-center gap-1 mt-1">
+                <img
+                  src={item.prof_pic}
+                  alt="Profile"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+                />
+                <div className="font-semibold">
+                  {(() => {
+                    try {
+                      const about = parsed.aboutYou || {};
+                      const firstName = about.first_name || '';
+                      const lastName = about.last_name || '';
+
+                      return `${firstName} ${lastName}`.trim();
+                    } catch {
+                      return 'Unknown Designer';
+                    }
+                  })()}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Timeline */}
+            <motion.div
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="absolute top-28 left-6 right-6 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+            >
+              TIMELINE <div className="font-normal">{formatTimeline(item.createdAt)}</div>
+            </motion.div>
+          </>
         )}
-        {!loading && data.length === 0 && (
-          <div className="w-full text-center text-gray-500 py-12">No collective items yet.</div>
-        )}
-        {data.map((item) => (
-          <CollectiveCard key={item.id} item={item} onShowInfoChange={handleShowInfoChange} />
-        ))}
-        {loading && data.length > 0 && (
-          <div className="flex items-center justify-center py-4 text-sm text-gray-500">
-            Loading more…
+      </AnimatePresence>
+
+      {/* Left side */}
+      <motion.div
+        className="flex flex-col items-center md:items-start"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      >
+        <img
+          src={item.imageUrl}
+          alt={outfitName}
+          className="rounded-2xl object-contain 
+                     w-[220px] h-[220px] sm:w-[260px] sm:h-[260px] md:w-[324px] md:h-[324px]"
+        />
+
+        <div className="hidden md:flex items-center gap-2 mt-4 text-base sm:text-lg md:text-xl font-semibold">
+          <span>{outfitName}</span>
+          <span className="bg-purple-100 text-purple-700 text-[10px] sm:text-xs font-bold rounded-full flex items-center gap-1 px-2 py-0.5">
+            <img src={Ai_refresh} alt="AI Refresh" className="h-4 sm:h-5 md:h-6" />
+            <span>AI</span>
+          </span>
+          <img src={coins} alt="Coin Icon" className="ml-1 h-4 sm:h-5 md:h-6" />
+          <span className="text-xs text-gray-500 ml-1">{item.version}</span>
+        </div>
+
+        <motion.div className="flex items-center gap-5 mt-3" whileTap={{ scale: 0.9 }}>
+          <button
+            type="button"
+            aria-label={liked ? 'Unlike' : 'Like'}
+            onClick={handleLikeToggle}
+            className="flex items-center gap-1 text-red-600 focus:outline-none"
+          >
+            {liked ? <FaHeart /> : <FaRegHeart />}
+            <span className="font-bold">{likeCount}</span>
+          </button>
+        </motion.div>
+      </motion.div>
+
+      {/* Right side (only desktop) */}
+      <motion.div
+        className="hidden md:flex flex-1 flex-col justify-start mt-6 md:mt-0 md:pl-32"
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <div className="flex flex-col gap-6">
+          {/* Designer */}
+          <div>
+            <div className="font-semibold text-[10px] sm:text-[11px] text-gray-500 tracking-wide">
+              DESIGNED BY
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <img
+                src={item.prof_pic}
+                alt="Profile"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+              />
+
+              <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
+                {(() => {
+                  try {
+                    const about = parsed.aboutYou || {};
+
+                    const firstName = about.first_name || '';
+                    const lastName = about.last_name || '';
+
+                    return `${firstName} ${lastName}`.trim();
+                  } catch {
+                    return 'Unknown Designer';
+                  }
+                })()}
+              </span>
+            </div>
           </div>
-        )}
+
+          {/* Timeline */}
+          <div>
+            <div className="font-semibold text-[10px] sm:text-[11px] text-gray-500 tracking-wide">
+              TIMELINE
+            </div>
+            <div className="text-xs sm:text-sm text-gray-700 mt-1 flex items-start gap-2">
+              <span className="text-lg leading-none">•</span>
+              <span>{formatTimeline(item.createdAt)}</span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Mobile Bottom Bar */}
+      <div className="md:hidden absolute left-0 right-0 bottom-0 z-10 px-4 py-3 bg-white rounded-b-[30px] shadow-md flex flex-col">
+        {/* First Line: OutfitName on left, Like Button on right */}
+
+        <div className="flex flex-row justify-between items-center w-full px-5">
+          <span className="font-semibold text-base">{outfitName}</span>
+
+          <button
+            type="button"
+            aria-label={liked ? 'Unlike' : 'Like'}
+            onClick={handleLikeToggle}
+            className="flex items-center text-red-600 focus:outline-none"
+            style={{ fontSize: '18px', fontWeight: 600 }}
+          >
+            {liked ? <FaHeart /> : <FaRegHeart />}
+            <span className="ml-1">{likeCount}</span>
+          </button>
+        </div>
+        <div className="flex items-center gap-2 py-2">
+          <span className="flex items-center bg-green-100 text-green-700 px-3 py-1 text-xs font-bold rounded-full">
+            Brought to life
+          </span>
+          <img src={coins} alt="Coin Icon" className="h-4 w-auto" />
+          <span className="font-semibold ml-1 text-base">{item.version}</span>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
-export default Collective;
+export default CollectiveCard;

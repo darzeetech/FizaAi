@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
-import coins from '../../assets/images/coins.png'; // Coin icon example
-import Ai_refresh from '../../assets/icons/Ai_Loader.gif';
-import { api } from '../../utils/apiRequest';
+import React, { useEffect, useRef, useState } from 'react';
+import CollectiveCard from './CollectiveCard'; // Adjust this path
 
 export interface CollectiveItem {
   id: number;
@@ -14,156 +11,89 @@ export interface CollectiveItem {
   likedByCurrentUser: boolean;
   version: number;
   prof_pic: string;
-} // Or wherever CollectiveItem interface is
-
-interface CollectiveCardProps {
-  item: CollectiveItem;
 }
 
-const formatTimeline = (createdAt: string): string => {
-  const createdDate = new Date(createdAt);
-  const now = new Date();
-  const diffMs = now.getTime() - createdDate.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+interface CollectiveProps {
+  data: CollectiveItem[];
+  loading: boolean;
+  onLoadMore?: () => void;
+  pageInfo?: {
+    currentPage: number;
+    totalPages: number;
+    lastPage: boolean;
+    totalItems: number;
+  };
+}
 
-  if (diffHours < 1) {
-    return `Prompt Created - just now`;
-  }
+const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, pageInfo }) => {
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const scrollDebounceRef = useRef<number | null>(null);
+  const [isAnyInfoShown, setIsAnyInfoShown] = useState(false);
 
-  if (diffDays < 1) {
-    return `Prompt Created - ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-  }
-
-  if (diffDays < 30) {
-    return `Prompt Created - ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-  }
-  const diffMonths = Math.floor(diffDays / 30);
-
-  return `Prompt Created - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
-};
-
-const CollectiveCard: React.FC<CollectiveCardProps> = ({ item }) => {
-  let parsed: any = {};
-  try {
-    parsed = item.data ? JSON.parse(item.data) : {};
-  } catch {
-    // eslint-disable-next-line no-console
-    console.error('Error parsing item data JSON', item.data);
-  }
-
-  const outfitName =
-    parsed?.selectedOutfit?.replace(/_/g, ' ')?.replace(/\b\w/g, (c: string) => c.toUpperCase()) ||
-    item.title;
-  const [liked, setLiked] = useState(item.likedByCurrentUser);
-  const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
-
-  const handleLikeToggle = async () => {
-    try {
-      const token = localStorage.getItem('userToken') || '';
-      const endpoint = liked
-        ? `fiza/collective/dislike?id=${item.id}`
-        : `fiza/collective/like?id=${item.id}`;
-
-      const res = await api.putRequest(endpoint, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Assuming response structure similar to fetch example
-      const data = res.data;
-      const updatedCount = Number(data.msg.replace(/[^0-9]/g, ''));
-      setLikeCount(updatedCount);
-      setLiked(!liked);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Error toggling like', e);
-    }
+  const handleShowInfoChange = (isShown: boolean) => {
+    setIsAnyInfoShown(isShown);
   };
 
+  useEffect(() => {
+    const el = listRef.current;
+
+    if (!el || !onLoadMore) {
+      return;
+    }
+
+    const handleScroll = () => {
+      if (loading || !pageInfo || pageInfo.lastPage) {
+        return;
+      }
+
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 150) {
+        onLoadMore();
+      }
+    };
+
+    const debounced = () => {
+      if (scrollDebounceRef.current) {
+        window.clearTimeout(scrollDebounceRef.current);
+      }
+      scrollDebounceRef.current = window.setTimeout(handleScroll, 120) as unknown as number;
+    };
+
+    el.addEventListener('scroll', debounced);
+
+    return () => {
+      el.removeEventListener('scroll', debounced);
+
+      if (scrollDebounceRef.current) {
+        window.clearTimeout(scrollDebounceRef.current);
+      }
+    };
+  }, [onLoadMore, loading, pageInfo?.lastPage]);
+
   return (
-    <div
-      className="flex flex-col md:flex-row bg-white shadow-md transition-shadow hover:shadow-lg mx-auto"
-      style={{
-        width: '903px',
-        height: '797px',
-        borderRadius: '30px',
-        borderWidth: '2px',
-        borderStyle: 'solid',
-        borderColor: '#F3D7AC',
-        padding: '32px',
-      }}
-    >
-      {/* Left side */}
-      <div className="flex flex-col">
-        <div>
-          <img
-            src={item.imageUrl}
-            alt={outfitName}
-            style={{ width: '324px', height: '324px', objectFit: 'contain', borderRadius: '30px' }}
-          />
-        </div>
-        <div className="flex items-center gap-2 mt-6 text-xl font-semibold">
-          <span>{outfitName}</span>
-          <span className="bg-purple-100 text-purple-700 text-xs font-bold rounded-full flex gap-0.5 w-12">
-            <img src={Ai_refresh} alt="AI Refresh" className="h-5 md:h-6" />
-            <span className="pt-1">AI</span>
-          </span>
-          <img src={coins} alt="Coin Icon" className="ml-1 h-5 md:h-6" />
-          <span className="text-xs text-gray-500 ml-1">{item.version}</span>
-        </div>
-        <div className="flex items-center gap-5 mt-4">
-          <button
-            type="button"
-            aria-label={liked ? 'Unlike' : 'Like'}
-            onClick={handleLikeToggle}
-            className="flex items-center gap-1 text-red-600 focus:outline-none"
-          >
-            {liked ? <FaHeart /> : <FaRegHeart />}
-            <span className="font-bold">{likeCount}</span>
-          </button>
-        </div>
-      </div>
-      {/* Right side */}
-      <div className="flex-1 flex flex-col justify-start pl-32">
-        <div className="flex flex-col gap-6">
-          <div>
-            <div className="font-semibold text-[11px] text-gray-500 tracking-wide">DESIGNED BY</div>
-            <div className="flex items-center gap-2 mt-1">
-              <img
-                src={item.prof_pic}
-                alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
-              />
+    <div className="relative max-h-[calc(100vh-72px)] overflow-y-auto px-6 py-6 w-full">
+      {/* Overlay covering whole page when info shown */}
+      {isAnyInfoShown && (
+        <div className="fixed inset-0 bg-black opacity-25 z-50 pointer-events-none" />
+      )}
 
-              <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
-                {(() => {
-                  try {
-                    const about = parsed.aboutYou || {};
-
-                    const firstName = about.first_name || '';
-                    const lastName = about.last_name || '';
-
-                    return `${firstName} ${lastName}`.trim();
-                  } catch {
-                    return 'Unknown Designer';
-                  }
-                })()}
-              </span>
-            </div>
+      <div ref={listRef} className=" flex flex-col gap-10 ">
+        {loading && data.length === 0 && (
+          <div className="w-full flex justify-center py-12">Loading...</div>
+        )}
+        {!loading && data.length === 0 && (
+          <div className="w-full text-center text-gray-500 py-12">No collective items yet.</div>
+        )}
+        {data.map((item) => (
+          <CollectiveCard key={item.id} item={item} onShowInfoChange={handleShowInfoChange} />
+        ))}
+        {loading && data.length > 0 && (
+          <div className="flex items-center justify-center py-4 text-sm text-gray-500">
+            Loading more…
           </div>
-          <div>
-            <div className="font-semibold text-[11px] text-gray-500 tracking-wide">TIMELINE</div>
-            <div className="text-sm text-gray-700 mt-1 flex items-start gap-2">
-              <span className="text-lg leading-none">•</span>
-              <span>{formatTimeline(item.createdAt)}</span>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default CollectiveCard;
+export default Collective;

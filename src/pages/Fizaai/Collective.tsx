@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import CollectiveCard from './CollectiveCard'; // Adjust this path
 
 export interface CollectiveItem {
@@ -28,6 +28,11 @@ interface CollectiveProps {
 const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, pageInfo }) => {
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollDebounceRef = useRef<number | null>(null);
+  const [isAnyInfoShown, setIsAnyInfoShown] = useState(false);
+
+  const handleShowInfoChange = (isShown: boolean) => {
+    setIsAnyInfoShown(isShown);
+  };
 
   useEffect(() => {
     const el = listRef.current;
@@ -65,24 +70,28 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
   }, [onLoadMore, loading, pageInfo?.lastPage]);
 
   return (
-    <div
-      ref={listRef}
-      className="w-full flex flex-col gap-10 max-h-[calc(100vh-72px)] overflow-y-auto px-6 py-6"
-    >
-      {loading && data.length === 0 && (
-        <div className="w-full flex justify-center py-12">Loading...</div>
+    <div className="relative max-h-[calc(100vh-72px)] overflow-y-auto px-6 py-6 w-full">
+      {/* Overlay covering whole page when info shown */}
+      {isAnyInfoShown && (
+        <div className="fixed inset-0 bg-black opacity-25 z-50 pointer-events-none" />
       )}
-      {!loading && data.length === 0 && (
-        <div className="w-full text-center text-gray-500 py-12">No collective items yet.</div>
-      )}
-      {data.map((item) => (
-        <CollectiveCard key={item.id} item={item} />
-      ))}
-      {loading && data.length > 0 && (
-        <div className="flex items-center justify-center py-4 text-sm text-gray-500">
-          Loading more…
-        </div>
-      )}
+
+      <div ref={listRef} className=" flex flex-col gap-10 ">
+        {loading && data.length === 0 && (
+          <div className="w-full flex justify-center py-12">Loading...</div>
+        )}
+        {!loading && data.length === 0 && (
+          <div className="w-full text-center text-gray-500 py-12">No collective items yet.</div>
+        )}
+        {data.map((item) => (
+          <CollectiveCard key={item.id} item={item} onShowInfoChange={handleShowInfoChange} />
+        ))}
+        {loading && data.length > 0 && (
+          <div className="flex items-center justify-center py-4 text-sm text-gray-500">
+            Loading more…
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -42,11 +42,24 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
     }
 
     const handleScroll = () => {
+      // eslint-disable-next-line no-console
+      console.log(
+        'scrollTop:',
+        el.scrollTop,
+        'scrollHeight:',
+        el.scrollHeight,
+        'clientHeight:',
+        el.clientHeight
+      );
+
       if (loading || !pageInfo || pageInfo.lastPage) {
         return;
       }
 
-      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 150) {
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+        // eslint-disable-next-line no-console
+        console.log('Loading more triggered');
+
         onLoadMore();
       }
     };
@@ -59,6 +72,8 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
     };
 
     el.addEventListener('scroll', debounced);
+    // eslint-disable-next-line no-console
+    console.log(isAnyInfoShown);
 
     return () => {
       el.removeEventListener('scroll', debounced);
@@ -70,13 +85,22 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
   }, [onLoadMore, loading, pageInfo?.lastPage]);
 
   return (
-    <div className="relative max-h-[calc(100vh-72px)] overflow-y-auto px-6 py-6 w-full">
-      {/* Overlay covering whole page when info shown */}
-      {isAnyInfoShown && (
-        <div className="fixed inset-0 bg-black opacity-25 z-50 pointer-events-none" />
-      )}
+    // <div className="relative max-h-[calc(100vh-72px)] overflow-y-auto px-6 py-6 w-full">
+    //   {/* Overlay covering whole page when info shown */}
+    //   {isAnyInfoShown && (
+    //     <div className="fixed inset-0 bg-black opacity-25 z-50 pointer-events-none" />
+    //   )}
 
-      <div ref={listRef} className=" flex flex-col gap-10 ">
+    <div
+      ref={listRef}
+      className="  relative max-h-[calc(100vh-72px)] overflow-y-auto px-6 py-6 w-full "
+    >
+      <div className=" flex flex-col gap-10 ">
+        {/* Overlay covering whole page when info shown */}
+        {isAnyInfoShown && (
+          <div className="fixed inset-0 bg-black opacity-25 z-50 pointer-events-none" />
+        )}
+
         {loading && data.length === 0 && (
           <div className="w-full flex justify-center py-12">Loading...</div>
         )}

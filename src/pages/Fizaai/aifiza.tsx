@@ -207,7 +207,13 @@ export default function FizaAI() {
   const [userMobileNumber, setUserMobileNumber] = useState<string>('');
   const [coinBalance, setCoinBalance] = useState<number>(0);
   const [showStudio, setShowStudio] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<'studio' | 'lookbook'>('studio');
+  const [selectedTab, setSelectedTab] = useState<'studio' | 'lookbook'>(
+    () =>
+      (typeof window !== 'undefined' &&
+        (localStorage.getItem('selected_tab') as 'studio' | 'lookbook')) ||
+      'studio'
+  );
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoggedInn, setIsLoggedInn] = useState(false);
   const [sidebarAnimating, setSidebarAnimating] = useState(false);
@@ -283,6 +289,11 @@ export default function FizaAI() {
   const [collectivePage, setCollectivePage] = useState(0);
   const [collectiveTotalPages, setCollectiveTotalPages] = useState(1);
   const [collectiveLastPage, setCollectiveLastPage] = useState(false);
+
+  const handleTabChange = (tab: 'studio' | 'lookbook') => {
+    setSelectedTab(tab);
+    localStorage.setItem('selected_tab', tab);
+  };
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);
@@ -880,9 +891,6 @@ export default function FizaAI() {
 
   // Fetch portfolios when user switches to Lookbook tab
   useEffect(() => {
-    if (selectedTab !== 'lookbook') {
-      return;
-    }
     fetchPortfolios(0, false);
     fetchCollective(0, false);
   }, [selectedTab]);
@@ -1553,7 +1561,7 @@ export default function FizaAI() {
                 {/* Studio Tab */}
                 <div
                   onClick={() => {
-                    setSelectedTab('studio');
+                    handleTabChange('studio');
                   }}
                   className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2 ${
                     selectedTab === 'studio' ? 'border-b-2 border-[#4F2945]' : ''
@@ -1572,7 +1580,7 @@ export default function FizaAI() {
                 {/* Lookbook Tab */}
                 <div
                   onClick={() => {
-                    setSelectedTab('lookbook');
+                    handleTabChange('lookbook');
                   }}
                   className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2  ${
                     selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
@@ -2889,56 +2897,54 @@ export default function FizaAI() {
                               <div className="text-sm text-gray-600 mb-4">
                                 AI-generated preview based on your selections
                               </div>
-                              <div className="flex items-center w-full max-w-md justify-between mt-2 p-2 ">
-                                {/* Avatars */}
-                                <div className="flex items-center ">
+                              <div className="flex items-center justify-between w-full px-4 py-2">
+                                {/* Avatars + Designer Count */}
+                                <div className="flex items-center">
                                   <div className="flex -space-x-2">
                                     <img
                                       src={designerone}
                                       alt="Designer 1"
-                                      className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
                                     />
                                     <img
                                       src={designertwo}
                                       alt="Designer 2"
-                                      className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
                                     />
                                     <img
                                       src={designerthree}
                                       alt="Designer 3"
-                                      className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
                                     />
                                   </div>
-                                  <span className="ml-4 font-semibold text-base">
-                                    500 designers available
+                                  <span className="  ml-3 font-medium text-sm text-gray-800 whitespace-nowrap">
+                                    500+ designers available
                                   </span>
                                 </div>
 
-                                {/* Collective Toggle */}
-                                <div
-                                  className="flex items-center px-4 py-2 rounded-xl bg-[#FCF7F4] ml-2"
-                                  style={{ minWidth: 185 }}
-                                >
-                                  <span className="relative w-2 h-2 mr-2"></span>
-                                  <span className="font-medium text-gray-900 text-[15px] pr-2">
+                                {/* Toggle Card */}
+                                <div className="flex items-center bg-[#FCF7F4] rounded-xl py-2 px-4">
+                                  <span className="font-semibold text-sm text-black mr-3 hidden md:block">
                                     Add to collective
                                   </span>
                                   <button
                                     disabled={collectiveLoading}
                                     type="button"
                                     aria-pressed={!!currentVersionEntry?.collective}
-                                    className={`relative w-[46px] h-[26px] rounded-full ml-2 transition-all duration-200 
-        ${currentVersionEntry?.collective ? 'bg-[#79539f]' : 'bg-[#e5e5e5]'}
-        ${collectiveLoading ? 'opacity-60 pointer-events-none' : ''}`}
+                                    className={`
+        w-10 h-6 flex items-center rounded-full transition-colors duration-200
+        ${currentVersionEntry?.collective ? 'bg-[#79539f]' : 'bg-gray-200'}
+        relative
+      `}
                                     style={{ boxShadow: '0px 2px 4px #0001' }}
                                     onClick={handleCollectiveToggle}
                                   >
                                     <span
-                                      className="block absolute top-1/2 left-[6px] w-5 h-5 rounded-full bg-white transition-transform duration-200"
+                                      className="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-200"
                                       style={{
                                         transform: currentVersionEntry?.collective
-                                          ? 'translate(20px, -50%)'
-                                          : 'translate(0px, -50%)',
+                                          ? 'translateX(16px)'
+                                          : 'translateX(0px)',
                                       }}
                                     />
                                   </button>

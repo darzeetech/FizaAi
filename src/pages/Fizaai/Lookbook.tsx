@@ -14,6 +14,8 @@ import glove from '../../assets/images/Vector3.png';
 import insta from '../../assets/images/Clip path group.png';
 import upi from '../../assets/images/Frame 1000010260.png';
 import map from '../../assets/images/google-maps.png';
+import info from '../../assets/images/workflow.png';
+import portfolio from '../../assets/images/album.png';
 
 import { api } from '../../utils/apiRequest';
 
@@ -70,6 +72,12 @@ export default function Lookbook({
   const [detailError, setDetailError] = useState<string | null>(null);
   const [lastFetchedUsername, setLastFetchedUsername] = useState<string | null>(null);
 
+  const [viewStage, setViewStage] = useState<'INFO' | 'PORTFOLIO'>('INFO');
+
+  // filters / store data state
+  const [filtersData, setFiltersData] = useState<any | null>(null);
+  const [filtersError, setFiltersError] = useState<string | null>(null);
+
   useEffect(() => {
     const el = listRef.current;
 
@@ -113,11 +121,24 @@ export default function Lookbook({
 
   // reset detail when a different portfolio is selected so user can fetch fresh data by clicking right pane
   useEffect(() => {
+    const username = selected?.userName || '';
+    const tailorId = detail?.tailor_id ?? undefined;
+
     setDetail(null);
     setDetailError(null);
     setDetailLoading(false);
     setLastFetchedUsername(null);
-    fetchByUsername(selected?.userName || '');
+
+    setFiltersData(null);
+    setFiltersError(null);
+
+    if (!username) {
+      return;
+    }
+
+    // fetch profile and filters (can be parallel)
+    fetchByUsername(username);
+    fetchFiltersByUsername(username, tailorId);
   }, [selected?.userName]);
 
   const fetchByUsername = async (username: string) => {
@@ -151,7 +172,34 @@ export default function Lookbook({
       setDetailLoading(false);
     }
   };
-  //
+
+  // fetch filters/store data when username changes
+  const fetchFiltersByUsername = async (username: string, tailorId?: number | null) => {
+    if (!username) {
+      return;
+    }
+
+    setFiltersError(null);
+
+    try {
+      const qs = `tailor_id=${encodeURIComponent(tailorId ?? 92)}&username=${encodeURIComponent(
+        username
+      )}`;
+      const res = await api.getRequest(`portfolio/filters?${qs}`);
+
+      if (!res || !res.status) {
+        throw new Error(res?.message || 'Failed to fetch filters');
+      }
+
+      setFiltersData(res.data);
+    } catch (err: any) {
+      setFiltersError(err?.message || 'Failed to load filters');
+      setFiltersData(null);
+    }
+  };
+
+  // eslint-disable-next-line no-console
+  console.log(filtersData, filtersError);
 
   return (
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
@@ -161,7 +209,7 @@ export default function Lookbook({
       >
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Designers</h3>
-          <div className="flex items-center gap-2">
+          <div className="fle items-center gap-2 hidden">
             {onRefresh && (
               <button
                 onClick={onRefresh}
@@ -329,6 +377,53 @@ export default function Lookbook({
                 </div>
               </div>
 
+              {/* stage toggle buttons */}
+              <div className="flex items-center gap-3 mb-4 w-full ">
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => setViewStage('INFO')}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
+                      viewStage === 'INFO'
+                        ? 'bg-[#111827] text-white shadow'
+                        : 'bg-white border-2 border-gray-200 text-[#333333B2]'
+                    }`}
+                    title="Info"
+                  >
+                    <img src={info} alt="info" className="h-6 md:h-7 aspect-auto" />
+                  </button>
+                  <p
+                    className={`text-sm font-semibold  ${
+                      viewStage === 'INFO' ? ' text-[#000000] ' : ' text-[#333333B2]'
+                    }`}
+                  >
+                    Info
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => setViewStage('PORTFOLIO')}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
+                      viewStage === 'PORTFOLIO'
+                        ? 'bg-[#111827] text-white shadow'
+                        : 'bg-white border-2 border-gray-200 text-[#333333B2]'
+                    }`}
+                    title="Portfolio"
+                  >
+                    <div>
+                      <img src={portfolio} alt="portfolio" className="h-6 md:h-7 aspect-auto" />
+                    </div>
+                  </button>
+                  <p
+                    className={`text-sm font-semibold  ${
+                      viewStage === 'PORTFOLIO' ? ' text-[#000000] ' : ' text-[#333333B2]'
+                    }`}
+                  >
+                    Portfolio
+                  </p>
+                </div>
+              </div>
+
               {/* About */}
               {detail?.info?.about && (
                 <div>
@@ -337,74 +432,81 @@ export default function Lookbook({
                 </div>
               )}
 
-              <div className="">
-                <div className="text-xs text-[#323232B2] mb-1 font-semibold">Type</div>
-                <div className="flex gap-2 mt-2">
-                  {detail?.info?.genders && detail?.info?.genders?.length > 0 ? (
-                    detail?.info?.genders?.map((g: string) => (
-                      <span
-                        key={g}
-                        className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252]"
-                      >
-                        {g === 'MALE' ? 'Male Outfits' : g === 'FEMALE' ? 'Female Outfits' : g}
-                      </span>
-                    ))
-                  ) : (
-                    <>
-                      <span className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252] flex items-center gap-2">
-                        <img src={female} alt="person" className="h-3 md:h-4 aspect-auto" />
-                        Female Outfits
-                      </span>
-                      <span className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252] flex items-center gap-2">
-                        <img src={male} alt="person" className="h-3 md:h-4 aspect-auto" />
-                        Male Outfits
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Location & distance */}
-              <div>
-                <div className="text-xs text-[#323232B2] mb-1 font-semibold flex items-center gap-2">
-                  <img src={location} alt="location" className="h-4 md:h-4 aspect-auto" />
-                  Location
-                </div>
-                <div className="text-[.9rem] text-[#41423C] font-semibold">
-                  {detail?.address_details?.address ? (
-                    <>
-                      {detail?.address_details?.address?.addressLine1
-                        ? detail?.address_details?.address?.addressLine1 + ', '
-                        : ''}
-                      {detail?.address_details?.address?.addressLine2
-                        ? detail?.address_details?.address?.addressLine2 + ', '
-                        : ''}
-                      {detail?.address_details?.address?.city
-                        ? detail?.address_details?.address?.city + ', '
-                        : ''}
-                      {detail?.address_details.address.state
-                        ? detail.address_details.address.state + ', '
-                        : ''}
-                      {detail?.address_details.address.country || ''}
-                    </>
-                  ) : (
-                    'Location not provided'
-                  )}
-                </div>
-                {typeof detail?.address_details?.distance === 'number' && (
-                  <div className="text-[.9rem] text-[#41423CCC] mt-1">
-                    {detail.address_details.distance} Km Away
+              {viewStage === 'INFO' ? (
+                <>
+                  {/* Type */}
+                  <div className="">
+                    <div className="text-xs text-[#323232B2] mb-1 font-semibold">Type</div>
+                    <div className="flex gap-2 mt-2">
+                      {detail?.info?.genders && detail?.info?.genders?.length > 0 ? (
+                        detail?.info?.genders?.map((g: string) => (
+                          <span
+                            key={g}
+                            className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252]"
+                          >
+                            {g === 'MALE' ? 'Male Outfits' : g === 'FEMALE' ? 'Female Outfits' : g}
+                          </span>
+                        ))
+                      ) : (
+                        <>
+                          <span className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252] flex items-center gap-2">
+                            <img src={female} alt="person" className="h-3 md:h-4 aspect-auto" />
+                            Female Outfits
+                          </span>
+                          <span className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252] flex items-center gap-2">
+                            <img src={male} alt="person" className="h-3 md:h-4 aspect-auto" />
+                            Male Outfits
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
+
+                  {/* Location & distance */}
+                  <div>
+                    <div className="text-xs text-[#323232B2] mb-1 font-semibold flex items-center gap-2">
+                      <img src={location} alt="location" className="h-4 md:h-4 aspect-auto" />
+                      Location
+                    </div>
+                    <div className="text-[.9rem] text-[#41423C] font-semibold">
+                      {detail?.address_details?.address ? (
+                        <>
+                          {detail?.address_details?.address?.addressLine1
+                            ? detail?.address_details?.address?.addressLine1 + ', '
+                            : ''}
+                          {detail?.address_details?.address?.addressLine2
+                            ? detail?.address_details?.address?.addressLine2 + ', '
+                            : ''}
+                          {detail?.address_details?.address?.city
+                            ? detail?.address_details?.address?.city + ', '
+                            : ''}
+                          {detail?.address_details.address.state
+                            ? detail.address_details.address.state + ', '
+                            : ''}
+                          {detail?.address_details.address.country || ''}
+                        </>
+                      ) : (
+                        'Location not provided'
+                      )}
+                    </div>
+                    {typeof detail?.address_details?.distance === 'number' && (
+                      <div className="text-[.9rem] text-[#41423CCC] mt-1">
+                        {detail.address_details.distance} Km Away
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <></>
+              )}
             </div>
 
             {/* Right: gallery + fetchable backend details */}
             <div className="md:w-[60%] w-full">
               <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
-                {selected.coverPictureUrl ? (
+                {detail?.base_info ? (
                   <img
-                    src={selected.coverPictureUrl}
+                    src={detail?.base_info?.cover_picture_url}
                     alt={`${selected.tailorName} cover`}
                     className="w-full h-full object-cover rounded-lg"
                   />
@@ -415,23 +517,22 @@ export default function Lookbook({
                 )}
               </div>
 
-              <div className="flex gap-2 mt-3 w-full">
-                <img
-                  src={selected.coverPictureUrl || '/placeholder.png'}
-                  alt=""
-                  className=" w-1/3 aspect-auto object-cover rounded-md"
-                />
-                <img
-                  src={selected.coverPictureUrl || '/placeholder.png'}
-                  alt=""
-                  className=" w-1/3 aspect-auto object-cover rounded-md"
-                />
-                <img
-                  src={selected.coverPictureUrl || '/placeholder.png'}
-                  alt=""
-                  className=" w-1/3 aspect-auto object-cover rounded-md"
-                />
-              </div>
+              {/* images (if any) */}
+              {detail?.images && Array.isArray(detail?.images) && detail?.images.length > 0 && (
+                <div>
+                  {/* <div className="text-xs text-gray-500 mb-1">Gallery</div> */}
+                  <div className="grid grid-cols-3 gap-3 mt-[1rem]">
+                    {detail?.images.map((imgUrl: string, idx: number) => (
+                      <img
+                        key={idx}
+                        src={imgUrl}
+                        className="w-full h-[8rem] object-cover rounded-md"
+                        alt=""
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="mt-4 hidden">
                 {detailLoading && (

@@ -108,7 +108,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
 
   return (
     <motion.div
-      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[903px]   ${
+      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%]  ${
         showInfo ? ' bg-black bg-opacity-25' : ''
       }`}
       style={{
@@ -137,7 +137,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="absolute top-4 left-5 right-6 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              className="absolute top-4 left-5 right-5 max-w-xs mx-auto bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
             >
               DESIGNED BY
               <div className="flex items-center gap-1 mt-1">
@@ -186,8 +186,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
         <img
           src={item.imageUrl}
           alt={outfitName}
-          className="rounded-2xl object-contain 
-                     w-[220px] h-[220px] sm:w-[260px] sm:h-[260px] md:w-[324px] md:h-[324px]"
+          className="rounded-2xl object-contain
+    w-[460px] h-[480px]           
+   sm:w-[260px] sm:h-[420px]     
+    md:w-[300px] md:h-[400px]"
         />
 
         <div className="hidden md:flex items-center gap-2 mt-4 text-base sm:text-lg md:text-xl font-semibold">
@@ -282,8 +284,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           </button>
         </div>
         <div className="flex items-center gap-2 py-2">
-          <span className="flex items-center bg-green-100 text-green-700 px-3 py-1 text-xs font-bold rounded-full">
-            Brought to life
+          <span className="bg-purple-100 text-purple-700 text-[10px] sm:text-xs font-bold rounded-full flex items-center gap-1 px-2 py-0.5">
+            <img src={Ai_refresh} alt="AI Refresh" className="h-4 sm:h-5 md:h-6" />
+            <span>AI</span>
           </span>
           <img src={coins} alt="Coin Icon" className="h-4 w-auto" />
           <span className="font-semibold ml-1 text-base">{item.version}</span>

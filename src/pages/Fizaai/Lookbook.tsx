@@ -516,6 +516,7 @@ export default function Lookbook({
                               >
                                 <input
                                   type="checkbox"
+                                  className="accent-[#4D7AFF]"
                                   checked={selectedOutfits.includes(outfit.index)}
                                   onChange={() => {
                                     setSelectedOutfits((prev) =>
@@ -576,10 +577,11 @@ export default function Lookbook({
                                 {uniqueSubOutfits.map(({ subIdx, subName }) => (
                                   <label
                                     key={subIdx}
-                                    className="flex items-center text-[#323232] text-[.8rem] font-[500]  gap-2 cursor-pointer"
+                                    className="flex items-center text-[#323232] text-[.8rem] font-[500]  gap-2 cursor-pointer p-[.1rem]"
                                   >
                                     <input
                                       type="checkbox"
+                                      className="accent-[#4D7AFF]"
                                       checked={selectedSubOutfits.includes(subIdx)}
                                       onChange={() => {
                                         setSelectedSubOutfits((prev) =>

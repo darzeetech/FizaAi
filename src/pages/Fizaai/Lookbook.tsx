@@ -1,4 +1,3 @@
-// ...existing code...
 import React, { useEffect, useState, useRef } from 'react';
 import './sidebar.css';
 import location from '../../assets/images/location_on.png';
@@ -77,6 +76,10 @@ export default function Lookbook({
   // filters / store data state
   const [filtersData, setFiltersData] = useState<any | null>(null);
   const [filtersError, setFiltersError] = useState<string | null>(null);
+
+  const [selectedOutfits, setSelectedOutfits] = useState<number[]>([]);
+  const [selectedSubOutfits, setSelectedSubOutfits] = useState<number[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -436,7 +439,6 @@ export default function Lookbook({
                 <>
                   {/* Type */}
                   <div className="">
-                    <div className="text-xs text-[#323232B2] mb-1 font-semibold">Type</div>
                     <div className="flex gap-2 mt-2">
                       {detail?.info?.genders && detail?.info?.genders?.length > 0 ? (
                         detail?.info?.genders?.map((g: string) => (
@@ -497,7 +499,153 @@ export default function Lookbook({
                   </div>
                 </>
               ) : (
-                <></>
+                <>
+                  <div>
+                    {filtersData?.outfit_filter && (
+                      <div className=" w-full mb-6 py-4 bg-white ">
+                        {/* Outfit type */}
+                        <div>
+                          <div className="font-semibold text-[.9rem] mb-2 flex items-center justify-between">
+                            Outfit type
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 mb-2">
+                            {filtersData.outfit_filter.map((outfit: any) => (
+                              <label
+                                key={outfit.index}
+                                className="flex items-center text-[#323232] text-[.8rem] font-[500] gap-2 cursor-pointer"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedOutfits.includes(outfit.index)}
+                                  onChange={() => {
+                                    setSelectedOutfits((prev) =>
+                                      prev.includes(outfit.index)
+                                        ? prev.filter((i) => i !== outfit.index)
+                                        : [...prev, outfit.index]
+                                    );
+                                    // Reset suboutfits if outfit is deselected
+
+                                    if (selectedOutfits.includes(outfit.index)) {
+                                      setSelectedSubOutfits((prev) =>
+                                        prev.filter(
+                                          (subIdx) =>
+                                            !Object.keys(outfit.sub_outfits)
+                                              .map(Number)
+                                              .includes(subIdx)
+                                        )
+                                      );
+                                    }
+                                  }}
+                                />
+                                {outfit.name}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Sub Outfit type */}
+                        {(() => {
+                          // Gather all sub outfits from all selected outfits and show in a single section
+                          const allSubOutfits: { subIdx: number; subName: string }[] = [];
+                          filtersData.outfit_filter
+                            .filter((outfit: any) => selectedOutfits.includes(outfit.index))
+                            .forEach((outfit: any) => {
+                              Object.entries(outfit.sub_outfits).forEach(([subIdx, subName]) => {
+                                allSubOutfits.push({
+                                  subIdx: Number(subIdx),
+                                  subName: subName as string,
+                                });
+                              });
+                            });
+
+                          // Remove duplicates by subIdx
+                          const uniqueSubOutfits = Array.from(
+                            new Map(allSubOutfits.map((item) => [item.subIdx, item])).values()
+                          );
+
+                          if (uniqueSubOutfits.length === 0) {
+                            return null;
+                          }
+
+                          return (
+                            <div className="mb-2">
+                              <div className="font-semibold text-[.9rem] mb-2 flex items-center justify-between">
+                                Sub Outfit type
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                {uniqueSubOutfits.map(({ subIdx, subName }) => (
+                                  <label
+                                    key={subIdx}
+                                    className="flex items-center text-[#323232] text-[.8rem] font-[500]  gap-2 cursor-pointer"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedSubOutfits.includes(subIdx)}
+                                      onChange={() => {
+                                        setSelectedSubOutfits((prev) =>
+                                          prev.includes(subIdx)
+                                            ? prev.filter((i) => i !== subIdx)
+                                            : [...prev, subIdx]
+                                        );
+                                      }}
+                                    />
+                                    {subName}
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Color filter */}
+                        <div className="mt-4">
+                          <div className=" mb-2 font-semibold text-[.9rem] flex items-center justify-between">
+                            Select Colors
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {filtersData.color_filter &&
+                              Object.entries(filtersData.color_filter).map(
+                                ([colorCode, colorName]) => (
+                                  <button
+                                    key={colorCode}
+                                    type="button"
+                                    className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${
+                                      selectedColors.includes(colorCode)
+                                        ? 'border-[#79539f]'
+                                        : 'border-gray-200'
+                                    }`}
+                                    style={{ backgroundColor: `#${colorCode}` }}
+                                    title={colorName as string}
+                                    onClick={() => {
+                                      setSelectedColors((prev) =>
+                                        prev.includes(colorCode)
+                                          ? prev.filter((c) => c !== colorCode)
+                                          : [...prev, colorCode]
+                                      );
+                                    }}
+                                  >
+                                    {selectedColors.includes(colorCode) && (
+                                      <span className="text-white text-xs">&#10003;</span>
+                                    )}
+                                  </button>
+                                )
+                              )}
+                          </div>
+                        </div>
+
+                        <button
+                          className="mt-4 w-full bg-[#79539f] text-white rounded-md py-2 font-semibold"
+                          onClick={() => {
+                            // You can handle filter apply here
+                            // Example: console.log(selectedOutfits, selectedSubOutfits, selectedColors);
+                          }}
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
 

@@ -93,7 +93,8 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
 
     <div
       ref={listRef}
-      className="  relative max-h-[calc(100vh-72px)] overflow-y-auto px-6 py-6 w-full "
+      className="  relative max-h-[calc(100vh-72px)] overflow-y-auto 
+    p-1 sm:px-6 sm:py-6 w-full "
     >
       <div className=" flex flex-col gap-10 ">
         {/* Overlay covering whole page when info shown */}

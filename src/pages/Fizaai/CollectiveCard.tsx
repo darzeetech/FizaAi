@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+// import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import coins from '../../assets/images/coins.png';
 import Ai_refresh from '../../assets/icons/Ai_Loader.gif';
 import { api } from '../../utils/apiRequest';
+import circle from '../../assets/icons/circle.png';
+import like from '../../assets/icons/lked.png';
+import notlike from '../../assets/icons/not-liked.png';
 
 export interface CollectiveItem {
   id: number;
@@ -108,15 +111,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
 
   return (
     <motion.div
-      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%]  ${
+      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg md:mx-auto mx-1 w-full max-w-[95%] md:mt-2 ${
         showInfo ? ' bg-black bg-opacity-25' : ''
-      }`}
-      style={{
-        borderRadius: '30px',
-        borderWidth: '2px',
-        borderColor: '#F3D7AC',
-        padding: '20px',
-      }}
+      } rounded-[30px] border-2 border-[#F3D7AC] p-0 sm:p-5 sm:mx-auto`}
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -124,8 +121,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       {/* Circle Button only visible on phone */}
       <button
         onClick={() => setShowInfoAndNotify(true)}
-        className="absolute top-4 right-4 w-6 h-6 border border-gray-400 rounded-full md:hidden"
-      />
+        className="md:hidden absolute top-6 right-4 z-20"
+      >
+        <img src={circle} alt="Info" className="h-6 w-6" />
+      </button>
 
       {/* Mobile Animated Overlay */}
       <AnimatePresence>
@@ -137,7 +136,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="absolute top-4 left-5 right-5 max-w-xs mx-auto bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              className="absolute top-6 right-1 -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl md:px-4 px-1 py-1 text-sm font-medium shadow-md md:hidden"
             >
               DESIGNED BY
               <div className="flex items-center gap-1 mt-1">
@@ -146,7 +145,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                   alt="Profile"
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
                 />
-                <div className="font-semibold">
+                <div className="font-semibold text-white">
                   {(() => {
                     try {
                       const about = parsed.aboutYou || {};
@@ -168,9 +167,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="absolute top-28 left-6 right-6 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              className=" absolute top-[104px] right-1 -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
             >
-              TIMELINE <div className="font-normal">{formatTimeline(item.createdAt)}</div>
+              TIMELINE{' '}
+              <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
             </motion.div>
           </>
         )}
@@ -178,7 +178,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
 
       {/* Left side */}
       <motion.div
-        className="flex flex-col items-center md:items-start"
+        className="flex flex-col items-center md:items-start rounded-[30px]"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -186,10 +186,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
         <img
           src={item.imageUrl}
           alt={outfitName}
-          className="rounded-2xl object-contain
-    w-[460px] h-[480px]           
-   sm:w-[260px] sm:h-[420px]     
-    md:w-[300px] md:h-[400px]"
+          className=" object-contain md:mx-auto w-[345px] h-[540px] md:w-[300px] md:h-[400px] rounded-[30px]  border-[#F3D7AC]  "
         />
 
         <div className="hidden md:flex items-center gap-2 mt-4 text-base sm:text-lg md:text-xl font-semibold">
@@ -209,7 +206,11 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             onClick={handleLikeToggle}
             className="flex items-center gap-1 text-red-600 focus:outline-none"
           >
-            {liked ? <FaHeart /> : <FaRegHeart />}
+            {liked ? (
+              <img src={like} alt="Like Icon" className="h-5 w-auto" />
+            ) : (
+              <img src={notlike} alt="Unlike Icon" className="h-5 w-auto" />
+            )}
             <span className="font-bold">{likeCount}</span>
           </button>
         </motion.div>
@@ -266,30 +267,44 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       </motion.div>
 
       {/* Mobile Bottom Bar */}
-      <div className="md:hidden absolute left-0 right-0 bottom-0 z-10 px-4 py-3 bg-white rounded-b-[30px] shadow-md flex flex-col">
-        {/* First Line: OutfitName on left, Like Button on right */}
 
-        <div className="flex flex-row justify-between items-center w-full px-5">
-          <span className="font-semibold text-base">{outfitName}</span>
+      {/* Mobile Bottom Bar */}
+      <div className="md:hidden absolute left-0 right-0 bottom-0 z-10 px-4 py-3 bg-white rounded-b-[30px] shadow-md">
+        {/* Row 1: Outfit Name + Coins + Likes */}
+        <div className="flex items-center justify-between w-full px-2 text-sm">
+          {/* Outfit Name */}
+          <span className="font-semibold text-base truncate">{outfitName}</span>
 
-          <button
-            type="button"
-            aria-label={liked ? 'Unlike' : 'Like'}
-            onClick={handleLikeToggle}
-            className="flex items-center text-red-600 focus:outline-none"
-            style={{ fontSize: '18px', fontWeight: 600 }}
-          >
-            {liked ? <FaHeart /> : <FaRegHeart />}
-            <span className="ml-1">{likeCount}</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Coins */}
+            <div className="flex items-center gap-2">
+              <img src={coins} alt="Coin Icon" className="h-5 w-auto" />
+              <span className="text-sm font-medium">{item.version}</span>
+            </div>
+
+            {/* Likes */}
+            <button
+              type="button"
+              aria-label={liked ? 'Unlike' : 'Like'}
+              onClick={handleLikeToggle}
+              className="flex items-center gap-1 text-red-600 focus:outline-none"
+            >
+              {liked ? (
+                <img src={like} alt="Like Icon" className="h-5 w-auto" />
+              ) : (
+                <img src={notlike} alt="Unlike Icon" className="h-5 w-auto" />
+              )}
+              <span className="font-medium">{likeCount}</span>
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2 py-2">
-          <span className="bg-purple-100 text-purple-700 text-[10px] sm:text-xs font-bold rounded-full flex items-center gap-1 px-2 py-0.5">
-            <img src={Ai_refresh} alt="AI Refresh" className="h-4 sm:h-5 md:h-6" />
-            <span>AI</span>
+
+        {/* Row 2: AI Badge */}
+        <div className="flex items-center gap-1  px-2">
+          <span className="bg-purple-100 text-purple-700 text-[10px] font-bold rounded-full flex items-center gap-1 px-2 py-0.5">
+            <img src={Ai_refresh} alt="AI Refresh" className="h-4" />
+            AI
           </span>
-          <img src={coins} alt="Coin Icon" className="h-4 w-auto" />
-          <span className="font-semibold ml-1 text-base">{item.version}</span>
         </div>
       </div>
     </motion.div>

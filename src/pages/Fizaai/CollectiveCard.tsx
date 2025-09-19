@@ -111,7 +111,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
 
   return (
     <motion.div
-      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg md:mx-auto mx-1 w-full max-w-[95%] md:mt-2 ${
+      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-2 ${
         showInfo ? ' bg-black bg-opacity-25' : ''
       } rounded-[30px] border-2 border-[#F3D7AC] p-0 sm:p-5 sm:mx-auto`}
       initial={{ opacity: 0, y: 40 }}
@@ -121,9 +121,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       {/* Circle Button only visible on phone */}
       <button
         onClick={() => setShowInfoAndNotify(true)}
-        className="md:hidden absolute top-6 right-4 z-20"
+        className="md:hidden absolute top-6 right-[30px] z-20"
       >
-        <img src={circle} alt="Info" className="h-6 w-6" />
+        <img src={circle} alt="Info" className="h-5 w-5" />
       </button>
 
       {/* Mobile Animated Overlay */}
@@ -136,7 +136,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="absolute top-6 right-1 -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl md:px-4 px-1 py-1 text-sm font-medium shadow-md md:hidden"
+              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2  text-sm font-medium shadow-md md:hidden"
             >
               DESIGNED BY
               <div className="flex items-center gap-1 mt-1">
@@ -167,7 +167,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className=" absolute top-[104px] right-1 -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              className=" absolute top-[104px] right-[20px] -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
             >
               TIMELINE{' '}
               <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
@@ -178,16 +178,14 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
 
       {/* Left side */}
       <motion.div
-        className="flex flex-col items-center md:items-start rounded-[30px]"
+        className="flex flex-col items-center md:items-start rounded-[30px] p-[10px]"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        <img
-          src={item.imageUrl}
-          alt={outfitName}
-          className=" object-contain md:mx-auto w-[345px] h-[540px] md:w-[300px] md:h-[400px] rounded-[30px]  border-[#F3D7AC]  "
-        />
+        <div className="w-full h-[76vh] md:h-[60vh] flex items-start  justify-center overflow-hidden rounded-[30px] md:rounded-[30px]  ">
+          <img src={item.imageUrl} alt={outfitName} className=" object-fill h-full" />
+        </div>
 
         <div className="hidden md:flex items-center gap-2 mt-4 text-base sm:text-lg md:text-xl font-semibold">
           <span>{outfitName}</span>
@@ -199,7 +197,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           <span className="text-xs text-gray-500 ml-1">{item.version}</span>
         </div>
 
-        <motion.div className="flex items-center gap-5 mt-3" whileTap={{ scale: 0.9 }}>
+        <motion.div className="md:flex items-center gap-5 mt-3 hidden " whileTap={{ scale: 0.9 }}>
           <button
             type="button"
             aria-label={liked ? 'Unlike' : 'Like'}
@@ -211,7 +209,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             ) : (
               <img src={notlike} alt="Unlike Icon" className="h-5 w-auto" />
             )}
-            <span className="font-bold">{likeCount}</span>
+            <span className="font-bold hidden md:block">{likeCount}</span>
           </button>
         </motion.div>
       </motion.div>
@@ -269,7 +267,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       {/* Mobile Bottom Bar */}
 
       {/* Mobile Bottom Bar */}
-      <div className="md:hidden absolute left-0 right-0 bottom-0 z-10 px-4 py-3 bg-white rounded-b-[30px] shadow-md">
+      <div className="md:hidden  px-4 pb-3 bg-white rounded-b-[30px] shadow-md">
         {/* Row 1: Outfit Name + Coins + Likes */}
         <div className="flex items-center justify-between w-full px-2 text-sm">
           {/* Outfit Name */}

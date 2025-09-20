@@ -202,7 +202,10 @@ export default function Lookbook({
   };
 
   // eslint-disable-next-line no-console
-  console.log(filtersData, filtersError);
+  console.log(filtersData, filtersError, selectedOutfits, selectedColors);
+
+  // eslint-disable-next-line no-console
+  console.log(selectedOutfits, selectedSubOutfits, selectedColors);
 
   return (
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
@@ -292,7 +295,13 @@ export default function Lookbook({
                         p.genders.map((g) => (
                           <span
                             key={g}
-                            className="text-xs flex items-center gap-2 px-2 py-1 rounded-full bg-gray-100 text-gray-700"
+                            className={`text-xs flex items-center gap-2 px-3 py-1 rounded-full text-gray-700 ${
+                              g === 'MALE'
+                                ? 'bg-[#BDCFFF]'
+                                : g === 'FEMALE'
+                                  ? 'bg-[#D8C9E6]'
+                                  : 'bg-gray-100'
+                            }`}
                           >
                             <img src={person} alt="person" className="h-3 md:h-4 aspect-auto" />
                             {g === 'MALE' ? 'Men' : g === 'FEMALE' ? 'Women' : g}
@@ -434,7 +443,6 @@ export default function Lookbook({
                   <div className="text-sm text-[#41423C] font-semibold">{detail?.info?.about}</div>
                 </div>
               )}
-
               {viewStage === 'INFO' ? (
                 <>
                   {/* Type */}
@@ -444,18 +452,24 @@ export default function Lookbook({
                         detail?.info?.genders?.map((g: string) => (
                           <span
                             key={g}
-                            className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252]"
+                            className={`text-xs px-2 py-1 rounded-full text-[#525252] ${
+                              g === 'MALE'
+                                ? 'bg-[#BDCFFF]'
+                                : g === 'FEMALE'
+                                  ? 'bg-[#D8C9E6]'
+                                  : 'bg-gray-100'
+                            }`}
                           >
                             {g === 'MALE' ? 'Male Outfits' : g === 'FEMALE' ? 'Female Outfits' : g}
                           </span>
                         ))
                       ) : (
                         <>
-                          <span className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252] flex items-center gap-2">
+                          <span className="text-xs px-2 py-1 rounded-full bg-[#D8C9E6] text-[#525252] flex items-center gap-2">
                             <img src={female} alt="person" className="h-3 md:h-4 aspect-auto" />
                             Female Outfits
                           </span>
-                          <span className="text-xs px-2 py-1 rounded-full bg-[#4D7AFF4A] text-[#525252] flex items-center gap-2">
+                          <span className="text-xs px-2 py-1 rounded-full bg-[#BDCFFF] text-[#525252] flex items-center gap-2">
                             <img src={male} alt="person" className="h-3 md:h-4 aspect-auto" />
                             Male Outfits
                           </span>
@@ -463,7 +477,6 @@ export default function Lookbook({
                       )}
                     </div>
                   </div>
-
                   {/* Location & distance */}
                   <div>
                     <div className="text-xs text-[#323232B2] mb-1 font-semibold flex items-center gap-2">
@@ -654,6 +667,15 @@ export default function Lookbook({
             {/* Right: gallery + fetchable backend details */}
             <div className="md:w-[60%] w-full">
               <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
+                {detailLoading && (
+                  <div className="text-sm text-gray-500 w-full flex items-center justify-center">
+                    Loading full profile…
+                  </div>
+                )}
+
+                {detailError && (
+                  <div className="text-sm text-red-500">Error loading profile: {detailError}</div>
+                )}
                 {detail?.base_info ? (
                   <img
                     src={detail?.base_info?.cover_picture_url}
@@ -662,7 +684,11 @@ export default function Lookbook({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    No image
+                    {!detailLoading && (
+                      <div className="text-sm text-gray-400 mt-3">
+                        Click this panel to load full profile from backend
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -683,84 +709,6 @@ export default function Lookbook({
                   </div>
                 </div>
               )}
-
-              <div className="mt-4 hidden">
-                {detailLoading && (
-                  <div className="text-sm text-gray-500">Loading full profile…</div>
-                )}
-
-                {detailError && (
-                  <div className="text-sm text-red-500">Error loading profile: {detailError}</div>
-                )}
-
-                {detail ? (
-                  <div className="mt-3 grid grid-cols-1 gap-4">
-                    {/* header */}
-                    <div className="flex items-start gap-4">
-                      {detail.base_info?.profile_picture_url && (
-                        <img
-                          src={detail.base_info.profile_picture_url}
-                          alt="profile"
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
-                      )}
-                      <div>
-                        <div className="font-semibold text-lg">
-                          {detail.base_info?.boutique_name || detail.base_info?.tailor_name}
-                        </div>
-                        <div className="text-sm text-gray-500">{detail.base_info?.user_name}</div>
-                      </div>
-                    </div>
-
-                    {/* Social */}
-                    {detail.social_media_handlers && (
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Social</div>
-                        <div className="flex gap-3 items-center">
-                          {detail.social_media_handlers.instagram && (
-                            <a
-                              href={detail.social_media_handlers.instagram}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-sm text-[#79539f] underline"
-                            >
-                              Instagram
-                            </a>
-                          )}
-                          {detail.social_media_handlers.whatsapp && (
-                            <span className="text-sm text-gray-600">
-                              WhatsApp: {detail.social_media_handlers.whatsapp}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* images (if any) */}
-                    {detail.images && Array.isArray(detail.images) && detail.images.length > 0 && (
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Gallery</div>
-                        <div className="grid grid-cols-3 gap-3">
-                          {detail.images.map((imgUrl: string, idx: number) => (
-                            <img
-                              key={idx}
-                              src={imgUrl}
-                              className="w-full h-24 object-cover rounded-md"
-                              alt=""
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  !detailLoading && (
-                    <div className="text-sm text-gray-400 mt-3">
-                      Click this panel to load full profile from backend
-                    </div>
-                  )
-                )}
-              </div>
             </div>
           </div>
         )}

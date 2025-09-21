@@ -3,13 +3,16 @@ import CollectiveCard from './CollectiveCard'; // Adjust this path
 
 export interface CollectiveItem {
   id: number;
-  imageUrl: string;
-  title: string;
-  likeCount: number;
   data: string;
-  createdAt: string;
-  likedByCurrentUser: boolean;
   version: number;
+  parentId: number | null;
+  createdAt: string;
+  imageUrl: string;
+  userId: number;
+  children?: number | null;
+  collective: boolean;
+  likeCount: number | null;
+  likedByCurrentUser: boolean;
   prof_pic: string;
 }
 
@@ -94,7 +97,7 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
     <div
       ref={listRef}
       className="  relative max-h-[calc(100vh-72px)] overflow-y-auto 
-    p-1 sm:px-6 sm:py-6 w-full "
+    p-1 sm:px-6  w-full "
     >
       <div className=" flex flex-col gap-10 ">
         {/* Overlay covering whole page when info shown */}

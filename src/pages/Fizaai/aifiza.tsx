@@ -150,6 +150,21 @@ type OutfitOption = {
   portfolio_eligible: boolean;
 };
 
+interface VersionDataa {
+  id: number;
+  data: string;
+  version: number;
+  parentId: number | null;
+  createdAt: string;
+  imageUrl: string;
+  userId: number;
+  children?: number | null;
+  collective: boolean;
+  likeCount: number | null;
+  likedByCurrentUser: boolean;
+  prof_pic: string;
+}
+
 interface VersionData {
   id: number;
   data: string;
@@ -284,7 +299,8 @@ export default function FizaAI() {
   const [portfoliosLastPage, setPortfoliosLastPage] = useState<boolean>(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
   const [collectiveLoading, setCollectiveLoading] = useState(false);
-  const [collectiveItems, setCollectiveItems] = useState([]);
+  const [collectiveItems, setCollectiveItems] = useState<VersionDataa[]>([]);
+
   const [loadingCollective, setLoadingCollective] = useState(false);
   const [collectivePage, setCollectivePage] = useState(0);
   const [collectiveTotalPages, setCollectiveTotalPages] = useState(1);
@@ -855,9 +871,17 @@ export default function FizaAI() {
 
   const fetchCollective = async (pageNo = 0, append = false) => {
     setLoadingCollective(true);
+
+    const token = localStorage.getItem('userToken');
+    // eslint-disable-next-line no-console
+    console.log('hhhh');
+
     try {
       const response = await api.getRequest(
-        `fiza/collective/list?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`
+        `fiza/collective/list?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`,
+        {
+          Authorization: `Bearer ${token}`,
+        }
       );
 
       if (response.status && response.data && Array.isArray(response.data.content)) {
@@ -892,7 +916,10 @@ export default function FizaAI() {
   // Fetch portfolios when user switches to Lookbook tab
   useEffect(() => {
     fetchPortfolios(0, false);
-    fetchCollective(0, false);
+
+    if (selectedTab === 'lookbook') {
+      fetchCollective(0, false);
+    }
   }, [selectedTab]);
 
   const handleLoadMorePortfolios = () => {
@@ -1622,7 +1649,7 @@ export default function FizaAI() {
               {/* Logout */}
               {/* <div
                 onClick={() => {
-                  localStorage.setItem('token', '');
+                  localStorage.setItem('token', '');tab
                   localStorage.clear();
                   window.location.reload();
                 }}

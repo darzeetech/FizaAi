@@ -10,13 +10,16 @@ import notlike from '../../assets/icons/not-liked.png';
 
 export interface CollectiveItem {
   id: number;
-  imageUrl: string;
-  title: string;
-  likeCount: number;
   data: string;
-  createdAt: string;
-  likedByCurrentUser: boolean;
   version: number;
+  parentId: number | null;
+  createdAt: string;
+  imageUrl: string;
+  userId: number;
+  children?: number | null;
+  collective: boolean;
+  likeCount: number | null;
+  likedByCurrentUser: boolean;
   prof_pic: string;
 }
 
@@ -50,6 +53,8 @@ const formatTimeline = (createdAt: string): string => {
 };
 
 const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange }) => {
+  // eslint-disable-next-line no-console
+  console.log('CollectiveCard item:', item);
   let parsed: any = {};
   try {
     parsed = item.data ? JSON.parse(item.data) : {};
@@ -58,9 +63,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     console.error('Error parsing item data JSON', item.data);
   }
 
-  const outfitName =
-    parsed?.selectedOutfit?.replace(/_/g, ' ')?.replace(/\b\w/g, (c: string) => c.toUpperCase()) ||
-    item.title;
+  const outfitName = parsed?.selectedOutfit
+    ?.replace(/_/g, ' ')
+    ?.replace(/\b\w/g, (c: string) => c.toUpperCase());
 
   const [liked, setLiked] = useState(item.likedByCurrentUser);
   const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
@@ -183,7 +188,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        <div className="w-full h-[70vh] md:h-[60vh] flex items-start  justify-center overflow-hidden rounded-[30px] md:rounded-[30px]  ">
+        <div className="w-full h-[60vh] md:h-[60vh] flex items-start  justify-center overflow-hidden rounded-[30px] md:rounded-[30px]  ">
           <img src={item.imageUrl} alt={outfitName} className=" object-fill h-full" />
         </div>
 

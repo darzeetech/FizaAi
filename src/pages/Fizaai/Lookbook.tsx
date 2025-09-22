@@ -2,11 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import './sidebar.css';
 import location from '../../assets/images/location_on.png';
 import person from '../../assets/images/Vector1.png';
-import male from '../../assets/images/male.png';
 import qr from '../../assets/images/qr_code_scanner.png';
 import share from '../../assets/images/share.png';
 import copy from '../../assets/images/content_copy.png';
-import female from '../../assets/images/Group.png';
 import facebook from '../../assets/images/facebook.png';
 import whatapp from '../../assets/images/whatsapp3.png';
 import glove from '../../assets/images/Vector3.png';
@@ -81,6 +79,24 @@ export default function Lookbook({
   const [selectedSubOutfits, setSelectedSubOutfits] = useState<number[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
+  type FilteredOutfit = {
+    outfit_type: string;
+    portfolio_outfits: {
+      id: number;
+      title: string;
+      sub_outfit_name: string;
+      image_url: string[];
+    }[];
+  };
+
+  type FilteredOutfitsResponse = {
+    outfit_details: FilteredOutfit[];
+  } | null;
+
+  const [filteredOutfits, setFilteredOutfits] = useState<FilteredOutfitsResponse>(null);
+  const [filteredOutfitsLoading, setFilteredOutfitsLoading] = useState(false);
+  const [filteredOutfitsError, setFilteredOutfitsError] = useState<string | null>(null);
+
   useEffect(() => {
     const el = listRef.current;
 
@@ -125,24 +141,39 @@ export default function Lookbook({
   // reset detail when a different portfolio is selected so user can fetch fresh data by clicking right pane
   useEffect(() => {
     const username = selected?.userName || '';
-    const tailorId = detail?.tailor_id ?? undefined;
-
     setDetail(null);
     setDetailError(null);
     setDetailLoading(false);
     setLastFetchedUsername(null);
 
-    setFiltersData(null);
-    setFiltersError(null);
-
     if (!username) {
       return;
     }
-
-    // fetch profile and filters (can be parallel)
     fetchByUsername(username);
-    fetchFiltersByUsername(username, tailorId);
   }, [selected?.userName]);
+
+  useEffect(() => {
+    const username = selected?.userName || '';
+    const tailorId = detail?.tailor_id ?? undefined;
+    setFiltersData(null);
+    setFiltersError(null);
+
+    if (!username || !tailorId) {
+      return;
+    }
+    fetchFiltersByUsername(username, tailorId);
+  }, [detail]);
+
+  useEffect(() => {
+    if (detail && detail?.port_folio_id) {
+      fetchFilteredOutfits(
+        detail?.port_folio_id,
+        selectedOutfits,
+        selectedSubOutfits,
+        selectedColors
+      );
+    }
+  }, [detail]);
 
   const fetchByUsername = async (username: string) => {
     if (!username) {
@@ -201,11 +232,43 @@ export default function Lookbook({
     }
   };
 
+  const fetchFilteredOutfits = async (
+    portfolioId: number,
+    selectedOutfits: any[],
+    selectedSubOutfits: any[],
+    selectedColors: any[]
+  ) => {
+    setFilteredOutfitsLoading(true);
+    setFilteredOutfitsError(null);
+    setFilteredOutfits(null);
+    try {
+      const outfit_type = selectedOutfits.join(',');
+      const sub_outfit = selectedSubOutfits.join(',');
+      const color = selectedColors.join(',');
+      const url = `portfolio/${portfolioId}/portfolio_outfit?outfit_type=${encodeURIComponent(
+        outfit_type
+      )}&sub_outfit=${encodeURIComponent(sub_outfit)}&color=${encodeURIComponent(color)}`;
+      const res = await api.getRequest(url);
+
+      if (!res || !res.status) {
+        throw new Error(res?.message || 'Failed to fetch filtered outfits');
+      }
+      setFilteredOutfits(res.data);
+    } catch (err: any) {
+      setFilteredOutfitsError(err?.message || 'Failed to fetch filtered outfits');
+    } finally {
+      setFilteredOutfitsLoading(false);
+    }
+  };
+
   // eslint-disable-next-line no-console
   console.log(filtersData, filtersError, selectedOutfits, selectedColors);
 
   // eslint-disable-next-line no-console
   console.log(selectedOutfits, selectedSubOutfits, selectedColors);
+
+  // eslint-disable-next-line no-console
+  console.log(filteredOutfits);
 
   return (
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
@@ -452,7 +515,7 @@ export default function Lookbook({
                         detail?.info?.genders?.map((g: string) => (
                           <span
                             key={g}
-                            className={`text-xs px-2 py-1 rounded-full text-[#525252] ${
+                            className={`text-xs flex items-center gap-2 px-3 py-1 rounded-full text-gray-700 ${
                               g === 'MALE'
                                 ? 'bg-[#BDCFFF]'
                                 : g === 'FEMALE'
@@ -460,20 +523,12 @@ export default function Lookbook({
                                   : 'bg-gray-100'
                             }`}
                           >
+                            <img src={person} alt="person" className="h-3 md:h-4 aspect-auto" />
                             {g === 'MALE' ? 'Male Outfits' : g === 'FEMALE' ? 'Female Outfits' : g}
                           </span>
                         ))
                       ) : (
-                        <>
-                          <span className="text-xs px-2 py-1 rounded-full bg-[#D8C9E6] text-[#525252] flex items-center gap-2">
-                            <img src={female} alt="person" className="h-3 md:h-4 aspect-auto" />
-                            Female Outfits
-                          </span>
-                          <span className="text-xs px-2 py-1 rounded-full bg-[#BDCFFF] text-[#525252] flex items-center gap-2">
-                            <img src={male} alt="person" className="h-3 md:h-4 aspect-auto" />
-                            Male Outfits
-                          </span>
-                        </>
+                        <span className="text-xs px-2 py-1 rounded-full hidden bg-gray-100 text-gray-700"></span>
                       )}
                     </div>
                   </div>
@@ -650,10 +705,16 @@ export default function Lookbook({
 
                         <button
                           className="mt-4 w-full bg-[#79539f] text-white rounded-md py-2 font-semibold"
-                          onClick={() => {
-                            // You can handle filter apply here
-                            // Example: console.log(selectedOutfits, selectedSubOutfits, selectedColors);
-                          }}
+                          // onClick={() => {
+                          //   if (detail && detail.port_folio_id) {
+                          //     fetchFilteredOutfits(
+                          //       detail.port_folio_id,
+                          //       selectedOutfits,
+                          //       selectedSubOutfits,
+                          //       selectedColors
+                          //     );
+                          //   }
+                          // }}
                         >
                           Apply
                         </button>
@@ -665,51 +726,118 @@ export default function Lookbook({
             </div>
 
             {/* Right: gallery + fetchable backend details */}
-            <div className="md:w-[60%] w-full">
-              <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
-                {detailLoading && (
-                  <div className="text-sm text-gray-500 w-full flex items-center justify-center">
-                    Loading full profile…
-                  </div>
-                )}
 
-                {detailError && (
-                  <div className="text-sm text-red-500">Error loading profile: {detailError}</div>
-                )}
-                {detail?.base_info ? (
-                  <img
-                    src={detail?.base_info?.cover_picture_url}
-                    alt={`${selected.tailorName} cover`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    {!detailLoading && (
-                      <div className="text-sm text-gray-400 mt-3">
-                        Click this panel to load full profile from backend
+            {viewStage === 'INFO' ? (
+              <>
+                <div className="md:w-[60%] w-full">
+                  <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
+                    {detailLoading && (
+                      <div className="text-sm text-gray-500 w-full flex items-center justify-center">
+                        Loading full profile…
+                      </div>
+                    )}
+
+                    {detailError && (
+                      <div className="text-sm text-red-500">
+                        Error loading profile: {detailError}
+                      </div>
+                    )}
+                    {detail?.base_info ? (
+                      <img
+                        src={detail?.base_info?.cover_picture_url}
+                        alt={`${selected.tailorName} cover`}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        {!detailLoading && (
+                          <div className="text-sm text-gray-400 mt-3">
+                            Click this panel to load full profile from backend
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
 
-              {/* images (if any) */}
-              {detail?.images && Array.isArray(detail?.images) && detail?.images.length > 0 && (
-                <div>
-                  {/* <div className="text-xs text-gray-500 mb-1">Gallery</div> */}
-                  <div className="grid grid-cols-3 gap-3 mt-[1rem]">
-                    {detail?.images.map((imgUrl: string, idx: number) => (
-                      <img
-                        key={idx}
-                        src={imgUrl}
-                        className="w-full h-[8rem] object-cover rounded-md"
-                        alt=""
-                      />
-                    ))}
+                  {/* images (if any) */}
+                  {detail?.images && Array.isArray(detail?.images) && detail?.images.length > 0 && (
+                    <div>
+                      {/* <div className="text-xs text-gray-500 mb-1">Gallery</div> */}
+                      <div className="grid grid-cols-3 gap-3 mt-[1rem]">
+                        {detail?.images.map((imgUrl: string, idx: number) => (
+                          <img
+                            key={idx}
+                            src={imgUrl}
+                            className="w-full h-[8rem] object-cover rounded-md"
+                            alt=""
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="md:w-[60%] w-full">
+                  <div className="w-full h-fit bg-gray-100 rounded-lg overflow-hidden p-3">
+                    {filteredOutfitsLoading && (
+                      <div className="text-sm text-gray-500 w-full flex items-center justify-center">
+                        Loading full profile…
+                      </div>
+                    )}
+
+                    {filteredOutfitsError && (
+                      <div className="text-sm text-red-500">
+                        Error loading profile: {filteredOutfitsError}
+                      </div>
+                    )}
+
+                    {filteredOutfits?.outfit_details &&
+                    filteredOutfits.outfit_details.length > 0 ? (
+                      filteredOutfits.outfit_details.map((outfit) => (
+                        <div key={outfit.outfit_type} className="mb-6">
+                          <h4 className="font-semibold mb-2">{outfit.outfit_type}</h4>
+                          <div className=" flex flex-col w-full gap-4">
+                            {outfit.portfolio_outfits.map((item) => (
+                              <div key={item.id} className="mb-4 w-full">
+                                {/* First image */}
+                                {item.image_url && item.image_url.length > 0 && (
+                                  <img
+                                    src={item.image_url[0]}
+                                    alt={item.title}
+                                    className="w-full h-[360px] object-cover rounded-lg"
+                                  />
+                                )}
+                                {/* More images (if any) */}
+                                {item.image_url && item.image_url.length > 1 && (
+                                  <div className="grid grid-cols-3 gap-3 mt-[1rem]">
+                                    {item.image_url.slice(1).map((img, idx) => (
+                                      <img
+                                        key={idx}
+                                        src={img}
+                                        alt={`${item.title} extra ${idx + 1}`}
+                                        className="w-full h-[8rem] object-cover rounded-md"
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="mt-1 text-xs font-medium">{item.title}</div>
+                                <div className="text-xs text-gray-500">{item.sub_outfit_name}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-gray-400 text-center py-8">
+                        No filtered outfits found.
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         )}
       </section>

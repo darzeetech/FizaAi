@@ -705,16 +705,16 @@ export default function Lookbook({
 
                         <button
                           className="mt-4 w-full bg-[#79539f] text-white rounded-md py-2 font-semibold"
-                          // onClick={() => {
-                          //   if (detail && detail.port_folio_id) {
-                          //     fetchFilteredOutfits(
-                          //       detail.port_folio_id,
-                          //       selectedOutfits,
-                          //       selectedSubOutfits,
-                          //       selectedColors
-                          //     );
-                          //   }
-                          // }}
+                          onClick={() => {
+                            if (detail && detail.port_folio_id) {
+                              fetchFilteredOutfits(
+                                detail.port_folio_id,
+                                selectedOutfits,
+                                selectedSubOutfits,
+                                selectedColors
+                              );
+                            }
+                          }}
                         >
                           Apply
                         </button>

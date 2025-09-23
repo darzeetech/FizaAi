@@ -7,6 +7,8 @@ import { api } from '../../utils/apiRequest';
 import circle from '../../assets/icons/circle.png';
 import like from '../../assets/icons/lked.png';
 import notlike from '../../assets/icons/not-liked.png';
+import femalelogo from '../../assets/icons/ai-stylist-female.png';
+import malelogo from '../../assets/icons/ai-stylist-male.png';
 
 export interface CollectiveItem {
   id: number;
@@ -66,6 +68,27 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
   const outfitName = parsed?.selectedOutfit
     ?.replace(/_/g, ' ')
     ?.replace(/\b\w/g, (c: string) => c.toUpperCase());
+  const about = parsed?.aboutYou || {};
+
+  const gender = about.gender || ''; // or however gender is stored
+
+  // Compute profile pic:
+  const getProfilePic = () => {
+    if (item.prof_pic && item.prof_pic.trim() !== '') {
+      return item.prof_pic;
+    }
+
+    if (gender.toLowerCase() === 'female') {
+      return femalelogo;
+    }
+
+    if (gender.toLowerCase() === 'male') {
+      return malelogo;
+    }
+    // fallback to one (male/female) if gender is not set
+
+    return malelogo;
+  };
 
   const [liked, setLiked] = useState(item.likedByCurrentUser);
   const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
@@ -146,7 +169,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               DESIGNED BY
               <div className="flex items-center gap-1 mt-1">
                 <img
-                  src={item.prof_pic}
+                  src={getProfilePic()}
                   alt="Profile"
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
                 />
@@ -226,7 +249,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 md:mt-4">
           {/* Designer */}
           <div>
             <div className="font-semibold text-[10px] sm:text-[11px] text-gray-500 tracking-wide">
@@ -234,7 +257,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             </div>
             <div className="flex items-center gap-2 mt-1">
               <img
-                src={item.prof_pic}
+                src={getProfilePic()}
                 alt="Profile"
                 className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
               />

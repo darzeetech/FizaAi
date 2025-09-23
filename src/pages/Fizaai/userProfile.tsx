@@ -10,6 +10,8 @@ import vision from '../../assets/icons/Vision_Fiza_AI.gif';
 import PaymentMethods from '../../assets/icons/Payment_Methods.png';
 import parcel from '../../assets/icons/searching-parcel.png';
 import address from '../../assets/icons/address.png';
+import femalelogo from '../../assets/icons/ai-stylist-female.png';
+import malelogo from '../../assets/icons/ai-stylist-male.png';
 
 interface UserProfileProps {
   showProfile: boolean;
@@ -29,9 +31,14 @@ const UserProfile: React.FC<UserProfileProps> = ({
   const storedData = localStorage.getItem('fizaaiuser');
   let fullName = 'Fiza User 1';
 
+  let profileUrl = '';
+  let gender = '';
+
   if (storedData) {
     try {
       const userData = JSON.parse(storedData);
+      profileUrl = userData?.user?.userPreference?.profilePicture || ''; // Change if your user object has a different field
+      gender = (userData?.user?.userPreference?.gender || '').toLowerCase(); // Adjust path as needed
       const firstName = userData?.user?.first_name || '';
       const lastName = userData?.user?.last_name || '';
       fullName = `${firstName} ${lastName}`.trim() || fullName;
@@ -41,8 +48,24 @@ const UserProfile: React.FC<UserProfileProps> = ({
     }
   }
 
+  const getProfileImg = () => {
+    if (profileUrl && profileUrl.trim() !== '') {
+      return profileUrl;
+    }
+
+    if (gender === 'female') {
+      return femalelogo;
+    }
+
+    if (gender === 'male') {
+      return malelogo;
+    }
+
+    return malelogo; // fallback
+  };
+
   const username = fullName;
-  const userInitial = username.charAt(0).toUpperCase();
+  // const userInitial = username.charAt(0).toUpperCase();
   const [selectedMenu, setSelectedMenu] = useState<'orders' | 'address' | 'payment'>('orders');
   const [showYouTubeModal, setShowYouTubeModal] = useState(false);
 
@@ -71,9 +94,12 @@ const UserProfile: React.FC<UserProfileProps> = ({
               }
             }}
           >
-            <div className="w-8 h-8 ml-3 rounded-full bg-[#4F2945] text-white flex items-center justify-center text-lg font-semibold">
-              {userInitial}
-            </div>
+            <img
+              src={getProfileImg()}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover border border-[#E0D6CF]"
+            />
+
             <span className="text-base ml-3 font-medium text-black">{username}</span>
           </div>
         </div>

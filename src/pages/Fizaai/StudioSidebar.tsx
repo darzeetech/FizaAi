@@ -17,6 +17,8 @@ import './sidebar.css';
 import UserProfile from './userProfile';
 import { FaChevronDown, FaSearch } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
+import femalelogo from '../../assets/icons/ai-stylist-female.png';
+import malelogo from '../../assets/icons/ai-stylist-male.png';
 
 interface StudioSidebarProps {
   setShowStudio: (val: boolean) => void;
@@ -107,9 +109,14 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
   const storedData = localStorage.getItem('fizaaiuser');
   let fullName = '';
 
+  let profileUrl = '';
+  let gender = '';
+
   if (storedData) {
     try {
       const userData = JSON.parse(storedData);
+      profileUrl = userData?.user?.userPreference?.profilePicture || ''; // Change if your user object has a different field
+      gender = (userData?.user?.userPreference?.gender || '').toLowerCase(); // Adjust path as needed
       const firstName = userData?.user?.first_name || '';
       const lastName = userData?.user?.last_name || '';
       fullName = `${firstName} ${lastName}`.trim() || fullName;
@@ -119,8 +126,25 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
     }
   }
 
+  // Helper function to get correct image
+  const getProfileImg = () => {
+    if (profileUrl && profileUrl.trim() !== '') {
+      return profileUrl;
+    }
+
+    if (gender === 'female') {
+      return femalelogo;
+    }
+
+    if (gender === 'male') {
+      return malelogo;
+    }
+
+    return malelogo; // fallback
+  };
+
   const username = fullName;
-  const userInitial = username.charAt(0).toUpperCase();
+  // const userInitial = username.charAt(0).toUpperCase();
 
   function formatOutfit(outfit: string): string {
     if (!outfit) {
@@ -391,9 +415,12 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
       {!showProfile && (
         <div className="sticky bottom-0 bg-[#F9F6F1] py-3 border-t border-[#E0D6CF] z-50 px-0">
           <div className="flex items-center justify-start gap-2 pl-4">
-            <div className="w-8 h-8 rounded-full bg-[#4F2945] flex items-center justify-center text-white text-sm font-bold">
-              {userInitial}
-            </div>
+            <img
+              src={getProfileImg()}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover border border-[#E0D6CF]"
+            />
+
             <div
               className="flex items-center gap-1 cursor-pointer"
               onClick={() => setShowProfile(true)}

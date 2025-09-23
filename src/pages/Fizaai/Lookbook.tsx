@@ -79,6 +79,8 @@ export default function Lookbook({
   const [selectedSubOutfits, setSelectedSubOutfits] = useState<number[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
+  const [selectedImageIndexes, setSelectedImageIndexes] = useState<{ [key: number]: number }>({});
+
   type FilteredOutfit = {
     outfit_type: string;
     portfolio_outfits: {
@@ -405,15 +407,15 @@ export default function Lookbook({
           )}
       </aside>
 
-      <section className="flex-1 border rounded-lg p-4 bg-white max-h-[calc(100vh-72px)] custom-scrollbar overflow-y-auto">
+      <section className="flex-1 border rounded-lg p-4 bg-white max-h-[calc(100vh-72px)] ">
         {!selected ? (
           <div className="flex items-center justify-center h-full text-gray-500">
             Select a portfolio on the left to view details
           </div>
         ) : (
-          <div className="w-full h-full flex flex-col md:flex-row gap-8">
+          <div className="w-full h-full flex flex-col md:flex-row gap-8 relative">
             {/* Left: owner & meta */}
-            <div className="md:w-[40%] w-full flex flex-col gap-4">
+            <div className="md:w-[40%] w-full flex flex-col gap-4 ">
               <div className="flex flex-col w-full items-center gap-3 p-3 borde rounded-lg bg-gray-50 shadow shadow-[#00000040]">
                 <div className="flex items-center gap-3 w-full ">
                   {detail?.base_info?.profile_picture_url ? (
@@ -729,7 +731,7 @@ export default function Lookbook({
 
             {viewStage === 'INFO' ? (
               <>
-                <div className="md:w-[60%] w-full">
+                <div className="md:w-[60%] w-full ">
                   <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
                     {detailLoading && (
                       <div className="text-sm text-gray-500 w-full flex items-center justify-center">
@@ -779,8 +781,9 @@ export default function Lookbook({
               </>
             ) : (
               <>
-                <div className="md:w-[60%] w-full">
-                  <div className="w-full h-fit bg-gray-100 rounded-lg overflow-hidden p-3">
+                <div className="md:w-[60%] w-full custom-scrollbar overflow-y-auto max-h-[calc(100vh-10px)]">
+                  <div className="w-full h-fit rounded-lg overflow-hidden p-3">
+                    {/* <div>nitish</div> */}
                     {filteredOutfitsLoading && (
                       <div className="text-sm text-gray-500 w-full flex items-center justify-center">
                         Loading full profile…
@@ -804,20 +807,30 @@ export default function Lookbook({
                                 {/* First image */}
                                 {item.image_url && item.image_url.length > 0 && (
                                   <img
-                                    src={item.image_url[0]}
+                                    src={item.image_url[selectedImageIndexes[item.id] ?? 0]}
                                     alt={item.title}
-                                    className="w-full h-[360px] object-cover rounded-lg"
+                                    className="w-full h-[360px] object-fill  rounded-lg"
                                   />
                                 )}
                                 {/* More images (if any) */}
                                 {item.image_url && item.image_url.length > 1 && (
-                                  <div className="grid grid-cols-3 gap-3 mt-[1rem]">
-                                    {item.image_url.slice(1).map((img, idx) => (
+                                  <div className="grid grid-cols-4 gap-2 mt-[1rem]">
+                                    {item.image_url?.map((img, idx) => (
                                       <img
                                         key={idx}
                                         src={img}
                                         alt={`${item.title} extra ${idx + 1}`}
-                                        className="w-full h-[8rem] object-cover rounded-md"
+                                        className={`w-full h-[8rem] object-fill rounded-md cursor-pointer ${
+                                          (selectedImageIndexes[item.id] ?? 0) === idx
+                                            ? 'ring-2 ring-[#79539f]'
+                                            : ''
+                                        }`}
+                                        onClick={() => {
+                                          setSelectedImageIndexes((prev) => ({
+                                            ...prev,
+                                            [item.id]: idx,
+                                          }));
+                                        }}
                                       />
                                     ))}
                                   </div>

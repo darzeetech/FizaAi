@@ -175,6 +175,11 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
     {} as Record<string, VersionData[][]>
   );
 
+  const handleLookbookTabChange = (tab: string) => {
+    setSelectlookbook(tab);
+    localStorage.setItem('selectlookbook', tab);
+  };
+
   useEffect(() => {
     if (showProfile) {
       setSearchMode(false);
@@ -322,7 +327,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
           <div className="flex flex-col">
             {/* Explore Designers */}
             <div
-              onClick={() => setSelectlookbook('Explore Designers')}
+              onClick={() => handleLookbookTabChange('Explore Designers')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Explore Designers' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
               }`}
@@ -332,7 +337,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
             </div>
             {/* Outfits */}
             <div
-              onClick={() => setSelectlookbook('Outfits')}
+              onClick={() => handleLookbookTabChange('Outfits')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Outfits' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
               }`}
@@ -347,7 +352,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
 
             {/* Collective */}
             <div
-              onClick={() => setSelectlookbook('Collective')}
+              onClick={() => handleLookbookTabChange('Collective')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Collective' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
               }`}
@@ -362,7 +367,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
 
             {/* My Designs */}
             <div
-              onClick={() => setSelectlookbook('My Designs')}
+              onClick={() => handleLookbookTabChange('My Designs')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'My Designs' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
               }`}
@@ -373,7 +378,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
 
             {/* Favorites */}
             <div
-              onClick={() => setSelectlookbook('Favorites')}
+              onClick={() => handleLookbookTabChange('Favorites')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Favorites' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
               }`}
@@ -384,7 +389,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
 
             {/* Brought to life */}
             <div
-              onClick={() => setSelectlookbook('Brought to life')}
+              onClick={() => handleLookbookTabChange('Brought to life')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Brought to life' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
               }`}

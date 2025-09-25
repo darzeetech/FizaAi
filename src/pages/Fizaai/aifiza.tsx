@@ -922,9 +922,7 @@ export default function FizaAI() {
   useEffect(() => {
     fetchPortfolios(0, false);
 
-    if (selectedTab === 'lookbook') {
-      fetchCollective(0, false);
-    }
+    fetchCollective(0, false);
   }, [selectedTab]);
 
   const handleLoadMorePortfolios = () => {

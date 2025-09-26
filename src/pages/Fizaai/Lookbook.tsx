@@ -794,7 +794,7 @@ export default function Lookbook({
                 <div className="md:w-[60%] w-full custom-scrollbar overflow-y-auto max-h-[calc(100vh-1px)]">
                   <div className="w-full h-fit rounded-lg overflow-hidden p-2">
                     {/* Outfit Type Filter Buttons */}
-                    <div className="fle gap-2 mb-6 hidden">
+                    <div className="fle gap-2 mb-6  hidden">
                       {/* All button first */}
                       <button
                         className={`px-4 py-2 rounded-full font-semibold text-sm transition-all focus:outline-none
@@ -905,13 +905,16 @@ export default function Lookbook({
                             {outfit?.portfolio_outfits.map((item) => (
                               <div key={item.id} className="mb-4 w-full">
                                 {/* First image */}
-                                {item.image_url && item.image_url.length > 0 && (
-                                  <img
-                                    src={item.image_url[selectedImageIndexes[item.id] ?? 0]}
-                                    alt={item.title}
-                                    className="w-full h-[360px object-cover  rounded-lg"
-                                  />
-                                )}
+                                <div className="w-full h-[60vh] md:h-[55vh] flex items-start  justify-center overflow-hidden rounded-[20px] md:rounded-[10px]">
+                                  {item.image_url && item.image_url.length > 0 && (
+                                    <img
+                                      src={item.image_url[selectedImageIndexes[item.id] ?? 0]}
+                                      alt={item.title}
+                                      className=" object-fill h-full"
+                                    />
+                                  )}
+                                </div>
+
                                 {/* More images (if any) */}
                                 {item.image_url && item.image_url.length > 1 && (
                                   <div className="grid grid-cols-4 gap-2 mt-[1rem]">

@@ -794,7 +794,7 @@ export default function Lookbook({
                 <div className="md:w-[60%] w-full custom-scrollbar overflow-y-auto max-h-[calc(100vh-1px)]">
                   <div className="w-full h-fit rounded-lg overflow-hidden p-2">
                     {/* Outfit Type Filter Buttons */}
-                    <div className="fle gap-2 mb-6  hidden">
+                    <div className="flex gap-2 mb-6 flex-wrap">
                       {/* All button first */}
                       <button
                         className={`px-4 py-2 rounded-full font-semibold text-sm transition-all focus:outline-none

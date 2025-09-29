@@ -420,7 +420,7 @@ export default function Lookbook({
             </div>
           )}
 
-        <div className="w-full h-[100px] md:hidden block"></div>
+        <div className="w-full h-[80px] md:hidden block"></div>
       </aside>
 
       <section
@@ -818,6 +818,7 @@ export default function Lookbook({
                       </div>
                     </div>
                   )}
+                  <div className="w-full h-[8px] md:hidden block "></div>
                 </div>
               </>
             ) : (
@@ -984,12 +985,13 @@ export default function Lookbook({
                           No filtered outfits found.
                         </div>
                       )}
+
+                      <div className="w-full h-[80px] md:hidden block "></div>
                     </div>
                   </div>
                 </div>
               </>
             )}
-            <div className="w-full h-[400px] md:hidden block"></div>
           </div>
         )}
       </section>

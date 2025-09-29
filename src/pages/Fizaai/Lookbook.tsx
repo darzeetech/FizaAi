@@ -419,6 +419,8 @@ export default function Lookbook({
               </button>
             </div>
           )}
+
+        <div className="w-full h-[100px] md:hidden block"></div>
       </aside>
 
       <section
@@ -987,6 +989,7 @@ export default function Lookbook({
                 </div>
               </>
             )}
+            <div className="w-full h-[400px] md:hidden block"></div>
           </div>
         )}
       </section>

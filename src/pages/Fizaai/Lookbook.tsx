@@ -17,6 +17,7 @@ import portfolio from '../../assets/images/album1.png';
 import portfolio1 from '../../assets/images/album.png';
 
 import { api } from '../../utils/apiRequest';
+import { TiArrowLeft } from 'react-icons/ti';
 
 export type Portfolio = {
   id: number;
@@ -84,6 +85,8 @@ export default function Lookbook({
   const [selectedImageIndexes, setSelectedImageIndexes] = useState<{ [key: number]: number }>({});
 
   const [selectedOutfitsr, setSelectedOutfitsr] = useState<number[]>([]);
+
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
 
   type FilteredOutfit = {
     outfit_type: string;
@@ -186,6 +189,10 @@ export default function Lookbook({
       return;
     }
 
+    // if (window.innerWidth < 768) {
+    //   setShowMobilePreview(true);
+    // }
+
     // avoid refetching same username repeatedly
     if (lastFetchedUsername === username) {
       return;
@@ -280,7 +287,9 @@ export default function Lookbook({
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
       <aside
         ref={listRef}
-        className="md:w-[30%] w-full max-h-[calc(100vh-72px)] custom-scrollbar overflow-y-auto border rounded-lg p-3 bg-white"
+        className={`${
+          showMobilePreview ? 'hidden md:block md:w-[30%]' : 'md:w-[30%] w-full'
+        }  w-full max-h-[calc(100vh-72px)] custom-scrollbar overflow-y-auto border rounded-lg md:p-3 p-2 bg-white`}
       >
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Designers</h3>
@@ -319,6 +328,7 @@ export default function Lookbook({
                 key={p.id}
                 onClick={() => {
                   onSelect(p);
+                  setShowMobilePreview(true);
                 }}
                 className={`w-full text-left flex flex-col items-start gap-3 p-3 border border-[#0000001A] rounded-lg transition-shadow ${
                   selected?.id === p.id ? 'ring-2 ring-[#79539f]' : 'shadow-sm hover:shadow'
@@ -411,15 +421,33 @@ export default function Lookbook({
           )}
       </aside>
 
-      <section className="flex-1 border rounded-lg p-4 bg-white max-h-[calc(100vh-72px)] ">
+      <section
+        className={`${
+          showMobilePreview ? 'w-full ' : ' md:block hidden'
+        } flex-1 border rounded-lg md:p-4 p-2 bg-white h-fit md:max-h-[calc(100vh-72px)]`}
+      >
         {!selected ? (
           <div className="flex items-center justify-center h-full text-gray-500">
             Select a portfolio on the left to view details
           </div>
         ) : (
-          <div className="w-full h-full flex flex-col md:flex-row gap-8 relative">
+          <div className="w-full h-screen flex flex-col md:flex-row gap-8 relative custom-scrollbar overflow-y-scroll ">
             {/* Left: owner & meta */}
-            <div className="md:w-[40%] w-full flex flex-col gap-4 ">
+            <div className="md:w-[40%] h-fit w-full flex flex-col gap-4 ">
+              {showMobilePreview && window.innerWidth < 768 && (
+                <button
+                  className="flex items-center font-semibold"
+                  onClick={() => setShowMobilePreview(false)}
+                >
+                  <TiArrowLeft
+                    onClick={() => {
+                      setShowMobilePreview(false);
+                    }}
+                    className={`${showMobilePreview ? ' block' : ' hidden'} size-8 cursor-pointer`}
+                  />{' '}
+                  Designers
+                </button>
+              )}
               <div className="flex flex-col w-full items-center gap-3 p-3 borde rounded-lg bg-gray-50 shadow shadow-[#00000040]">
                 <div className="flex items-center gap-3 w-full ">
                   {detail?.base_info?.profile_picture_url ? (
@@ -741,7 +769,7 @@ export default function Lookbook({
 
             {viewStage === 'INFO' ? (
               <>
-                <div className="md:w-[60%] w-full ">
+                <div className="md:w-[60%] w-full h-full md:pb-[2rem] pb-[3rem] ">
                   <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
                     {detailLoading && (
                       <div className="text-sm text-gray-500 w-full flex items-center justify-center">
@@ -754,6 +782,7 @@ export default function Lookbook({
                         Error loading profile: {detailError}
                       </div>
                     )}
+
                     {detail?.base_info ? (
                       <img
                         src={detail?.base_info?.cover_picture_url}
@@ -791,165 +820,169 @@ export default function Lookbook({
               </>
             ) : (
               <>
-                <div className="md:w-[60%] w-full custom-scrollbar overflow-y-auto max-h-[calc(100vh-1px)]">
-                  <div className="w-full h-fit rounded-lg overflow-hidden p-2">
-                    {/* Outfit Type Filter Buttons */}
-                    <div className="flex gap-2 mb-6 flex-wrap">
-                      {/* All button first */}
-                      <button
-                        className={`px-4 py-2 rounded-full font-semibold text-sm transition-all focus:outline-none
+                <div className="md:w-[60%] w-full h-full ">
+                  <div className=" w-full custom-scrollbar md:overflow-y-auto h-full md:max-h-[calc(100vh-1px)] ">
+                    <div className="w-full h-fit rounded-lg md:overflow-hidden p-2">
+                      {/* Outfit Type Filter Buttons */}
+                      <div className="flex gap-2 mb-6 flex-wrap">
+                        {/* All button first */}
+                        <button
+                          className={`px-4 py-2 rounded-full font-semibold text-sm transition-all focus:outline-none
                           ${
                             selectedOutfitsr.length === filtersData?.outfit_filter.length
                               ? 'bg-gray-700 text-white shadow'
                               : 'bg-gray-100 text-gray-700'
                           }`}
-                        onClick={() => {
-                          const allOutfits = filtersData.outfit_filter.map((o: any) => o.index);
+                          onClick={() => {
+                            const allOutfits = filtersData.outfit_filter.map((o: any) => o.index);
 
-                          if (selectedOutfitsr.length === allOutfits.length) {
-                            // All are selected, so deselect all and call API
-                            setSelectedOutfitsr([]);
+                            if (selectedOutfitsr.length === allOutfits.length) {
+                              // All are selected, so deselect all and call API
+                              setSelectedOutfitsr([]);
 
-                            if (detail && detail.port_folio_id) {
-                              fetchFilteredOutfits(
-                                detail.port_folio_id,
-                                [],
-                                selectedSubOutfits,
-                                selectedColors
-                              );
+                              if (detail && detail.port_folio_id) {
+                                fetchFilteredOutfits(
+                                  detail.port_folio_id,
+                                  [],
+                                  selectedSubOutfits,
+                                  selectedColors
+                                );
+                              }
+                            } else {
+                              // Select all and call API
+                              setSelectedOutfitsr(allOutfits);
+
+                              if (detail && detail.port_folio_id) {
+                                fetchFilteredOutfits(
+                                  detail.port_folio_id,
+                                  allOutfits,
+                                  selectedSubOutfits,
+                                  selectedColors
+                                );
+                              }
                             }
-                          } else {
-                            // Select all and call API
-                            setSelectedOutfitsr(allOutfits);
-
-                            if (detail && detail.port_folio_id) {
-                              fetchFilteredOutfits(
-                                detail.port_folio_id,
-                                allOutfits,
-                                selectedSubOutfits,
-                                selectedColors
-                              );
-                            }
-                          }
-                        }}
-                      >
-                        All
-                      </button>
-                      {/* Individual outfit type buttons */}
-                      {filtersData?.outfit_filter?.map((outfit: any) => (
-                        <button
-                          key={outfit.index}
-                          className={`px-4 py-2 rounded-full font-semibold text-sm transition-all focus:outline-none
+                          }}
+                        >
+                          All
+                        </button>
+                        {/* Individual outfit type buttons */}
+                        {filtersData?.outfit_filter?.map((outfit: any) => (
+                          <button
+                            key={outfit.index}
+                            className={`px-4 py-2 rounded-full font-semibold text-sm transition-all focus:outline-none
                             ${
                               selectedOutfitsr.includes(outfit.index)
                                 ? 'bg-gray-700 text-white shadow'
                                 : 'bg-gray-100 text-gray-700'
                             }`}
-                          onClick={() => {
-                            setSelectedOutfitsr((prev: number[]) => {
-                              if (prev.includes(outfit.index)) {
-                                // Deselect and remove from array, change color, and call API
-                                const updated = prev.filter((i) => i !== outfit.index);
+                            onClick={() => {
+                              setSelectedOutfitsr((prev: number[]) => {
+                                if (prev.includes(outfit.index)) {
+                                  // Deselect and remove from array, change color, and call API
+                                  const updated = prev.filter((i) => i !== outfit.index);
 
-                                if (detail && detail.port_folio_id) {
-                                  fetchFilteredOutfits(
-                                    detail.port_folio_id,
-                                    updated,
-                                    selectedSubOutfits,
-                                    selectedColors
-                                  );
+                                  if (detail && detail.port_folio_id) {
+                                    fetchFilteredOutfits(
+                                      detail.port_folio_id,
+                                      updated,
+                                      selectedSubOutfits,
+                                      selectedColors
+                                    );
+                                  }
+
+                                  return updated;
+                                } else {
+                                  // Select and call API
+                                  const updated = [...prev, outfit.index];
+
+                                  if (detail && detail.port_folio_id) {
+                                    fetchFilteredOutfits(
+                                      detail.port_folio_id,
+                                      updated,
+                                      selectedSubOutfits,
+                                      selectedColors
+                                    );
+                                  }
+
+                                  return updated;
                                 }
-
-                                return updated;
-                              } else {
-                                // Select and call API
-                                const updated = [...prev, outfit.index];
-
-                                if (detail && detail.port_folio_id) {
-                                  fetchFilteredOutfits(
-                                    detail.port_folio_id,
-                                    updated,
-                                    selectedSubOutfits,
-                                    selectedColors
-                                  );
-                                }
-
-                                return updated;
-                              }
-                            });
-                          }}
-                        >
-                          {outfit.name}
-                        </button>
-                      ))}
-                    </div>
-                    {/* End Outfit Type Filter Buttons */}
-                    {filteredOutfitsLoading && (
-                      <div className="text-sm text-gray-500 w-full flex items-center justify-center">
-                        Loading full profile…
+                              });
+                            }}
+                          >
+                            {outfit.name}
+                          </button>
+                        ))}
                       </div>
-                    )}
-
-                    {filteredOutfitsError && (
-                      <div className="text-sm text-red-500">
-                        Error loading profile: {filteredOutfitsError}
-                      </div>
-                    )}
-
-                    {filteredOutfits?.outfit_details &&
-                    filteredOutfits?.outfit_details.length > 0 ? (
-                      filteredOutfits?.outfit_details.map((outfit) => (
-                        <div key={outfit.outfit_type} className="mb-6">
-                          <h4 className="font-semibold mb-2">{outfit.outfit_type}</h4>
-                          <div className=" flex flex-col w-full gap-4">
-                            {outfit?.portfolio_outfits.map((item) => (
-                              <div key={item.id} className="mb-4 w-full">
-                                {/* First image */}
-                                <div className="w-full h-[60vh] md:h-[55vh] flex items-start  justify-center overflow-hidden rounded-[20px] md:rounded-[10px]">
-                                  {item.image_url && item.image_url.length > 0 && (
-                                    <img
-                                      src={item.image_url[selectedImageIndexes[item.id] ?? 0]}
-                                      alt={item.title}
-                                      className=" object-fill h-full"
-                                    />
-                                  )}
-                                </div>
-
-                                {/* More images (if any) */}
-                                {item.image_url && item.image_url.length > 1 && (
-                                  <div className="grid grid-cols-4 gap-2 mt-[1rem]">
-                                    {item.image_url?.map((img, idx) => (
-                                      <img
-                                        key={idx}
-                                        src={img}
-                                        alt={`${item.title} extra ${idx + 1}`}
-                                        className={`w-full h-[8rem] object-fill rounded-md cursor-pointer ${
-                                          (selectedImageIndexes[item.id] ?? 0) === idx
-                                            ? 'ring-2 ring-[#79539f]'
-                                            : ''
-                                        }`}
-                                        onClick={() => {
-                                          setSelectedImageIndexes((prev) => ({
-                                            ...prev,
-                                            [item.id]: idx,
-                                          }));
-                                        }}
-                                      />
-                                    ))}
-                                  </div>
-                                )}
-                                <div className="mt-1 text-xs font-medium">{item.title}</div>
-                                <div className="text-xs text-gray-500">{item.sub_outfit_name}</div>
-                              </div>
-                            ))}
-                          </div>
+                      {/* End Outfit Type Filter Buttons */}
+                      {filteredOutfitsLoading && (
+                        <div className="text-sm text-gray-500 w-full flex items-center justify-center">
+                          Loading full profile…
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-gray-400 text-center py-8">
-                        No filtered outfits found.
-                      </div>
-                    )}
+                      )}
+
+                      {filteredOutfitsError && (
+                        <div className="text-sm text-red-500">
+                          Error loading profile: {filteredOutfitsError}
+                        </div>
+                      )}
+
+                      {filteredOutfits?.outfit_details &&
+                      filteredOutfits?.outfit_details.length > 0 ? (
+                        filteredOutfits?.outfit_details.map((outfit) => (
+                          <div key={outfit.outfit_type} className="mb-6">
+                            <h4 className="font-semibold mb-2">{outfit.outfit_type}</h4>
+                            <div className=" flex flex-col w-full gap-4">
+                              {outfit?.portfolio_outfits.map((item) => (
+                                <div key={item.id} className="mb-4 w-full">
+                                  {/* First image */}
+                                  <div className="w-full h-[60vh] md:h-[55vh] flex items-start  justify-center overflow-hidden rounded-[20px] md:rounded-[10px]">
+                                    {item.image_url && item.image_url.length > 0 && (
+                                      <img
+                                        src={item.image_url[selectedImageIndexes[item.id] ?? 0]}
+                                        alt={item.title}
+                                        className=" object-fill h-full"
+                                      />
+                                    )}
+                                  </div>
+
+                                  {/* More images (if any) */}
+                                  {item.image_url && item.image_url.length > 1 && (
+                                    <div className="grid grid-cols-4 gap-2 mt-[1rem]">
+                                      {item.image_url?.map((img, idx) => (
+                                        <img
+                                          key={idx}
+                                          src={img}
+                                          alt={`${item.title} extra ${idx + 1}`}
+                                          className={`w-full h-[8rem] object-fill rounded-md cursor-pointer ${
+                                            (selectedImageIndexes[item.id] ?? 0) === idx
+                                              ? 'ring-2 ring-[#79539f]'
+                                              : ''
+                                          }`}
+                                          onClick={() => {
+                                            setSelectedImageIndexes((prev) => ({
+                                              ...prev,
+                                              [item.id]: idx,
+                                            }));
+                                          }}
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                  <div className="mt-1 text-xs font-medium">{item.title}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {item.sub_outfit_name}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-gray-400 text-center py-8">
+                          No filtered outfits found.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>

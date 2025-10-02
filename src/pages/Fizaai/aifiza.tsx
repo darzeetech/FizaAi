@@ -156,13 +156,21 @@ interface VersionDataa {
   version: number;
   parentId: number | null;
   createdAt: string;
-  imageUrl: string;
+  images: string[];
   userId: number;
   children?: number | null;
   collective: boolean;
   likeCount: number | null;
-  likedByCurrentUser: boolean;
+  likeByCurrentUser: boolean;
   prof_pic: string;
+  // Additional/derived fields from your input context:
+  addedToFav?: boolean;
+  coinUsed?: number;
+  favCount?: number;
+  originId?: number;
+  platForm?: string;
+  dressInfo?: { selectedOutfit?: string };
+  userInfo?: { fullName?: string | null; profilePicture?: string | null; gender?: string | null };
 }
 
 interface VersionData {
@@ -873,17 +881,26 @@ export default function FizaAI() {
 
     fetchVersions();
   }, [isLoggedInn, showStudio, generatedImageUrl]);
+  useEffect(() => {
+    if (isLoggedIn && auth.currentUser) {
+      fetchCollective(0, false);
+    }
+    // Only runs when auth state is ready
+  }, [selectedTab, isLoggedIn, auth.currentUser]);
 
   const fetchCollective = async (pageNo = 0, append = false) => {
     setLoadingCollective(true);
 
-    const token = localStorage.getItem('userToken');
     // eslint-disable-next-line no-console
     console.log('hhhh');
 
     try {
+      const user = auth.currentUser;
+      const token = user && (await user.getIdToken());
+      // eslint-disable-next-line no-console
+      console.log(token);
       const response = await api.getRequest(
-        `fiza/collective/list?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`,
+        `fiza/collective/feed?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`,
         {
           Authorization: `Bearer ${token}`,
         }
@@ -921,8 +938,6 @@ export default function FizaAI() {
   // Fetch portfolios when user switches to Lookbook tab
   useEffect(() => {
     fetchPortfolios(0, false);
-
-    fetchCollective(0, false);
   }, [selectedTab]);
 
   const handleLoadMorePortfolios = () => {

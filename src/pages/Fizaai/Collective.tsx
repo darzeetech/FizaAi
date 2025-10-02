@@ -7,13 +7,22 @@ export interface CollectiveItem {
   version: number;
   parentId: number | null;
   createdAt: string;
-  imageUrl: string;
+  images: string[];
   userId: number;
   children?: number | null;
   collective: boolean;
   likeCount: number | null;
-  likedByCurrentUser: boolean;
+  likeByCurrentUser: boolean;
   prof_pic: string;
+
+  // Extended/Optional fields
+  platForm?: string;
+  coinUsed?: number;
+  addedToFav?: boolean;
+  favCount?: number;
+  originId?: number;
+  dressInfo?: { selectedOutfit?: string };
+  userInfo?: { fullName?: string | null; profilePicture?: string | null; gender?: string | null };
 }
 
 interface CollectiveProps {

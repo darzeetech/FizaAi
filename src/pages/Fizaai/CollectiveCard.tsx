@@ -293,17 +293,8 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-2 mt-4 text-base sm:text-lg md:text-xl font-semibold">
+        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-lg md:text-xl font-semibold">
           <span>{outfitName}</span>
-          <span className="bg-purple-100 text-purple-700 text-[10px] sm:text-xs font-bold rounded-full flex items-center gap-1 px-2 py-0.5">
-            <img src={Ai_refresh} alt="AI Refresh" className="h-4 sm:h-5 md:h-6" />
-            <span>AI</span>
-          </span>
-          <img src={coins} alt="Coin Icon" className="ml-1 h-4 sm:h-5 md:h-6" />
-          <span className="text-xs text-gray-500 ml-1">{item.version}</span>
-        </div>
-
-        <motion.div className="md:flex items-center gap-5 mt-3 hidden " whileTap={{ scale: 0.9 }}>
           <button
             type="button"
             aria-label={liked ? 'Unlike' : 'Like'}
@@ -317,7 +308,48 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             )}
             <span className="font-bold hidden md:block">{likeCount}</span>
           </button>
-        </motion.div>
+          <button
+            type="button"
+            aria-label={favorited ? 'Remove from Favorites' : 'Add to Favorites'}
+            onClick={handleFavoriteToggle}
+            className="flex items-center gap-1 text-yellow-500 focus:outline-none"
+          >
+            {favorited ? (
+              <img src={favorite} alt="Favorited" className="h-5 w-auto" />
+            ) : (
+              <img src={notfavorite} alt="Not Favorited" className="h-5 w-auto" />
+            )}
+            <span className="font-medium ">{favCount}</span>
+          </button>
+          {item.platForm == 'FIZA' && (
+            <>
+              <img src={coins} alt="Coin Icon" className="h-5 w-auto" />
+              <span className="text-sm font-medium">{item.coinUsed}</span>
+            </>
+          )}
+        </div>
+
+        <div className="md:flex items-center gap-5 mt-3 hidden ">
+          <span
+            className={`${
+              item.platForm === 'DARZEE'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-purple-100 text-purple-700'
+            } text-[10px] font-bold rounded-full flex items-center gap-1 px-2 py-0.5`}
+          >
+            {item.platForm === 'DARZEE' ? (
+              <>
+                <img src={life} alt="brought to life" className="h-4" />
+                Brought to Life
+              </>
+            ) : (
+              <>
+                <img src={Ai_refresh} alt="AI Refresh" className="h-4" />
+                AI
+              </>
+            )}
+          </span>
+        </div>
       </motion.div>
 
       {/* Right side (only desktop) */}

@@ -15,6 +15,8 @@ import info1 from '../../assets/images/workflow1.png';
 import info2 from '../../assets/images/workflow.png';
 import portfolio from '../../assets/images/album1.png';
 import portfolio1 from '../../assets/images/album.png';
+import hexagon from '../../assets/images/hexagon.png';
+import hexagonfinal from '../../assets/images/Property 1=Variant2.png';
 
 import { api } from '../../utils/apiRequest';
 import { TiArrowLeft } from 'react-icons/ti';
@@ -92,6 +94,7 @@ export default function Lookbook({
     outfit_type: string;
     portfolio_outfits: {
       id: number;
+      creation_time: string;
       title: string;
       sub_outfit_name: string;
       image_url: string[];
@@ -188,10 +191,6 @@ export default function Lookbook({
     if (!username) {
       return;
     }
-
-    // if (window.innerWidth < 768) {
-    //   setShowMobilePreview(true);
-    // }
 
     // avoid refetching same username repeatedly
     if (lastFetchedUsername === username) {
@@ -489,55 +488,108 @@ export default function Lookbook({
               </div>
 
               {/* stage toggle buttons */}
-              <div className="flex items-center gap-3 mb-4 w-full ">
-                <div className="flex flex-col items-center gap-1">
-                  <button
-                    onClick={() => setViewStage('INFO')}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
-                      viewStage === 'INFO'
-                        ? 'bg-[#111827] text-white shadow'
-                        : 'bg-white border-2 border-gray-200 text-[#333333B2]'
-                    }`}
-                    title="Info"
-                  >
-                    {viewStage === 'INFO' ? (
-                      <img src={info1} alt="info" className="h-6 md:h-7 aspect-auto" />
-                    ) : (
-                      <img src={info2} alt="info" className="h-6 md:h-7 aspect-auto" />
-                    )}
-                  </button>
-                  <p
-                    className={`text-sm font-semibold  ${
-                      viewStage === 'INFO' ? ' text-[#000000] ' : ' text-[#333333B2]'
-                    }`}
-                  >
-                    Info
-                  </p>
-                </div>
+              <div className="flex items-center justify-between gap-3 mb-4 w-full ">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={() => setViewStage('INFO')}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
+                        viewStage === 'INFO'
+                          ? 'bg-[#111827] text-white shadow'
+                          : 'bg-white border-2 border-gray-200 text-[#333333B2]'
+                      }`}
+                      title="Info"
+                    >
+                      {viewStage === 'INFO' ? (
+                        <img src={info1} alt="info" className="h-6 md:h-7 aspect-auto" />
+                      ) : (
+                        <img src={info2} alt="info" className="h-6 md:h-7 aspect-auto" />
+                      )}
+                    </button>
+                    <p
+                      className={`text-sm font-semibold  ${
+                        viewStage === 'INFO' ? ' text-[#000000] ' : ' text-[#333333B2]'
+                      }`}
+                    >
+                      Info
+                    </p>
+                  </div>
 
-                <div className="flex flex-col items-center gap-1">
-                  <button
-                    onClick={() => setViewStage('PORTFOLIO')}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
-                      viewStage === 'PORTFOLIO'
-                        ? 'bg-[#111827] text-white shadow'
-                        : 'bg-white border-2 border-gray-200 text-[#333333B2]'
-                    }`}
-                    title="Portfolio"
-                  >
-                    {viewStage === 'INFO' ? (
-                      <img src={portfolio1} alt="portfolio" className="h-6 md:h-7 aspect-auto" />
-                    ) : (
-                      <img src={portfolio} alt="portfolio" className="h-6 md:h-7 aspect-auto" />
-                    )}
-                  </button>
-                  <p
-                    className={`text-sm font-semibold  ${
-                      viewStage === 'PORTFOLIO' ? ' text-[#000000] ' : ' text-[#333333B2]'
-                    }`}
-                  >
-                    Portfolio
-                  </p>
+                  <div className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={() => setViewStage('PORTFOLIO')}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
+                        viewStage === 'PORTFOLIO'
+                          ? 'bg-[#111827] text-white shadow'
+                          : 'bg-white border-2 border-gray-200 text-[#333333B2]'
+                      }`}
+                      title="Portfolio"
+                    >
+                      {viewStage === 'INFO' ? (
+                        <img src={portfolio1} alt="portfolio" className="h-6 md:h-7 aspect-auto" />
+                      ) : (
+                        <img src={portfolio} alt="portfolio" className="h-6 md:h-7 aspect-auto" />
+                      )}
+                    </button>
+                    <p
+                      className={`text-sm font-semibold  ${
+                        viewStage === 'PORTFOLIO' ? ' text-[#000000] ' : ' text-[#333333B2]'
+                      }`}
+                    >
+                      Portfolio
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  {detail?.fav ? (
+                    <img
+                      src={hexagonfinal}
+                      alt="Remove from favorite"
+                      className="h-9 md:h-10 aspect-auto cursor-pointer"
+                      onClick={async () => {
+                        if (detail && detail.port_folio_id) {
+                          try {
+                            await api.putRequest(
+                              `portfolio/remove-from-fav?portfolioId=${detail.port_folio_id}`,
+                              {},
+                              false
+                            );
+                            // Update local state to reflect change
+                            setDetail((prev: any) => ({
+                              ...prev,
+                              fav: false,
+                            }));
+                          } catch (e) {
+                            // Optionally handle error
+                          }
+                        }
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={hexagon}
+                      alt="Add to favorite"
+                      className="h-9 md:h-10 aspect-auto cursor-pointer"
+                      onClick={async () => {
+                        if (detail && detail.port_folio_id) {
+                          try {
+                            await api.putRequest(
+                              `portfolio/add-to-fav?portfolioId=${detail.port_folio_id}`,
+                              {},
+                              false
+                            );
+                            // Update local state to reflect change
+                            setDetail((prev: any) => ({
+                              ...prev,
+                              fav: true,
+                            }));
+                          } catch (e) {
+                            // Optionally handle error
+                          }
+                        }
+                      }}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -896,7 +948,7 @@ export default function Lookbook({
                                   return updated;
                                 } else {
                                   // Select and call API
-                                  const updated = [...prev, outfit.index];
+                                  const updated = [outfit.index];
 
                                   if (detail && detail.port_folio_id) {
                                     fetchFilteredOutfits(
@@ -934,6 +986,13 @@ export default function Lookbook({
                         filteredOutfits?.outfit_details.map((outfit) => (
                           <div key={outfit.outfit_type} className="mb-6">
                             <h4 className="font-semibold mb-2">{outfit.outfit_type}</h4>
+                            {/* Display titles and creation times for each portfolio outfit */}
+                            {outfit?.portfolio_outfits?.map((item) => (
+                              <div key={item.id} className="mb-1">
+                                <div className="mt-1 text-[.9rem] font-medium">{item.title}</div>
+                                <div className="text-xs text-[#525252]">{item.creation_time}</div>
+                              </div>
+                            ))}
                             <div className=" flex flex-col w-full gap-4">
                               {outfit?.portfolio_outfits.map((item) => (
                                 <div key={item.id} className="mb-4 w-full">
@@ -971,10 +1030,6 @@ export default function Lookbook({
                                       ))}
                                     </div>
                                   )}
-                                  <div className="mt-1 text-xs font-medium">{item.title}</div>
-                                  <div className="text-xs text-gray-500">
-                                    {item.sub_outfit_name}
-                                  </div>
                                 </div>
                               ))}
                             </div>

@@ -21,8 +21,8 @@ export interface CollectiveItem {
   addedToFav?: boolean;
   favCount?: number;
   originId?: number;
-  dressInfo?: { selectedOutfit?: string };
-  userInfo?: { fullName?: string | null; profilePicture?: string | null; gender?: string | null };
+  dressInfo?: { selectedOutfit?: string; gender?: string | null };
+  userInfo?: { fullName?: string | null; profilePicture?: string | null };
 }
 
 interface CollectiveProps {

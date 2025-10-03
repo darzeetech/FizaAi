@@ -279,13 +279,13 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           />
           {/* Mobile Dots Above Image */}
           {totalImages > 1 && (
-            <div className="flex justify-center gap-3 mt-2 mb-4 md:hidden">
+            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
               {item.images.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
                   className={`w-3 h-3 rounded-full ${
-                    index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                    index === currentImageIndex ? 'bg-black' : 'bg-red-400'
                   }`}
                 />
               ))}

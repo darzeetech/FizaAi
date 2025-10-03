@@ -398,7 +398,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               ) : (
                 <img src={notfavorite} alt="Not Favorited" className="h-5 w-auto" />
               )}
-              <span className="font-medium hidden md:block">{favCount}</span>
+              <span className="font-medium ">{favCount}</span>
             </button>
           </div>
         </div>

@@ -128,22 +128,24 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
   const handleFavoriteToggle = async () => {
     try {
       const token = localStorage.getItem('userToken') || '';
-      let endpoint = '';
+      const endpoint = favorited
+        ? `fiza/collective/remove_from_fav?elementId=${item.id}`
+        : `fiza/collective/add_to_fav?elementId=${item.id}`;
 
-      if (favorited) {
-        // Remove from fav
-        endpoint = `fiza/collective/remove_from_fav?elementId=${item.id}`;
-      } else {
-        // Add to fav (assuming you have a similar endpoint, e.g. `add_to_fav`)
-        endpoint = `fiza/collective/add_to_fav?elementId=${item.id}`;
-      }
       const res = await api.putRequest(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Assuming response contains updated fav count
+
       const data = res.data;
-      const updatedCount = Number(data.msg?.replace(/[^0-9]/g, '') ?? favCount);
-      setFavCount(updatedCount);
+      // eslint-disable-next-line no-console
+      console.log(data);
+
+      // Optimistically update favorite count and state
+      if (!favorited) {
+        setFavCount((prev) => prev + 1);
+      } else {
+        setFavCount((prev) => Math.max(prev - 1, 0)); // Prevent negative counts
+      }
       setFavorited(!favorited);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -161,9 +163,12 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       const res = await api.putRequest(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const data = res.data;
-      const updatedCount = Number(data.msg.replace(/[^0-9]/g, ''));
-      setLikeCount(updatedCount);
+      // eslint-disable-next-line no-console
+      console.log(data);
+      // Optimistically update like count
+      setLikeCount((prev) => (liked ? Math.max(prev - 1, 0) : prev + 1));
       setLiked(!liked);
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -299,7 +304,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             type="button"
             aria-label={liked ? 'Unlike' : 'Like'}
             onClick={handleLikeToggle}
-            className="flex items-center gap-1 text-red-600 focus:outline-none"
+            className="flex items-center gap-1 text-black focus:outline-none"
           >
             {liked ? (
               <img src={like} alt="Like Icon" className="h-5 w-auto" />
@@ -312,7 +317,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             type="button"
             aria-label={favorited ? 'Remove from Favorites' : 'Add to Favorites'}
             onClick={handleFavoriteToggle}
-            className="flex items-center gap-1 text-yellow-500 focus:outline-none"
+            className="flex items-center gap-1 text-black focus:outline-none"
           >
             {favorited ? (
               <img src={favorite} alt="Favorited" className="h-5 w-auto" />
@@ -410,7 +415,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               type="button"
               aria-label={liked ? 'Unlike' : 'Like'}
               onClick={handleLikeToggle}
-              className="flex items-center gap-1 text-red-600 focus:outline-none"
+              className="flex items-center gap-1 text-black focus:outline-none"
             >
               {liked ? (
                 <img src={like} alt="Like Icon" className="h-5 w-auto" />
@@ -423,7 +428,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               type="button"
               aria-label={favorited ? 'Remove from Favorites' : 'Add to Favorites'}
               onClick={handleFavoriteToggle}
-              className="flex items-center gap-1 text-yellow-500 focus:outline-none"
+              className="flex items-center gap-1 text-black focus:outline-none"
             >
               {favorited ? (
                 <img src={favorite} alt="Favorited" className="h-5 w-auto" />

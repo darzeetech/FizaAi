@@ -90,6 +90,9 @@ export default function Lookbook({
 
   const [showMobilePreview, setShowMobilePreview] = useState(false);
 
+  // Store lat/lon from ipapi.co
+  const [locationData, setLocationData] = useState<{ lat?: number; lon?: number }>({});
+
   type FilteredOutfit = {
     outfit_type: string;
     portfolio_outfits: {
@@ -108,6 +111,44 @@ export default function Lookbook({
   const [filteredOutfits, setFilteredOutfits] = useState<FilteredOutfitsResponse>(null);
   const [filteredOutfitsLoading, setFilteredOutfitsLoading] = useState(false);
   const [filteredOutfitsError, setFilteredOutfitsError] = useState<string | null>(null);
+
+  // Fetch lat/lon only once on mount
+  useEffect(() => {
+    // Try to get from localStorage first
+    let ipapiData: any = null;
+    try {
+      const stored = localStorage.getItem('ipapidata');
+
+      if (stored) {
+        ipapiData = JSON.parse(stored);
+      }
+    } catch (e) {
+      ipapiData = null;
+    }
+
+    if (
+      ipapiData &&
+      typeof ipapiData.latitude === 'number' &&
+      typeof ipapiData.longitude === 'number'
+    ) {
+      setLocationData({ lat: ipapiData.latitude, lon: ipapiData.longitude });
+    } else {
+      // Fallback to fetch from ipapi.co
+      const fetchLocation = async () => {
+        try {
+          const ipRes = await fetch('https://ipapi.co/json/');
+
+          if (ipRes.ok) {
+            const ipData = await ipRes.json();
+            setLocationData({ lat: ipData.latitude, lon: ipData.longitude });
+          }
+        } catch (e) {
+          setLocationData({});
+        }
+      };
+      fetchLocation();
+    }
+  }, []);
 
   useEffect(() => {
     const el = listRef.current;
@@ -201,9 +242,11 @@ export default function Lookbook({
     setDetailError(null);
 
     try {
-      const res = await api.getRequest(
-        `portfolio/fetch-by-username?username=${encodeURIComponent(username)}`
-      );
+      const { lat, lon } = locationData;
+      const url = `portfolio/fetch-by-username?username=${encodeURIComponent(username)}${
+        lat !== undefined && lon !== undefined ? `&lat=${lat}&lon=${lon}` : ''
+      }`;
+      const res = await api.getRequest(url);
 
       if (!res || !res.status) {
         throw new Error(res?.message || 'Failed to fetch profile');
@@ -478,10 +521,33 @@ export default function Lookbook({
                   </div>
                 </div>
                 <div className="flex items-center gap-4 w-full justify-center">
-                  <img src={facebook} alt="copy" className="h-4 md:h-5 aspect-auto" />
-                  <img src={insta} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  {/* Social media icons with links */}
+                  {detail?.social_media_handlers?.facebook && (
+                    <img
+                      src={facebook}
+                      alt="facebook"
+                      className="h-4 md:h-5 aspect-auto cursor-pointer"
+                      onClick={() => window.open(detail.social_media_handlers.facebook, '_blank')}
+                    />
+                  )}
+                  {detail?.social_media_handlers?.twitter && (
+                    <img
+                      src={insta}
+                      alt="twitter"
+                      className="h-4 md:h-5 aspect-auto cursor-pointer"
+                      onClick={() => window.open(detail.social_media_handlers.twitter, '_blank')}
+                    />
+                  )}
+                  {detail?.social_media_handlers?.whatsapp && (
+                    <img
+                      src={whatapp}
+                      alt="whatsapp"
+                      className="h-4 md:h-5 aspect-auto cursor-pointer"
+                      onClick={() => window.open(detail.social_media_handlers.whatsapp, '_blank')}
+                    />
+                  )}
+                  {/* Other icons remain static */}
                   <img src={glove} alt="copy" className="h-4 md:h-5 aspect-auto" />
-                  <img src={whatapp} alt="copy" className="h-4 md:h-5 aspect-auto" />
                   <img src={upi} alt="copy" className="h-4 md:h-5 aspect-auto" />
                   <img src={map} alt="copy" className="h-4 md:h-5 aspect-auto" />
                 </div>

@@ -289,8 +289,8 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-3 h-3 rounded-full border-2 border-gray-800 ${
-                    index === currentImageIndex ? 'bg-gray-700' : 'bg-gray-500'
+                  className={`w-3 h-3 rounded-full border-2 border-gray-600 ${
+                    index === currentImageIndex ? 'bg-gray-500' : 'bg-gray-400'
                   }`}
                 />
               ))}

@@ -12,6 +12,7 @@ import malelogo from '../../../assets/icons/ai-stylist-male.png';
 import life from '../../../assets/icons/life.png';
 import notfavorite from '../../../assets/icons/favorite.png';
 import favorite from '../../../assets/icons/favoritselected.png';
+import { useNavigate } from 'react-router-dom';
 
 export interface CollectiveItem {
   id: number;
@@ -104,6 +105,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
   const [favCount, setFavCount] = useState(item.favCount ?? 0);
 
   const totalImages = item.images.length;
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLiked(item.likeByCurrentUser);
@@ -126,6 +128,13 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
   }, [showInfo]);
 
   const handleFavoriteToggle = async () => {
+    const token = 1;
+
+    if (token == 1) {
+      navigate('/');
+
+      return;
+    }
     try {
       const token = localStorage.getItem('userToken') || '';
       const endpoint = favorited
@@ -154,6 +163,13 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
   };
 
   const handleLikeToggle = async () => {
+    const token = 1;
+
+    if (token == 1) {
+      navigate('/');
+
+      return;
+    }
     try {
       const token = localStorage.getItem('userToken') || '';
       const endpoint = liked

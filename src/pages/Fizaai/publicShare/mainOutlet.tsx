@@ -24,7 +24,9 @@ const CollectivePage: React.FC = () => {
       setSidebarAnimating(true);
       setDrawerOpen(false);
     } else {
-      setDrawerOpen(true);
+      setTimeout(() => {
+        setDrawerOpen(true);
+      }, 10);
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import CollectiveCard from './CollectiveCard'; // Adjust this path
+import CollectiveCard from './CollectiveCard';
+// Adjust this path
 
 export interface CollectiveItem {
   id: number;

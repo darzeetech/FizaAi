@@ -43,6 +43,11 @@ const CollectivePublic: React.FC = () => {
     lastPage: false,
     totalItems: 0,
   });
+  const [isAnyInfoShown, setIsAnyInfoShown] = useState(false);
+
+  const handleShowInfoChange = (isShown: boolean) => {
+    setIsAnyInfoShown(isShown);
+  };
 
   // If you use react-router's useNavigate, replace below with actual
   // const navigate = useNavigate();
@@ -115,13 +120,19 @@ const CollectivePublic: React.FC = () => {
   }, [loading, pageInfo.lastPage, pageInfo.currentPage]);
 
   return (
-    <div className="flex flex-col h-screen w-screen">
-      {/* Scrollable list */}
-      <div
-        ref={listRef}
-        className="flex-1 overflow-y-auto p-6 space-y-10"
-        style={{ width: '100vw' }}
-      >
+    // <div className="flex flex-col h-screen w-screen">
+    // {/* Scrollable list */}
+    <div
+      ref={listRef}
+      className="  relative max-h-[calc(100vh-72px)] overflow-y-auto 
+    p-1 sm:px-6  w-full "
+    >
+      <div className=" flex flex-col gap-10 ">
+        {/* Overlay covering whole page when info shown */}
+        {isAnyInfoShown && (
+          <div className="fixed inset-0 bg-black opacity-25 z-50 pointer-events-none" />
+        )}
+
         {loading && data.length === 0 && (
           <div className="w-full flex justify-center py-12">Loading...</div>
         )}
@@ -129,7 +140,7 @@ const CollectivePublic: React.FC = () => {
           <div className="w-full text-center text-gray-500 py-12">No collective items yet.</div>
         )}
         {data.map((item) => (
-          <CollectiveShareCard key={item.id} item={item} />
+          <CollectiveShareCard key={item.id} item={item} onShowInfoChange={handleShowInfoChange} />
         ))}
         {loading && data.length > 0 && (
           <div className="flex items-center justify-center py-4 text-sm text-gray-500">
@@ -138,6 +149,7 @@ const CollectivePublic: React.FC = () => {
         )}
       </div>
     </div>
+    // </div>
   );
 };
 

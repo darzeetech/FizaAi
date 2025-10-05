@@ -1,6 +1,7 @@
 import React from 'react';
 import SideDrawer from './SIdedrawer';
 import sidebar from '../../../../assets/images/view_sidebar.png';
+import './sidebar.css';
 
 interface HeaderWithSidedrawerProps {
   currentPage: 'collective' | 'explore';

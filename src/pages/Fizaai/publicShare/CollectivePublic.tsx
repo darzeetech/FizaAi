@@ -1,18 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import CollectiveShareCard from './collectiveShareCard'; // Adjust the path
-import { api } from '../../utils/apiRequest';
+import { api } from '../../../utils/apiRequest';
 
 export interface CollectiveItem {
   id: number;
-  imageUrl: string;
-  title: string;
-  designerName: string;
-  likeCount: number;
-  profileInitial: string;
   data: string;
-  createdAt: string;
-  likedByCurrentUser: boolean;
   version: number;
+  parentId: number | null;
+  createdAt: string;
+  images: string[];
+  userId: number;
+  children?: number | null;
+  collective: boolean;
+  likeCount: number | null;
+  likeByCurrentUser: boolean;
+  prof_pic: string;
+
+  // Extended/Optional fields
+  platForm?: string;
+  coinUsed?: number;
+  addedToFav?: boolean;
+  favCount?: number;
+  originId?: number;
+  dressInfo?: { selectedOutfit?: string; gender?: string | null };
+  userInfo?: { fullName?: string | null; profilePicture?: string | null };
 }
 
 const CollectivePublic: React.FC = () => {
@@ -35,18 +46,12 @@ const CollectivePublic: React.FC = () => {
 
   // If you use react-router's useNavigate, replace below with actual
   // const navigate = useNavigate();
-  // For this example, using a dummy:
-  const [, setDummy] = useState(false);
-  const navigate = (path: string) => {
-    window.location.href = path;
-    setDummy((v) => !v); // dummy state change to avoid unused warning
-  };
 
   const fetchCollective = async (pageNo = 0, append = false) => {
     setLoading(true);
     try {
       const response = await api.getRequest(
-        `fiza/collective/list_public?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`
+        `fiza/collective/public_feed?pageNo=${pageNo}&pageSize=5&sortBy=likeCount&sortDir=DESC`
       );
 
       if (response.status && response.data) {
@@ -109,24 +114,8 @@ const CollectivePublic: React.FC = () => {
     };
   }, [loading, pageInfo.lastPage, pageInfo.currentPage]);
 
-  const handleSignup = () => {
-    navigate('/');
-  };
-
   return (
     <div className="flex flex-col h-screen w-screen">
-      {/* Header */}
-      <header className="w-full flex justify-between items-center bg-white p-4 border-b border-gray-300 sticky top-0 z-10">
-        <h1 className="text-xl font-semibold text-purple-700 select-none">Collective Gallery</h1>
-        <button
-          className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded"
-          onClick={handleSignup}
-          aria-label="Sign Up"
-        >
-          Sign Up
-        </button>
-      </header>
-
       {/* Scrollable list */}
       <div
         ref={listRef}

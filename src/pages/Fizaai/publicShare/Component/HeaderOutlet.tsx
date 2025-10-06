@@ -29,9 +29,11 @@ const HeaderWithSidedrawer: React.FC<HeaderWithSidedrawerProps> = ({
           className="h-6 md:h-10 cursor-pointer"
           onClick={onToggleDrawer}
         />
-        <h1 className="text-xl font-semibold text-purple-700 select-none">Collective Gallery</h1>
+        <h1 className="text-[1rem] md:text-[1.8rem] font-medium text-[#79539F] select-none">
+          Collective Gallery
+        </h1>
         <button
-          className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded"
+          className="flex items-center bg-[#79539F]  text-white px-3 py-1 rounded-md text-[.8rem] md:text-[1rem] font-medium transition"
           onClick={onSignup}
           aria-label="Sign Up"
         >

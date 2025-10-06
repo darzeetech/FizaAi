@@ -1,8 +1,9 @@
 // CollectivePage.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HeaderWithSidedrawer from './Component/HeaderOutlet';
 import SideDrawer from './Component/SIdedrawer'; // ensure correct path
 import CollectivePublic from './CollectivePublic';
+import { useNavigate } from 'react-router-dom';
 
 const ExploreDesigners: React.FC = () => <div className="p-6">Explore Designers coming soon.</div>;
 
@@ -10,10 +11,19 @@ const CollectivePage: React.FC = () => {
   const [page, setPage] = useState<'collective' | 'explore'>('collective');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarAnimating, setSidebarAnimating] = useState(false);
+  const navigate = useNavigate();
 
   const handleNavigate = (page: 'collective' | 'explore') => {
     setPage(page);
   };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('fizaaiuser');
+
+    if (storedUser) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   const handleSignup = () => {
     window.location.href = '/';

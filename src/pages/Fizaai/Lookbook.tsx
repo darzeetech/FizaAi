@@ -316,6 +316,19 @@ export default function Lookbook({
     }
   };
 
+  const handleMapClick = () => {
+    // Optional chaining protects from null/undefined errors
+    const lat = detail?.address_details?.address?.lat;
+    const lon = detail?.address_details?.address?.lon;
+
+    if (lat && lon) {
+      const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+      window.open(googleMapsUrl, '_blank');
+    } else {
+      alert('Location details are not available.');
+    }
+  };
+
   // eslint-disable-next-line no-console
   console.log(filtersData, filtersError, selectedOutfits, selectedColors);
 
@@ -546,10 +559,21 @@ export default function Lookbook({
                       onClick={() => window.open(detail.social_media_handlers.whatsapp, '_blank')}
                     />
                   )}
-                  {/* Other icons remain static */}
-                  <img src={glove} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  {detail?.port_folio_link && (
+                    <img
+                      src={glove}
+                      alt="whatsapp"
+                      className="h-4 md:h-5 aspect-auto cursor-pointer"
+                      onClick={() => window.open(detail?.port_folio_link, '_blank')}
+                    />
+                  )}
                   <img src={upi} alt="copy" className="h-4 md:h-5 aspect-auto" />
-                  <img src={map} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  <img
+                    src={map}
+                    alt="copy"
+                    className="h-4 md:h-5 aspect-auto cursor-pointer"
+                    onClick={handleMapClick}
+                  />
                 </div>
               </div>
 
@@ -950,38 +974,19 @@ export default function Lookbook({
                         <button
                           className={`px-4 py-2 rounded-full font-semibold text-sm transition-all focus:outline-none
                           ${
-                            selectedOutfitsr.length === filtersData?.outfit_filter.length
+                            selectedOutfitsr.length === 0
                               ? 'bg-gray-700 text-white shadow'
                               : 'bg-gray-100 text-gray-700'
                           }`}
                           onClick={() => {
-                            const allOutfits = filtersData.outfit_filter.map((o: any) => o.index);
-
-                            if (selectedOutfitsr.length === allOutfits.length) {
-                              // All are selected, so deselect all and call API
-                              setSelectedOutfitsr([]);
-
-                              if (detail && detail.port_folio_id) {
-                                fetchFilteredOutfits(
-                                  detail.port_folio_id,
-                                  [],
-                                  selectedSubOutfits,
-                                  selectedColors
-                                );
-                              }
-                            } else {
-                              // Select all and call API
-                              setSelectedOutfitsr(allOutfits);
-
-                              if (detail && detail.port_folio_id) {
-                                fetchFilteredOutfits(
-                                  detail.port_folio_id,
-                                  allOutfits,
-                                  selectedSubOutfits,
-                                  selectedColors
-                                );
-                              }
-                            }
+                            // const allOutfits = filtersData.outfit_filter.map((o: any) => o.index);
+                            setSelectedOutfitsr([]);
+                            fetchFilteredOutfits(
+                              detail.port_folio_id,
+                              [],
+                              selectedSubOutfits,
+                              selectedColors
+                            );
                           }}
                         >
                           All
@@ -1052,16 +1057,14 @@ export default function Lookbook({
                         filteredOutfits?.outfit_details.map((outfit) => (
                           <div key={outfit.outfit_type} className="mb-6">
                             <h4 className="font-semibold mb-2">{outfit.outfit_type}</h4>
-                            {/* Display titles and creation times for each portfolio outfit */}
-                            {outfit?.portfolio_outfits?.map((item) => (
-                              <div key={item.id} className="mb-1">
-                                <div className="mt-1 text-[.9rem] font-medium">{item.title}</div>
-                                <div className="text-xs text-[#525252]">{item.creation_time}</div>
-                              </div>
-                            ))}
+
                             <div className=" flex flex-col w-full gap-4">
                               {outfit?.portfolio_outfits.map((item) => (
                                 <div key={item.id} className="mb-4 w-full">
+                                  <div className="mt-1 text-[.9rem] font-medium">{item.title}</div>
+                                  <div className="text-xs text-[#525252] mb-2">
+                                    {item.creation_time}
+                                  </div>
                                   {/* First image */}
                                   <div className="w-full h-[60vh] md:h-[55vh] flex items-start  justify-center overflow-hidden rounded-[20px] md:rounded-[10px]">
                                     {item.image_url && item.image_url.length > 0 && (
@@ -1107,7 +1110,7 @@ export default function Lookbook({
                         </div>
                       )}
 
-                      <div className="w-full h-[80px] md:hidden block "></div>
+                      <div className="w-full h-[80px] md:hidde block text-white">ni</div>
                     </div>
                   </div>
                 </div>

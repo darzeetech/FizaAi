@@ -488,7 +488,7 @@ export default function Lookbook({
             Select a portfolio on the left to view details
           </div>
         ) : (
-          <div className="w-full h-screen flex flex-col md:flex-row gap-8 relative custom-scrollbar overflow-y-scroll ">
+          <div className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative custom-scrollbar overflow-y-scroll ">
             {/* Left: owner & meta */}
             <div className="md:w-[40%] h-fit w-full flex flex-col gap-4 ">
               {showMobilePreview && window.innerWidth < 768 && (

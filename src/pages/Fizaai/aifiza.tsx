@@ -1094,7 +1094,7 @@ export default function FizaAI() {
       }
       setError(null);
 
-      const res = await api.getRequest(`portfolio/fetch-all?pageNo=${pageNo}&pageSize=5`);
+      const res = await api.getRequest(`portfolio/fetch-all?pageNo=${pageNo}&pageSize=10`);
 
       if (res.status && res.data && Array.isArray(res.data.content)) {
         const content = res.data.content as Portfolio[];

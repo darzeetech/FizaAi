@@ -3008,7 +3008,7 @@ export default function FizaAI() {
                                 alt="Generated outfit preview"
                                 onLoad={() => setIsImageLoaded(true)}
                                 onError={() => setIsImageLoaded(false)}
-                                className="w-full max-w-full h-auto md:max-h-[calc(100vh-250px)] max-h-[calc(100vh-300px)] object-contain rounded-lg"
+                                className="w-full max-w-full h-auto md:max-h-[calc(100vh-250px)] max-h-[calc(100vh-320px)] object-contain rounded-lg"
                               />
                               <div className="text-sm text-gray-600 mb-4">
                                 AI-generated preview based on your selections

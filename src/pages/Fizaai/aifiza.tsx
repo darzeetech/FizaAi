@@ -5,6 +5,7 @@ import BulkImageUploadField from '../../components/FormComponents/BulkImageUploa
 import BulkImageUploadFieldp from '../../components/FormComponents/BulkImageUploadFieldp';
 import './sidebar.css';
 import Lookbook, { Portfolio as LookbookPortfolio } from './Lookbook';
+import Favourites from './Favourites/faviourites';
 
 import Collective from './Collective';
 
@@ -188,6 +189,28 @@ interface VersionData {
   prof_pic: string | null;
 }
 
+interface FavouriteItem {
+  id: number;
+  coinUsed: number;
+  createdAt: string;
+  likeCount: number;
+  favCount: number;
+  platForm: string;
+  originId: number;
+  images: string[];
+  likeByCurrentUser: boolean;
+  addedToFav: boolean;
+  userInfo: {
+    fullName: string;
+    profilePicture: string | null;
+  };
+  dressInfo: {
+    color: string;
+    gender: string;
+    selectedOutfit: string;
+  };
+}
+
 // Add color options array after outfitOptions
 const colorOptions = [
   { id: 'blue', color: '#5578dc' },
@@ -318,6 +341,11 @@ export default function FizaAI() {
   const [collectivePage, setCollectivePage] = useState(0);
   const [collectiveTotalPages, setCollectiveTotalPages] = useState(1);
   const [collectiveLastPage, setCollectiveLastPage] = useState(false);
+  const [favouriteItems, setFavouriteItems] = useState<FavouriteItem[]>([]);
+  const [favouritePage, setFavouritePage] = useState(0);
+  const [favouriteTotalPages, setFavouriteTotalPages] = useState(1);
+  const [favouriteLastPage, setFavouriteLastPage] = useState(false);
+  const [loadingFavourites, setLoadingFavourites] = useState(false);
 
   const handleTabChange = (tab: 'studio' | 'lookbook') => {
     setSelectedTab(tab);
@@ -884,6 +912,7 @@ export default function FizaAI() {
   useEffect(() => {
     if (isLoggedIn && auth.currentUser) {
       fetchCollective(0, false);
+      fetchFavourites(0, false);
     }
     // Only runs when auth state is ready
   }, [selectedTab, isLoggedIn, auth.currentUser]);
@@ -927,12 +956,54 @@ export default function FizaAI() {
       setLoadingCollective(false);
     }
   };
+  const fetchFavourites = async (pageNo = 0, append = false) => {
+    setLoadingFavourites(true);
+
+    try {
+      const user = auth.currentUser;
+      const token = user && (await user.getIdToken());
+
+      const response = await api.getRequest(
+        `fiza/collective/fav_list?pageNo=${pageNo}&pageSize=10&sortBy=id&sortDir=DESC`,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
+
+      if (response.status && response.data && Array.isArray(response.data.content)) {
+        const content = response.data.content;
+        const lastPage = Boolean(response.data.lastPage);
+        const currentPage =
+          typeof response.data.currentPage === 'number' ? response.data.currentPage : pageNo;
+        const totalPages =
+          typeof response.data.totalPages === 'number' ? response.data.totalPages : 1;
+
+        setFavouriteItems(append ? [...favouriteItems, ...content] : content);
+        setFavouritePage(currentPage);
+        setFavouriteTotalPages(totalPages);
+        setFavouriteLastPage(lastPage);
+      } else {
+        if (!append) {
+          setFavouriteItems([]);
+        }
+      }
+    } finally {
+      setLoadingFavourites(false);
+    }
+  };
 
   const handleLoadMoreCollective = () => {
     if (loadingCollective || collectiveLastPage) {
       return;
     }
     fetchCollective(collectivePage + 1, true);
+  };
+
+  const handleLoadMoreFavourites = () => {
+    if (loadingFavourites || favouriteLastPage) {
+      return;
+    }
+    fetchFavourites(favouritePage + 1, true);
   };
 
   // Fetch portfolios when user switches to Lookbook tab
@@ -3227,6 +3298,20 @@ export default function FizaAI() {
                       </div>
                     );
                   case 'Favorites':
+                    return (
+                      <Favourites
+                        data={favouriteItems}
+                        loading={loadingFavourites}
+                        onLoadMore={handleLoadMoreFavourites}
+                        pageInfo={{
+                          currentPage: favouritePage,
+                          totalPages: favouriteTotalPages,
+                          lastPage: favouriteLastPage,
+                          totalItems: favouriteItems.length,
+                        }}
+                      />
+                    );
+
                     return (
                       <div>
                         {/* Add your Favorites component or UI here */}

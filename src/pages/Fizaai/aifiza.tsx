@@ -3008,7 +3008,7 @@ export default function FizaAI() {
                                 alt="Generated outfit preview"
                                 onLoad={() => setIsImageLoaded(true)}
                                 onError={() => setIsImageLoaded(false)}
-                                className="w-full max-w-full h-auto md:max-h-[calc(100vh-250px)] max-h-[calc(100vh-380px)] object-contain rounded-lg"
+                                className="w-full max-w-full h-auto md:max-h-[calc(100vh-250px)] max-h-[calc(100vh-280px)] object-contain rounded-lg"
                               />
                               <div className="text-sm text-gray-600 mb-4">
                                 AI-generated preview based on your selections
@@ -3066,9 +3066,9 @@ export default function FizaAI() {
                                       }}
                                     />
                                   </button>
-                                </div>
-                                <div className=" absolute left-8  bottom-11 font-medium text-sm text-gray-800 whitespace-nowrap md:hidden block">
-                                  500+ designers available
+                                  <div className=" absolute left-8  bottom-11 font-medium text-sm text-gray-800 whitespace-nowrap block  md:hidden ">
+                                    500+ designers available
+                                  </div>
                                 </div>
                               </div>
                             </div>

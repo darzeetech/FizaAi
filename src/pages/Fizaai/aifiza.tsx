@@ -3008,7 +3008,7 @@ export default function FizaAI() {
                                 alt="Generated outfit preview"
                                 onLoad={() => setIsImageLoaded(true)}
                                 onError={() => setIsImageLoaded(false)}
-                                className="w-full max-w-full h-auto max-h-[calc(100vh-250px)] object-contain rounded-lg"
+                                className="w-full max-w-full h-auto md:max-h-[calc(100vh-250px)] max-h-[calc(100vh-270px)] object-contain rounded-lg"
                               />
                               <div className="text-sm text-gray-600 mb-4">
                                 AI-generated preview based on your selections
@@ -3033,15 +3033,17 @@ export default function FizaAI() {
                                       className="w-6 h-6 rounded-full border-2 border-white object-cover"
                                     />
                                   </div>
-                                  <span className="  ml-3 font-medium text-sm text-gray-800 whitespace-nowrap">
+                                  <span className="  ml-3 font-medium hidden md:block text-sm text-gray-800 whitespace-nowrap">
                                     500+ designers available
                                   </span>
                                 </div>
 
                                 {/* Toggle Card */}
                                 <div className="flex items-center bg-[#FCF7F4] rounded-xl py-2 px-4">
-                                  <span className="font-semibold text-sm text-black mr-3 hidden md:block">
-                                    Add to collective
+                                  <span className="font-semibold text-sm text-black mr-3 ">
+                                    {currentVersionEntry?.collective
+                                      ? 'Added to collective'
+                                      : 'Add to collective'}
                                   </span>
                                   <button
                                     disabled={collectiveLoading}
@@ -3064,6 +3066,9 @@ export default function FizaAI() {
                                       }}
                                     />
                                   </button>
+                                </div>
+                                <div className=" absolute left-8  bottom-11 font-medium text-sm text-gray-800 whitespace-nowrap md:hidden block">
+                                  500+ designers available
                                 </div>
                               </div>
                             </div>

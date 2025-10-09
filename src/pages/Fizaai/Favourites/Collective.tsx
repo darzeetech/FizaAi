@@ -43,12 +43,16 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
   const [items, setItems] = useState<FavouriteItem[]>(data);
 
   useEffect(() => {
-    if (!data || data.length === 0) return;
+    if (!data || data.length === 0) {
+      return;
+    }
 
     setItems((prev) => {
       // prevent duplicates if same page refetches
       const existingIds = new Set(prev.map((i) => i.id));
+
       const newItems = data.filter((d) => !existingIds.has(d.id));
+
       return [...prev, ...newItems];
     });
   }, [data]);

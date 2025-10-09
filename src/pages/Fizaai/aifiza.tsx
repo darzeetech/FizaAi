@@ -3020,17 +3020,17 @@ export default function FizaAI() {
                                     <img
                                       src={designerone}
                                       alt="Designer 1"
-                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                                      className="w-7 h-7 md:w-6 md:h-6  rounded-full border-2 border-white object-cover"
                                     />
                                     <img
                                       src={designertwo}
                                       alt="Designer 2"
-                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                                      className="w-7 h-7 md:w-6 md:h-6 rounded-full border-2 border-white object-cover"
                                     />
                                     <img
                                       src={designerthree}
                                       alt="Designer 3"
-                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                                      className="w-7 h-7 md:w-6 md:h-6 rounded-full border-2 border-white object-cover"
                                     />
                                   </div>
                                   <span className="  ml-3 font-medium hidden md:block text-sm text-gray-800 whitespace-nowrap">

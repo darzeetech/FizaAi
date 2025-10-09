@@ -40,6 +40,15 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollDebounceRef = useRef<number | null>(null);
   const [isAnyInfoShown, setIsAnyInfoShown] = useState(false);
+  const [items, setItems] = useState<FavouriteItem[]>(data);
+
+  useEffect(() => {
+    setItems(data); // whenever new data comes from API, sync it
+  }, [data]);
+
+  const handleRemove = (id: number) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const handleShowInfoChange = (isShown: boolean) => {
     setIsAnyInfoShown(isShown);
@@ -119,8 +128,13 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
         {!loading && data.length === 0 && (
           <div className="w-full text-center text-gray-500 py-12">No collective items yet.</div>
         )}
-        {data.map((item) => (
-          <CollectiveCard key={item.id} item={item} onShowInfoChange={handleShowInfoChange} />
+        {items.map((item) => (
+          <CollectiveCard
+            key={item.id}
+            item={item}
+            onShowInfoChange={handleShowInfoChange}
+            onRemove={handleRemove}
+          />
         ))}
         {loading && data.length > 0 && (
           <div className="flex items-center justify-center py-4 text-sm text-gray-500">

@@ -1165,7 +1165,7 @@ export default function FizaAI() {
       }
       setError(null);
 
-      const res = await api.getRequest(`portfolio/fetch-all?pageNo=${pageNo}&pageSize=5`);
+      const res = await api.getRequest(`portfolio/fetch-all?pageNo=${pageNo}&pageSize=10`);
 
       if (res.status && res.data && Array.isArray(res.data.content)) {
         const content = res.data.content as Portfolio[];
@@ -3069,6 +3069,9 @@ export default function FizaAI() {
                                       }}
                                     />
                                   </button>
+                                  <div className=" absolute left-8  bottom-11 font-medium text-sm text-gray-800 whitespace-nowrap block  md:hidden ">
+                                    500+ designers available
+                                  </div>
                                 </div>
                               </div>
                             </div>

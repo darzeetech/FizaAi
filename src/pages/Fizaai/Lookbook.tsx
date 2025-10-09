@@ -17,9 +17,12 @@ import portfolio from '../../assets/images/album1.png';
 import portfolio1 from '../../assets/images/album.png';
 import hexagon from '../../assets/images/hexagon.png';
 import hexagonfinal from '../../assets/images/Property 1=Variant2.png';
+import left_swap from '../../assets/images/left_swipe.gif';
+import right_swap from '../../assets/images/right_swipe.gif';
 
 import { api } from '../../utils/apiRequest';
 import { TiArrowLeft } from 'react-icons/ti';
+import { useSwipeable } from 'react-swipeable';
 
 export type Portfolio = {
   id: number;
@@ -92,6 +95,10 @@ export default function Lookbook({
 
   // Store lat/lon from ipapi.co
   const [locationData, setLocationData] = useState<{ lat?: number; lon?: number }>({});
+
+  const [currentDesignerIndex, setCurrentDesignerIndex] = useState(0);
+
+  const [showSwapDiv, setShowSwapDiv] = useState(true);
 
   type FilteredOutfit = {
     outfit_type: string;
@@ -227,6 +234,14 @@ export default function Lookbook({
       );
     }
   }, [detail]);
+  useEffect(() => {
+    setShowSwapDiv(true); // show the div when section loads
+    const timer = setTimeout(() => {
+      setShowSwapDiv(false); // hide after 5 seconds
+    }, 5000);
+
+    return () => clearTimeout(timer); // cleanup on unmount
+  }, []);
 
   const fetchByUsername = async (username: string) => {
     if (!username) {
@@ -329,6 +344,25 @@ export default function Lookbook({
     }
   };
 
+  const handleCopyClick = () => {
+    navigator.clipboard.writeText(detail?.port_folio_link);
+    alert('Link copied to clipboard!');
+  };
+
+  const handleShareClick = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: 'Check Portfolio',
+          url: detail?.port_folio_link,
+        })
+        .catch(() => {});
+    } else {
+      navigator.clipboard.writeText(detail?.port_folio_link);
+      alert('Link copied! Native share is not supported in this browser.');
+    }
+  };
+
   // eslint-disable-next-line no-console
   console.log(filtersData, filtersError, selectedOutfits, selectedColors);
 
@@ -337,6 +371,25 @@ export default function Lookbook({
 
   // eslint-disable-next-line no-console
   console.log(filteredOutfits);
+
+  const handleSwipeLeft = () => {
+    const nextIndex = currentDesignerIndex < portfolios.length - 1 ? currentDesignerIndex + 1 : 0;
+    setCurrentDesignerIndex(nextIndex);
+
+    onSelect(portfolios[nextIndex]);
+  };
+
+  const handleSwipeRight = () => {
+    const prevIndex = currentDesignerIndex > 0 ? currentDesignerIndex - 1 : portfolios.length - 1;
+    setCurrentDesignerIndex(prevIndex);
+    onSelect(portfolios[prevIndex]);
+  };
+
+  const handlers = useSwipeable({
+    onSwipedLeft: handleSwipeLeft,
+    onSwipedRight: handleSwipeRight,
+    trackMouse: true,
+  });
 
   return (
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
@@ -488,7 +541,10 @@ export default function Lookbook({
             Select a portfolio on the left to view details
           </div>
         ) : (
-          <div className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative custom-scrollbar overflow-y-scroll ">
+          <div
+            className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative custom-scrollbar overflow-y-scroll "
+            {...(showMobilePreview && window.innerWidth < 768 ? handlers : {})}
+          >
             {/* Left: owner & meta */}
             <div className="md:w-[40%] h-fit w-full flex flex-col gap-4 ">
               {showMobilePreview && window.innerWidth < 768 && (
@@ -527,19 +583,29 @@ export default function Lookbook({
                       <div className="text-sm text-gray-500">{selected.userName}</div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <img src={copy} alt="copy" className="h-3 md:h-4 aspect-auto" />
-                      <img src={share} alt="share" className="h-3 md:h-4 aspect-auto" />
-                      <img src={qr} alt="qr" className="h-3 md:h-4 aspect-auto" />
+                      <img
+                        src={copy}
+                        alt="copy"
+                        className="h-5 md:h-4 aspect-auto cursor-pointer"
+                        onClick={handleCopyClick}
+                      />
+                      <img
+                        src={share}
+                        alt="share"
+                        className="h-5 md:h-4 aspect-auto cursor-pointer"
+                        onClick={handleShareClick}
+                      />
+                      <img src={qr} alt="qr" className="h-5 md:h-4 aspect-auto cursor-pointer" />
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 w-full justify-center">
+                <div className="flex items-center gap-4 w-full justify-center my-1">
                   {/* Social media icons with links */}
                   {detail?.social_media_handlers?.facebook && (
                     <img
                       src={facebook}
                       alt="facebook"
-                      className="h-4 md:h-5 aspect-auto cursor-pointer"
+                      className="h-5 md:h-5 aspect-auto cursor-pointer"
                       onClick={() => window.open(detail.social_media_handlers.facebook, '_blank')}
                     />
                   )}
@@ -547,7 +613,7 @@ export default function Lookbook({
                     <img
                       src={insta}
                       alt="twitter"
-                      className="h-4 md:h-5 aspect-auto cursor-pointer"
+                      className="h-5 md:h-5 aspect-auto cursor-pointer"
                       onClick={() => window.open(detail.social_media_handlers.twitter, '_blank')}
                     />
                   )}
@@ -555,7 +621,7 @@ export default function Lookbook({
                     <img
                       src={whatapp}
                       alt="whatsapp"
-                      className="h-4 md:h-5 aspect-auto cursor-pointer"
+                      className="h-5 md:h-5 aspect-auto cursor-pointer"
                       onClick={() => window.open(detail.social_media_handlers.whatsapp, '_blank')}
                     />
                   )}
@@ -563,15 +629,15 @@ export default function Lookbook({
                     <img
                       src={glove}
                       alt="whatsapp"
-                      className="h-4 md:h-5 aspect-auto cursor-pointer"
+                      className="h-5 md:h-5 aspect-auto cursor-pointer"
                       onClick={() => window.open(detail?.port_folio_link, '_blank')}
                     />
                   )}
-                  <img src={upi} alt="copy" className="h-4 md:h-5 aspect-auto" />
+                  <img src={upi} alt="copy" className="h-5 md:h-5 aspect-auto" />
                   <img
                     src={map}
                     alt="copy"
-                    className="h-4 md:h-5 aspect-auto cursor-pointer"
+                    className="h-5 md:h-5 aspect-auto cursor-pointer"
                     onClick={handleMapClick}
                   />
                 </div>
@@ -908,9 +974,7 @@ export default function Lookbook({
                 </>
               )}
             </div>
-
             {/* Right: gallery + fetchable backend details */}
-
             {viewStage === 'INFO' ? (
               <>
                 <div className="md:w-[60%] w-full h-full md:pb-[2rem] pb-[3rem] ">
@@ -960,7 +1024,7 @@ export default function Lookbook({
                       </div>
                     </div>
                   )}
-                  <div className="w-full h-[8px] md:hidden block "></div>
+                  <div className="w-full h-[80px] md:hidde block text-white">ni</div>
                 </div>
               </>
             ) : (
@@ -1115,6 +1179,33 @@ export default function Lookbook({
                   </div>
                 </div>
               </>
+            )}
+            {/* {showMobilePreview && window.innerWidth < 768 && (
+              <div className="absolute left-0 right-0 bottom-4 flex justify-center items-center gap-2 z-10">
+                {portfolios.map((_, idx) => (
+                  <span
+                    key={idx}
+                    className={`w-2 h-2 rounded-full ${
+                      idx === currentDesignerIndex ? 'bg-[#79539f]' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            )} */}
+
+            {showSwapDiv && (
+              <div className="md:hidden block absolute top-[150px] left-0 right-0 flex items-center justify-between px-4 ">
+                <img
+                  src={left_swap}
+                  alt="Left Swap"
+                  className="w-[150px] aspect-auto cursor-pointer"
+                />
+                <img
+                  src={right_swap}
+                  alt="Right Swap"
+                  className="w-[150px] aspect-auto cursor-pointer"
+                />
+              </div>
             )}
           </div>
         )}

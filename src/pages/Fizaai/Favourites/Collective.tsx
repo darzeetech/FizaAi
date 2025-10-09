@@ -48,14 +48,18 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
     }
 
     setItems((prev) => {
-      // prevent duplicates if same page refetches
-      const existingIds = new Set(prev.map((i) => i.id));
+      // If it's the first page, reset. Otherwise append
+      if (pageInfo?.currentPage === 1) {
+        return data;
+      }
 
+      // Avoid duplicates if re-fetch happens
+      const existingIds = new Set(prev.map((i) => i.id));
       const newItems = data.filter((d) => !existingIds.has(d.id));
 
       return [...prev, ...newItems];
     });
-  }, [data]);
+  }, [data, pageInfo?.currentPage]);
 
   const handleRemove = (id: number) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
@@ -133,10 +137,10 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
           <div className="fixed inset-0 bg-black opacity-25 z-50 pointer-events-none" />
         )}
 
-        {loading && data.length === 0 && (
+        {loading && items.length === 0 && (
           <div className="w-full flex justify-center py-12">Loading...</div>
         )}
-        {!loading && data.length === 0 && (
+        {!loading && items.length === 0 && (
           <div className="w-full text-center text-gray-500 py-12">No collective items yet.</div>
         )}
         {items.map((item) => (
@@ -147,7 +151,7 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
             onRemove={handleRemove}
           />
         ))}
-        {loading && data.length > 0 && (
+        {loading && items.length > 0 && (
           <div className="flex items-center justify-center py-4 text-sm text-gray-500">
             Loading more…
           </div>

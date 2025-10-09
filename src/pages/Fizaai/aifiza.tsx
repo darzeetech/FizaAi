@@ -3069,7 +3069,7 @@ export default function FizaAI() {
                                       }}
                                     />
                                   </button>
-                                  <div className=" absolute left-8  bottom-11 font-medium text-sm text-gray-800 whitespace-nowrap block  md:hidden ">
+                                  <div className=" absolute left-8  bottom-8 font-medium text-sm text-gray-800 whitespace-nowrap block  md:hidden ">
                                     500+ designers available
                                   </div>
                                 </div>

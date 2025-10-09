@@ -42,17 +42,16 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
   const [isAnyInfoShown, setIsAnyInfoShown] = useState(false);
   const [items, setItems] = useState<FavouriteItem[]>(data);
 
-useEffect(() => {
-  if (!data || data.length === 0) return;
+  useEffect(() => {
+    if (!data || data.length === 0) return;
 
-  setItems((prev) => {
-    // prevent duplicates if same page refetches
-    const existingIds = new Set(prev.map((i) => i.id));
-    const newItems = data.filter((d) => !existingIds.has(d.id));
-    return [...prev, ...newItems];
-  });
-}, [data]);
-
+    setItems((prev) => {
+      // prevent duplicates if same page refetches
+      const existingIds = new Set(prev.map((i) => i.id));
+      const newItems = data.filter((d) => !existingIds.has(d.id));
+      return [...prev, ...newItems];
+    });
+  }, [data]);
 
   const handleRemove = (id: number) => {
     setItems((prev) => prev.filter((item) => item.id !== id));

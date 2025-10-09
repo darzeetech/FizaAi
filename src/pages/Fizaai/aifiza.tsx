@@ -3013,29 +3013,32 @@ export default function FizaAI() {
                               <div className="text-sm text-gray-600 mb-4">
                                 AI-generated preview based on your selections
                               </div>
-                              <div className="flex items-center justify-between w-full px-4 py-2">
+                              <div className=" relative flex items-center justify-between w-full px-4 py-2">
                                 {/* Avatars + Designer Count */}
                                 <div className="flex items-center">
                                   <div className="flex -space-x-2">
                                     <img
                                       src={designerone}
                                       alt="Designer 1"
-                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                                      className="w-7 h-7 md:w-6 md:h-6  rounded-full border-2 border-white object-cover"
                                     />
                                     <img
                                       src={designertwo}
                                       alt="Designer 2"
-                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                                      className="w-7 h-7 md:w-6 md:h-6 rounded-full border-2 border-white object-cover"
                                     />
                                     <img
                                       src={designerthree}
                                       alt="Designer 3"
-                                      className="w-6 h-6 rounded-full border-2 border-white object-cover"
+                                      className="w-7 h-7 md:w-6 md:h-6 rounded-full border-2 border-white object-cover"
                                     />
                                   </div>
                                   <span className="  ml-3 font-medium hidden md:block text-sm text-gray-800 whitespace-nowrap">
                                     500+ designers available
                                   </span>
+                                </div>
+                                <div className=" absolute font-medium left-4 top-[42px]  text-sm text-gray-800 whitespace-nowrap block  md:hidden ">
+                                  500+ designers available
                                 </div>
 
                                 {/* Toggle Card */}
@@ -3066,9 +3069,9 @@ export default function FizaAI() {
                                       }}
                                     />
                                   </button>
-                                  <div className=" absolute left-8  bottom-11 font-medium text-sm text-gray-800 whitespace-nowrap block  md:hidden ">
+                                  {/* <div className=" absolute left-8  bottom- font-medium text-sm text-gray-800 whitespace-nowrap block  md:hidden ">
                                     500+ designers available
-                                  </div>
+                                  </div> */}
                                 </div>
                               </div>
                             </div>

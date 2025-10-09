@@ -35,6 +35,7 @@ export interface FavouriteItem {
 interface CollectiveCardProps {
   item: FavouriteItem;
   onShowInfoChange?: (isShown: boolean) => void;
+  onRemove?: (id: number) => void;
 }
 
 const formatTimeline = (createdAt: string): string => {
@@ -61,7 +62,7 @@ const formatTimeline = (createdAt: string): string => {
   return `Prompt Created - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
 };
 
-const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange }) => {
+const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange, onRemove }) => {
   const outfitName = item.dressInfo?.selectedOutfit
     ? item.dressInfo.selectedOutfit.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
     : 'Outfit';
@@ -134,13 +135,16 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       // eslint-disable-next-line no-console
       console.log(data);
 
-      // Optimistically update favorite count and state
       if (!favorited) {
         setFavCount((prev) => prev + 1);
+        setFavorited(true);
       } else {
-        setFavCount((prev) => Math.max(prev - 1, 0)); // Prevent negative counts
+        setFavCount((prev) => Math.max(prev - 1, 0));
+        setFavorited(false);
+
+        // 🔥 tell parent to remove this card from UI
+        onRemove?.(item.id);
       }
-      setFavorited(!favorited);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Error toggling favorite', err);

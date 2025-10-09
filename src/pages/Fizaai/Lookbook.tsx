@@ -413,13 +413,13 @@ export default function Lookbook({
             )}
           </div>
         </div>
-
-        <div className="relative mb-3">
+        <div className="relative mb-3 ">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg text-black ">🔍 </span>
           <input
             value={searchTerm}
             onChange={(e) => onSearchChange?.(e.target.value)}
             placeholder="Search designers"
-            className="w-full px-3 py-2 rounded-md bg-gray-100 text-sm"
+            className="w-full text-black pl-10 pr-3 py-2 rounded-full bg-[#c8bda5] text-base font[400] placeholder-black"
           />
         </div>
 
@@ -447,10 +447,10 @@ export default function Lookbook({
                     <img
                       src={p.profilePictureUrl}
                       alt={p.tailorName}
-                      className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                      className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                       <span className="text-sm font-semibold text-gray-700">
                         {(p.tailorName && p.tailorName.charAt(0).toUpperCase()) || '?'}
                       </span>
@@ -542,7 +542,7 @@ export default function Lookbook({
           </div>
         ) : (
           <div
-            className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative custom-scrollbar overflow-y-scroll "
+            className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative md:custom-scrollbar overflow-y-scroll scrollbar-hide"
             {...(showMobilePreview && window.innerWidth < 768 ? handlers : {})}
           >
             {/* Left: owner & meta */}
@@ -609,12 +609,12 @@ export default function Lookbook({
                       onClick={() => window.open(detail.social_media_handlers.facebook, '_blank')}
                     />
                   )}
-                  {detail?.social_media_handlers?.twitter && (
+                  {detail?.social_media_handlers?.instagram && (
                     <img
                       src={insta}
-                      alt="twitter"
+                      alt="instagram"
                       className="h-5 md:h-5 aspect-auto cursor-pointer"
-                      onClick={() => window.open(detail.social_media_handlers.twitter, '_blank')}
+                      onClick={() => window.open(detail.social_media_handlers.instagram, '_blank')}
                     />
                   )}
                   {detail?.social_media_handlers?.whatsapp && (
@@ -696,7 +696,7 @@ export default function Lookbook({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 md:pr-2 pr-6">
                   {detail?.fav ? (
                     <img
                       src={hexagonfinal}
@@ -750,7 +750,7 @@ export default function Lookbook({
               </div>
 
               {/* About */}
-              {detail?.info?.about && (
+              {detail?.info?.about && viewStage === 'INFO' && (
                 <div>
                   <div className="text-xs text-[#323232B2] mb-1 font-semibold">About</div>
                   <div className="text-sm text-[#41423C] font-semibold">{detail?.info?.about}</div>
@@ -788,7 +788,7 @@ export default function Lookbook({
                       <img src={location} alt="location" className="h-4 md:h-4 aspect-auto" />
                       Location
                     </div>
-                    <div className="text-[.9rem] text-[#41423C] font-semibold">
+                    <div className="text-[.8rem] text-[#51524e] font-medium">
                       {detail?.address_details?.address ? (
                         <>
                           {detail?.address_details?.address?.addressLine1
@@ -820,7 +820,7 @@ export default function Lookbook({
                 <>
                   <div>
                     {filtersData?.outfit_filter && (
-                      <div className=" w-full mb-6 py-4 bg-white ">
+                      <div className=" w-full mb-6 py-4 bg-white md:block hidden ">
                         {/* Outfit type */}
                         <div>
                           <div className="font-semibold text-[.9rem] mb-2 flex items-center justify-between">

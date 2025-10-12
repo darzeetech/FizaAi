@@ -347,6 +347,9 @@ export default function FizaAI() {
   const [favouriteLastPage, setFavouriteLastPage] = useState(false);
   const [loadingFavourites, setLoadingFavourites] = useState(false);
 
+  // Store lat/lon from ipapi.co
+  const [locationData, setLocationData] = useState<{ lat?: number; lon?: number }>({});
+
   const handleTabChange = (tab: 'studio' | 'lookbook') => {
     setSelectedTab(tab);
     localStorage.setItem('selected_tab', tab);
@@ -489,6 +492,44 @@ export default function FizaAI() {
     };
 
     fetchSkinColors();
+  }, []);
+
+  // Fetch lat/lon only once on mount
+  useEffect(() => {
+    // Try to get from localStorage first
+    let ipapiData: any = null;
+    try {
+      const stored = localStorage.getItem('ipapidata');
+
+      if (stored) {
+        ipapiData = JSON.parse(stored);
+      }
+    } catch (e) {
+      ipapiData = null;
+    }
+
+    if (
+      ipapiData &&
+      typeof ipapiData.latitude === 'number' &&
+      typeof ipapiData.longitude === 'number'
+    ) {
+      setLocationData({ lat: ipapiData.latitude, lon: ipapiData.longitude });
+    } else {
+      // Fallback to fetch from ipapi.co
+      const fetchLocation = async () => {
+        try {
+          const ipRes = await fetch('https://ipapi.co/json/');
+
+          if (ipRes.ok) {
+            const ipData = await ipRes.json();
+            setLocationData({ lat: ipData.latitude, lon: ipData.longitude });
+          }
+        } catch (e) {
+          setLocationData({});
+        }
+      };
+      fetchLocation();
+    }
   }, []);
 
   // Add this useEffect to fetch weight units when component mounts
@@ -1164,8 +1205,12 @@ export default function FizaAI() {
         setLoadingPortfolios(true);
       }
       setError(null);
-
-      const res = await api.getRequest(`portfolio/fetch-all?pageNo=${pageNo}&pageSize=10`);
+      const { lat, lon } = locationData;
+      const res = await api.getRequest(
+        `portfolio/fetch-all?pageNo=${pageNo}&pageSize=10${
+          lat !== undefined && lon !== undefined ? `&lat=${lat}&lon=${lon}` : ''
+        }`
+      );
 
       if (res.status && res.data && Array.isArray(res.data.content)) {
         const content = res.data.content as Portfolio[];

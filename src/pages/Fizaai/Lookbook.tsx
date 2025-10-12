@@ -534,7 +534,7 @@ export default function Lookbook({
       <section
         className={`${
           showMobilePreview ? 'w-full ' : ' md:block hidden'
-        } flex-1 border rounded-lg md:p-4 p-2 bg-white h-fit md:max-h-[calc(100vh-72px)]`}
+        } flex-1 border rounded-lg md:p-4 p- bg-white h-fit md:max-h-[calc(100vh-72px)]`}
       >
         {!selected ? (
           <div className="flex items-center justify-center h-full text-gray-500">
@@ -561,8 +561,16 @@ export default function Lookbook({
                   Designers
                 </button>
               )}
-              <div className="flex flex-col w-full items-center gap-3 p-3 borde rounded-lg bg-gray-50 shadow shadow-[#00000040]">
-                <div className="flex items-center gap-3 w-full ">
+
+              <div className="flex flex-col w-full items-center gap-3 md:p-3 borde rounded-lg bg-gray-50 shadow  shadow-[#00000040] ">
+                <div className="w-full h-[300px] md:hidden block">
+                  <img
+                    src={detail?.base_info?.cover_picture_url}
+                    alt={`${selected.tailorName} cover`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex items-center gap-3 w-full px-3 ">
                   {detail?.base_info?.profile_picture_url ? (
                     <img
                       src={detail?.base_info?.profile_picture_url}
@@ -570,8 +578,8 @@ export default function Lookbook({
                       className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-semibold text-gray-700">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                      <span className="text-md font-semibold text-gray-700">
                         {(selected.tailorName && selected.tailorName.charAt(0).toUpperCase()) ||
                           '?'}
                       </span>
@@ -599,7 +607,7 @@ export default function Lookbook({
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 w-full justify-center my-1">
+                <div className="flex items-center gap-4 w-full justify-center my-1 md:py-1 pb-4">
                   {/* Social media icons with links */}
                   {detail?.social_media_handlers?.facebook && (
                     <img
@@ -643,342 +651,354 @@ export default function Lookbook({
                 </div>
               </div>
 
-              {/* stage toggle buttons */}
-              <div className="flex items-center justify-between gap-3 mb-4 w-full ">
-                <div className="flex items-center gap-3">
-                  <div className="flex flex-col items-center gap-1">
-                    <button
-                      onClick={() => setViewStage('INFO')}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
-                        viewStage === 'INFO'
-                          ? 'bg-[#111827] text-white shadow'
-                          : 'bg-white border-2 border-gray-200 text-[#333333B2]'
-                      }`}
-                      title="Info"
-                    >
-                      {viewStage === 'INFO' ? (
-                        <img src={info1} alt="info" className="h-6 md:h-7 aspect-auto" />
-                      ) : (
-                        <img src={info2} alt="info" className="h-6 md:h-7 aspect-auto" />
-                      )}
-                    </button>
-                    <p
-                      className={`text-sm font-semibold  ${
-                        viewStage === 'INFO' ? ' text-[#000000] ' : ' text-[#333333B2]'
-                      }`}
-                    >
-                      Info
-                    </p>
-                  </div>
+              <div className="w-full px-2 flex flex-col gap-3">
+                {/* stage toggle buttons */}
+                <div className="flex items-center justify-between gap-3 mb-4 w-full  ">
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => setViewStage('INFO')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
+                          viewStage === 'INFO'
+                            ? 'bg-[#111827] text-white shadow'
+                            : 'bg-white border-2 border-gray-200 text-[#333333B2]'
+                        }`}
+                        title="Info"
+                      >
+                        {viewStage === 'INFO' ? (
+                          <img src={info1} alt="info" className="h-6 md:h-7 aspect-auto" />
+                        ) : (
+                          <img src={info2} alt="info" className="h-6 md:h-7 aspect-auto" />
+                        )}
+                      </button>
+                      <p
+                        className={`text-sm font-semibold  ${
+                          viewStage === 'INFO' ? ' text-[#000000] ' : ' text-[#333333B2]'
+                        }`}
+                      >
+                        Info
+                      </p>
+                    </div>
 
-                  <div className="flex flex-col items-center gap-1">
-                    <button
-                      onClick={() => setViewStage('PORTFOLIO')}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
-                        viewStage === 'PORTFOLIO'
-                          ? 'bg-[#111827] text-white shadow'
-                          : 'bg-white border-2 border-gray-200 text-[#333333B2]'
-                      }`}
-                      title="Portfolio"
-                    >
-                      {viewStage === 'INFO' ? (
-                        <img src={portfolio1} alt="portfolio" className="h-6 md:h-7 aspect-auto" />
-                      ) : (
-                        <img src={portfolio} alt="portfolio" className="h-6 md:h-7 aspect-auto" />
-                      )}
-                    </button>
-                    <p
-                      className={`text-sm font-semibold  ${
-                        viewStage === 'PORTFOLIO' ? ' text-[#000000] ' : ' text-[#333333B2]'
-                      }`}
-                    >
-                      Portfolio
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 md:pr-2 pr-6">
-                  {detail?.fav ? (
-                    <img
-                      src={hexagonfinal}
-                      alt="Remove from favorite"
-                      className="h-9 md:h-10 aspect-auto cursor-pointer"
-                      onClick={async () => {
-                        if (detail && detail.port_folio_id) {
-                          try {
-                            await api.putRequest(
-                              `portfolio/remove-from-fav?portfolioId=${detail.port_folio_id}`,
-                              {},
-                              false
-                            );
-                            // Update local state to reflect change
-                            setDetail((prev: any) => ({
-                              ...prev,
-                              fav: false,
-                            }));
-                          } catch (e) {
-                            // Optionally handle error
-                          }
-                        }
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src={hexagon}
-                      alt="Add to favorite"
-                      className="h-9 md:h-10 aspect-auto cursor-pointer"
-                      onClick={async () => {
-                        if (detail && detail.port_folio_id) {
-                          try {
-                            await api.putRequest(
-                              `portfolio/add-to-fav?portfolioId=${detail.port_folio_id}`,
-                              {},
-                              false
-                            );
-                            // Update local state to reflect change
-                            setDetail((prev: any) => ({
-                              ...prev,
-                              fav: true,
-                            }));
-                          } catch (e) {
-                            // Optionally handle error
-                          }
-                        }
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* About */}
-              {detail?.info?.about && viewStage === 'INFO' && (
-                <div>
-                  <div className="text-xs text-[#323232B2] mb-1 font-semibold">About</div>
-                  <div className="text-sm text-[#41423C] font-semibold">{detail?.info?.about}</div>
-                </div>
-              )}
-              {viewStage === 'INFO' ? (
-                <>
-                  {/* Type */}
-                  <div className="">
-                    <div className="flex gap-2 mt-2">
-                      {detail?.info?.genders && detail?.info?.genders?.length > 0 ? (
-                        detail?.info?.genders?.map((g: string) => (
-                          <span
-                            key={g}
-                            className={`text-xs flex items-center gap-2 px-3 py-1 rounded-full text-gray-700 ${
-                              g === 'MALE'
-                                ? 'bg-[#BDCFFF]'
-                                : g === 'FEMALE'
-                                  ? 'bg-[#D8C9E6]'
-                                  : 'bg-gray-100'
-                            }`}
-                          >
-                            <img src={person} alt="person" className="h-3 md:h-4 aspect-auto" />
-                            {g === 'MALE' ? 'Male Outfits' : g === 'FEMALE' ? 'Female Outfits' : g}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-xs px-2 py-1 rounded-full hidden bg-gray-100 text-gray-700"></span>
-                      )}
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => setViewStage('PORTFOLIO')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
+                          viewStage === 'PORTFOLIO'
+                            ? 'bg-[#111827] text-white shadow'
+                            : 'bg-white border-2 border-gray-200 text-[#333333B2]'
+                        }`}
+                        title="Portfolio"
+                      >
+                        {viewStage === 'INFO' ? (
+                          <img
+                            src={portfolio1}
+                            alt="portfolio"
+                            className="h-6 md:h-7 aspect-auto"
+                          />
+                        ) : (
+                          <img src={portfolio} alt="portfolio" className="h-6 md:h-7 aspect-auto" />
+                        )}
+                      </button>
+                      <p
+                        className={`text-sm font-semibold  ${
+                          viewStage === 'PORTFOLIO' ? ' text-[#000000] ' : ' text-[#333333B2]'
+                        }`}
+                      >
+                        Portfolio
+                      </p>
                     </div>
                   </div>
-                  {/* Location & distance */}
-                  <div>
-                    <div className="text-xs text-[#323232B2] mb-1 font-semibold flex items-center gap-2">
-                      <img src={location} alt="location" className="h-4 md:h-4 aspect-auto" />
-                      Location
-                    </div>
-                    <div className="text-[.8rem] text-[#51524e] font-medium">
-                      {detail?.address_details?.address ? (
-                        <>
-                          {detail?.address_details?.address?.addressLine1
-                            ? detail?.address_details?.address?.addressLine1 + ', '
-                            : ''}
-                          {detail?.address_details?.address?.addressLine2
-                            ? detail?.address_details?.address?.addressLine2 + ', '
-                            : ''}
-                          {detail?.address_details?.address?.city
-                            ? detail?.address_details?.address?.city + ', '
-                            : ''}
-                          {detail?.address_details.address.state
-                            ? detail.address_details.address.state + ', '
-                            : ''}
-                          {detail?.address_details.address.country || ''}
-                        </>
-                      ) : (
-                        'Location not provided'
-                      )}
-                    </div>
-                    {typeof detail?.address_details?.distance === 'number' && (
-                      <div className="text-[.9rem] text-[#41423CCC] mt-1">
-                        {detail.address_details.distance} Km Away
-                      </div>
+                  <div className="flex items-center gap-1 md:pr-2 pr-6">
+                    {detail?.fav ? (
+                      <img
+                        src={hexagonfinal}
+                        alt="Remove from favorite"
+                        className="h-9 md:h-10 aspect-auto cursor-pointer"
+                        onClick={async () => {
+                          if (detail && detail.port_folio_id) {
+                            try {
+                              await api.putRequest(
+                                `portfolio/remove-from-fav?portfolioId=${detail.port_folio_id}`,
+                                {},
+                                false
+                              );
+                              // Update local state to reflect change
+                              setDetail((prev: any) => ({
+                                ...prev,
+                                fav: false,
+                              }));
+                            } catch (e) {
+                              // Optionally handle error
+                            }
+                          }
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={hexagon}
+                        alt="Add to favorite"
+                        className="h-9 md:h-10 aspect-auto cursor-pointer"
+                        onClick={async () => {
+                          if (detail && detail.port_folio_id) {
+                            try {
+                              await api.putRequest(
+                                `portfolio/add-to-fav?portfolioId=${detail.port_folio_id}`,
+                                {},
+                                false
+                              );
+                              // Update local state to reflect change
+                              setDetail((prev: any) => ({
+                                ...prev,
+                                fav: true,
+                              }));
+                            } catch (e) {
+                              // Optionally handle error
+                            }
+                          }
+                        }}
+                      />
                     )}
                   </div>
-                </>
-              ) : (
-                <>
+                </div>
+
+                {/* About */}
+                {detail?.info?.about && viewStage === 'INFO' && (
                   <div>
-                    {filtersData?.outfit_filter && (
-                      <div className=" w-full mb-6 py-4 bg-white md:block hidden ">
-                        {/* Outfit type */}
-                        <div>
-                          <div className="font-semibold text-[.9rem] mb-2 flex items-center justify-between">
-                            Outfit type
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 mb-2">
-                            {filtersData?.outfit_filter.map((outfit: any) => (
-                              <label
-                                key={outfit.index}
-                                className="flex items-center text-[#323232] text-[.8rem] font-[500] gap-2 cursor-pointer"
-                              >
-                                <input
-                                  type="checkbox"
-                                  className="accent-[#4D7AFF]"
-                                  checked={selectedOutfits.includes(outfit.index)}
-                                  onChange={() => {
-                                    setSelectedOutfits((prev) =>
-                                      prev.includes(outfit.index)
-                                        ? prev.filter((i) => i !== outfit.index)
-                                        : [...prev, outfit.index]
-                                    );
-                                    // Reset suboutfits if outfit is deselected
-
-                                    if (selectedOutfits.includes(outfit.index)) {
-                                      setSelectedSubOutfits((prev) =>
-                                        prev.filter(
-                                          (subIdx) =>
-                                            !Object.keys(outfit.sub_outfits)
-                                              .map(Number)
-                                              .includes(subIdx)
-                                        )
-                                      );
-                                    }
-                                  }}
-                                />
-                                {outfit.name}
-                              </label>
-                            ))}
-                          </div>
+                    <div className="text-xs text-[#323232B2] mb-1 font-semibold">About</div>
+                    <div className="text-sm text-[#41423C] font-semibold">
+                      {detail?.info?.about}
+                    </div>
+                  </div>
+                )}
+                {viewStage === 'INFO' ? (
+                  <>
+                    {/* Type */}
+                    <div className="">
+                      <div className="flex gap-2 mt-2">
+                        {detail?.info?.genders && detail?.info?.genders?.length > 0 ? (
+                          detail?.info?.genders?.map((g: string) => (
+                            <span
+                              key={g}
+                              className={`text-xs flex items-center gap-2 px-3 py-1 rounded-full text-gray-700 ${
+                                g === 'MALE'
+                                  ? 'bg-[#BDCFFF]'
+                                  : g === 'FEMALE'
+                                    ? 'bg-[#D8C9E6]'
+                                    : 'bg-gray-100'
+                              }`}
+                            >
+                              <img src={person} alt="person" className="h-3 md:h-4 aspect-auto" />
+                              {g === 'MALE'
+                                ? 'Male Outfits'
+                                : g === 'FEMALE'
+                                  ? 'Female Outfits'
+                                  : g}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded-full hidden bg-gray-100 text-gray-700"></span>
+                        )}
+                      </div>
+                    </div>
+                    {/* Location & distance */}
+                    <div>
+                      <div className="text-xs text-[#323232B2] mb-1 font-semibold flex items-center gap-2">
+                        <img src={location} alt="location" className="h-4 md:h-4 aspect-auto" />
+                        Location
+                      </div>
+                      <div className="text-[.8rem] text-[#51524e] font-medium">
+                        {detail?.address_details?.address ? (
+                          <>
+                            {detail?.address_details?.address?.addressLine1
+                              ? detail?.address_details?.address?.addressLine1 + ', '
+                              : ''}
+                            {detail?.address_details?.address?.addressLine2
+                              ? detail?.address_details?.address?.addressLine2 + ', '
+                              : ''}
+                            {detail?.address_details?.address?.city
+                              ? detail?.address_details?.address?.city + ', '
+                              : ''}
+                            {detail?.address_details.address.state
+                              ? detail.address_details.address.state + ', '
+                              : ''}
+                            {detail?.address_details.address.country || ''}
+                          </>
+                        ) : (
+                          'Location not provided'
+                        )}
+                      </div>
+                      {typeof detail?.address_details?.distance === 'number' && (
+                        <div className="text-[.9rem] text-[#41423CCC] mt-1">
+                          {detail.address_details.distance} Km Away
                         </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      {filtersData?.outfit_filter && (
+                        <div className=" w-full mb-6 py-4 bg-white md:block hidden ">
+                          {/* Outfit type */}
+                          <div>
+                            <div className="font-semibold text-[.9rem] mb-2 flex items-center justify-between">
+                              Outfit type
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 mb-2">
+                              {filtersData?.outfit_filter.map((outfit: any) => (
+                                <label
+                                  key={outfit.index}
+                                  className="flex items-center text-[#323232] text-[.8rem] font-[500] gap-2 cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="accent-[#4D7AFF]"
+                                    checked={selectedOutfits.includes(outfit.index)}
+                                    onChange={() => {
+                                      setSelectedOutfits((prev) =>
+                                        prev.includes(outfit.index)
+                                          ? prev.filter((i) => i !== outfit.index)
+                                          : [...prev, outfit.index]
+                                      );
+                                      // Reset suboutfits if outfit is deselected
 
-                        {/* Sub Outfit type */}
-                        {(() => {
-                          // Gather all sub outfits from all selected outfits and show in a single section
-                          const allSubOutfits: { subIdx: number; subName: string }[] = [];
-                          filtersData?.outfit_filter
-                            .filter((outfit: any) => selectedOutfits.includes(outfit.index))
-                            .forEach((outfit: any) => {
-                              Object.entries(outfit.sub_outfits).forEach(([subIdx, subName]) => {
-                                allSubOutfits.push({
-                                  subIdx: Number(subIdx),
-                                  subName: subName as string,
+                                      if (selectedOutfits.includes(outfit.index)) {
+                                        setSelectedSubOutfits((prev) =>
+                                          prev.filter(
+                                            (subIdx) =>
+                                              !Object.keys(outfit.sub_outfits)
+                                                .map(Number)
+                                                .includes(subIdx)
+                                          )
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  {outfit.name}
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Sub Outfit type */}
+                          {(() => {
+                            // Gather all sub outfits from all selected outfits and show in a single section
+                            const allSubOutfits: { subIdx: number; subName: string }[] = [];
+                            filtersData?.outfit_filter
+                              .filter((outfit: any) => selectedOutfits.includes(outfit.index))
+                              .forEach((outfit: any) => {
+                                Object.entries(outfit.sub_outfits).forEach(([subIdx, subName]) => {
+                                  allSubOutfits.push({
+                                    subIdx: Number(subIdx),
+                                    subName: subName as string,
+                                  });
                                 });
                               });
-                            });
 
-                          // Remove duplicates by subIdx
-                          const uniqueSubOutfits = Array.from(
-                            new Map(allSubOutfits.map((item) => [item.subIdx, item])).values()
-                          );
+                            // Remove duplicates by subIdx
+                            const uniqueSubOutfits = Array.from(
+                              new Map(allSubOutfits.map((item) => [item.subIdx, item])).values()
+                            );
 
-                          if (uniqueSubOutfits.length === 0) {
-                            return null;
-                          }
+                            if (uniqueSubOutfits.length === 0) {
+                              return null;
+                            }
 
-                          return (
-                            <div className="mb-2">
-                              <div className="font-semibold text-[.9rem] mb-2 flex items-center justify-between">
-                                Sub Outfit type
+                            return (
+                              <div className="mb-2">
+                                <div className="font-semibold text-[.9rem] mb-2 flex items-center justify-between">
+                                  Sub Outfit type
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  {uniqueSubOutfits.map(({ subIdx, subName }) => (
+                                    <label
+                                      key={subIdx}
+                                      className="flex items-center text-[#323232] text-[.8rem] font-[500]  gap-2 cursor-pointer p-[.1rem]"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        className="accent-[#4D7AFF]"
+                                        checked={selectedSubOutfits.includes(subIdx)}
+                                        onChange={() => {
+                                          setSelectedSubOutfits((prev) =>
+                                            prev.includes(subIdx)
+                                              ? prev.filter((i) => i !== subIdx)
+                                              : [...prev, subIdx]
+                                          );
+                                        }}
+                                      />
+                                      {subName}
+                                    </label>
+                                  ))}
+                                </div>
                               </div>
-                              <div className="grid grid-cols-3 gap-2">
-                                {uniqueSubOutfits.map(({ subIdx, subName }) => (
-                                  <label
-                                    key={subIdx}
-                                    className="flex items-center text-[#323232] text-[.8rem] font-[500]  gap-2 cursor-pointer p-[.1rem]"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      className="accent-[#4D7AFF]"
-                                      checked={selectedSubOutfits.includes(subIdx)}
-                                      onChange={() => {
-                                        setSelectedSubOutfits((prev) =>
-                                          prev.includes(subIdx)
-                                            ? prev.filter((i) => i !== subIdx)
-                                            : [...prev, subIdx]
+                            );
+                          })()}
+
+                          {/* Color filter */}
+                          <div className="mt-4">
+                            <div className=" mb-2 font-semibold text-[.9rem] flex items-center justify-between">
+                              Select Colors
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {filtersData.color_filter &&
+                                Object.entries(filtersData.color_filter).map(
+                                  ([colorCode, colorName]) => (
+                                    <button
+                                      key={colorCode}
+                                      type="button"
+                                      className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${
+                                        selectedColors.includes(colorCode)
+                                          ? 'border-[#79539f]'
+                                          : 'border-gray-200'
+                                      }`}
+                                      style={{ backgroundColor: `#${colorCode}` }}
+                                      title={colorName as string}
+                                      onClick={() => {
+                                        setSelectedColors((prev) =>
+                                          prev.includes(colorCode)
+                                            ? prev.filter((c) => c !== colorCode)
+                                            : [...prev, colorCode]
                                         );
                                       }}
-                                    />
-                                    {subName}
-                                  </label>
-                                ))}
-                              </div>
+                                    >
+                                      {selectedColors.includes(colorCode) && (
+                                        <span className="text-white text-xs">&#10003;</span>
+                                      )}
+                                    </button>
+                                  )
+                                )}
                             </div>
-                          );
-                        })()}
+                          </div>
 
-                        {/* Color filter */}
-                        <div className="mt-4">
-                          <div className=" mb-2 font-semibold text-[.9rem] flex items-center justify-between">
-                            Select Colors
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {filtersData.color_filter &&
-                              Object.entries(filtersData.color_filter).map(
-                                ([colorCode, colorName]) => (
-                                  <button
-                                    key={colorCode}
-                                    type="button"
-                                    className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${
-                                      selectedColors.includes(colorCode)
-                                        ? 'border-[#79539f]'
-                                        : 'border-gray-200'
-                                    }`}
-                                    style={{ backgroundColor: `#${colorCode}` }}
-                                    title={colorName as string}
-                                    onClick={() => {
-                                      setSelectedColors((prev) =>
-                                        prev.includes(colorCode)
-                                          ? prev.filter((c) => c !== colorCode)
-                                          : [...prev, colorCode]
-                                      );
-                                    }}
-                                  >
-                                    {selectedColors.includes(colorCode) && (
-                                      <span className="text-white text-xs">&#10003;</span>
-                                    )}
-                                  </button>
-                                )
-                              )}
-                          </div>
+                          <button
+                            className="mt-4 w-full bg-[#79539f] text-white rounded-md py-2 font-semibold"
+                            onClick={() => {
+                              if (detail && detail.port_folio_id) {
+                                fetchFilteredOutfits(
+                                  detail.port_folio_id,
+                                  selectedOutfits,
+                                  selectedSubOutfits,
+                                  selectedColors
+                                );
+                              }
+                            }}
+                          >
+                            Apply
+                          </button>
                         </div>
-
-                        <button
-                          className="mt-4 w-full bg-[#79539f] text-white rounded-md py-2 font-semibold"
-                          onClick={() => {
-                            if (detail && detail.port_folio_id) {
-                              fetchFilteredOutfits(
-                                detail.port_folio_id,
-                                selectedOutfits,
-                                selectedSubOutfits,
-                                selectedColors
-                              );
-                            }
-                          }}
-                        >
-                          Apply
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
             {/* Right: gallery + fetchable backend details */}
             {viewStage === 'INFO' ? (
               <>
                 <div className="md:w-[60%] w-full h-full md:pb-[2rem] pb-[3rem] ">
-                  <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden">
+                  <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden md:block hidden">
                     {detailLoading && (
                       <div className="text-sm text-gray-500 w-full flex items-center justify-center">
                         Loading full profile…

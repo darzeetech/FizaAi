@@ -562,7 +562,7 @@ export default function Lookbook({
                 </button>
               )}
 
-              <div className="flex flex-col w-full items-center gap-3 md:p-3 borde rounded-lg bg-gray-50 shadow  shadow-[#00000040] ">
+              <div className="flex flex-col w-full items-center   relative ">
                 <div className="w-full h-[300px] md:hidden block">
                   <img
                     src={detail?.base_info?.cover_picture_url}
@@ -570,84 +570,88 @@ export default function Lookbook({
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="flex items-center gap-3 w-full px-3 ">
-                  {detail?.base_info?.profile_picture_url ? (
-                    <img
-                      src={detail?.base_info?.profile_picture_url}
-                      alt="profile"
-                      className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                      <span className="text-md font-semibold text-gray-700">
-                        {(selected.tailorName && selected.tailorName.charAt(0).toUpperCase()) ||
-                          '?'}
-                      </span>
-                    </div>
-                  )}
-                  <div className=" w-full flex  items-center justify-between   ">
-                    <div>
-                      <div className="font-semibold text-nowrap">{selected.tailorName}</div>
-                      <div className="text-sm text-gray-500">{selected.userName}</div>
-                    </div>
-                    <div className="flex items-center gap-4">
+                <div className="w-full md:relative absolute borde rounded-lg bg-gray-50 opacity-90  bg-[#9a9b9700 shadow   shadow-[#00000040] md:bottom-0 bottom-8 p-4">
+                  <div className="flex items-center gap-3 w-full  ">
+                    {detail?.base_info?.profile_picture_url ? (
                       <img
-                        src={copy}
-                        alt="copy"
-                        className="h-5 md:h-4 aspect-auto cursor-pointer"
-                        onClick={handleCopyClick}
+                        src={detail?.base_info?.profile_picture_url}
+                        alt="profile"
+                        className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                       />
-                      <img
-                        src={share}
-                        alt="share"
-                        className="h-5 md:h-4 aspect-auto cursor-pointer"
-                        onClick={handleShareClick}
-                      />
-                      <img src={qr} alt="qr" className="h-5 md:h-4 aspect-auto cursor-pointer" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                        <span className="text-md font-semibold text-gray-700">
+                          {(selected.tailorName && selected.tailorName.charAt(0).toUpperCase()) ||
+                            '?'}
+                        </span>
+                      </div>
+                    )}
+                    <div className=" w-full flex  items-center justify-between   ">
+                      <div>
+                        <div className="font-semibold text-nowrap">{selected.tailorName}</div>
+                        <div className="text-sm text-gray-500">{selected.userName}</div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={copy}
+                          alt="copy"
+                          className="h-5 md:h-4 aspect-auto cursor-pointer"
+                          onClick={handleCopyClick}
+                        />
+                        <img
+                          src={share}
+                          alt="share"
+                          className="h-5 md:h-4 aspect-auto cursor-pointer"
+                          onClick={handleShareClick}
+                        />
+                        <img src={qr} alt="qr" className="h-5 md:h-4 aspect-auto cursor-pointer" />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4 w-full justify-center my-1 md:py-1 pb-4">
-                  {/* Social media icons with links */}
-                  {detail?.social_media_handlers?.facebook && (
+                  <div className="flex items-center gap-4 w-full justify-center my-1 md:py-1 ">
+                    {/* Social media icons with links */}
+                    {detail?.social_media_handlers?.facebook && (
+                      <img
+                        src={facebook}
+                        alt="facebook"
+                        className="h-5 md:h-5 aspect-auto cursor-pointer"
+                        onClick={() => window.open(detail.social_media_handlers.facebook, '_blank')}
+                      />
+                    )}
+                    {detail?.social_media_handlers?.instagram && (
+                      <img
+                        src={insta}
+                        alt="instagram"
+                        className="h-5 md:h-5 aspect-auto cursor-pointer"
+                        onClick={() =>
+                          window.open(detail.social_media_handlers.instagram, '_blank')
+                        }
+                      />
+                    )}
+                    {detail?.social_media_handlers?.whatsapp && (
+                      <img
+                        src={whatapp}
+                        alt="whatsapp"
+                        className="h-5 md:h-5 aspect-auto cursor-pointer"
+                        onClick={() => window.open(detail.social_media_handlers.whatsapp, '_blank')}
+                      />
+                    )}
+                    {detail?.port_folio_link && (
+                      <img
+                        src={glove}
+                        alt="whatsapp"
+                        className="h-5 md:h-5 aspect-auto cursor-pointer"
+                        onClick={() => window.open(detail?.port_folio_link, '_blank')}
+                      />
+                    )}
+                    <img src={upi} alt="copy" className="h-5 md:h-5 aspect-auto" />
                     <img
-                      src={facebook}
-                      alt="facebook"
+                      src={map}
+                      alt="copy"
                       className="h-5 md:h-5 aspect-auto cursor-pointer"
-                      onClick={() => window.open(detail.social_media_handlers.facebook, '_blank')}
+                      onClick={handleMapClick}
                     />
-                  )}
-                  {detail?.social_media_handlers?.instagram && (
-                    <img
-                      src={insta}
-                      alt="instagram"
-                      className="h-5 md:h-5 aspect-auto cursor-pointer"
-                      onClick={() => window.open(detail.social_media_handlers.instagram, '_blank')}
-                    />
-                  )}
-                  {detail?.social_media_handlers?.whatsapp && (
-                    <img
-                      src={whatapp}
-                      alt="whatsapp"
-                      className="h-5 md:h-5 aspect-auto cursor-pointer"
-                      onClick={() => window.open(detail.social_media_handlers.whatsapp, '_blank')}
-                    />
-                  )}
-                  {detail?.port_folio_link && (
-                    <img
-                      src={glove}
-                      alt="whatsapp"
-                      className="h-5 md:h-5 aspect-auto cursor-pointer"
-                      onClick={() => window.open(detail?.port_folio_link, '_blank')}
-                    />
-                  )}
-                  <img src={upi} alt="copy" className="h-5 md:h-5 aspect-auto" />
-                  <img
-                    src={map}
-                    alt="copy"
-                    className="h-5 md:h-5 aspect-auto cursor-pointer"
-                    onClick={handleMapClick}
-                  />
+                  </div>
                 </div>
               </div>
 

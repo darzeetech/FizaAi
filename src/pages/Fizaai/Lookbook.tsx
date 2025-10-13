@@ -363,6 +363,18 @@ export default function Lookbook({
     }
   };
 
+  const handleUPIPayment = () => {
+    const paymentLink = detail?.social_media_handlers?.upi;
+    const upiPaymentLink = `http://www.upi.me/pay?pa=${paymentLink}`;
+    // Try opening in new window first
+    const paymentWindow = window.open(upiPaymentLink, '_blank');
+
+    // Fallback to direct location change if window.open fails
+    if (!paymentWindow) {
+      window.location.href = upiPaymentLink;
+    }
+  };
+
   // eslint-disable-next-line no-console
   console.log(filtersData, filtersError, selectedOutfits, selectedColors);
 
@@ -567,10 +579,10 @@ export default function Lookbook({
                   <img
                     src={detail?.base_info?.cover_picture_url}
                     alt={`${selected.tailorName} cover`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-b-lg"
                   />
                 </div>
-                <div className="w-full md:relative absolute borde rounded-lg bg-gray-50 opacity-90  bg-[#9a9b9700 shadow   shadow-[#00000040] md:bottom-0 bottom-8 p-4">
+                <div className="w-full md:relative absolute borde rounded-lg bg-gray-50 opacity-90  bg-[#9a9b9700 shadow   shadow-[#00000040] md:bottom-0 bottom-0 p-4">
                   <div className="flex items-center gap-3 w-full  ">
                     {detail?.base_info?.profile_picture_url ? (
                       <img
@@ -644,7 +656,15 @@ export default function Lookbook({
                         onClick={() => window.open(detail?.port_folio_link, '_blank')}
                       />
                     )}
-                    <img src={upi} alt="copy" className="h-5 md:h-5 aspect-auto" />
+                    {detail?.social_media_handlers?.upi && (
+                      <img
+                        src={upi}
+                        alt="copy"
+                        className="h-5 md:h-5 aspect-auto cursor-pointer"
+                        onClick={handleUPIPayment}
+                      />
+                    )}
+
                     <img
                       src={map}
                       alt="copy"
@@ -657,7 +677,7 @@ export default function Lookbook({
 
               <div className="w-full px-2 flex flex-col gap-3">
                 {/* stage toggle buttons */}
-                <div className="flex items-center justify-between gap-3 mb-4 w-full  ">
+                <div className="flex items-center justify-between gap-3 md:mb-4 mb-2 w-full  ">
                   <div className="flex items-center gap-3">
                     <div className="flex flex-col items-center gap-1">
                       <button

@@ -348,7 +348,10 @@ export default function FizaAI() {
   const [loadingFavourites, setLoadingFavourites] = useState(false);
 
   // Store lat/lon from ipapi.co
-  const [locationData, setLocationData] = useState<{ lat?: number; lon?: number }>({});
+  const [locationData, setLocationData] = useState<{ lat?: number; lon?: number }>({
+    lat: 99,
+    lon: 55,
+  });
 
   const handleTabChange = (tab: 'studio' | 'lookbook') => {
     setSelectedTab(tab);

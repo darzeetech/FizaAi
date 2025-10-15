@@ -1,29 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
-// import maleIcon from '../../../../assets/icons/ai-stylist-male.png';
-// import femaleIcon from '../../../../assets/icons/ai-stylist-female.png';
 import sidebar from '../../../../assets/images/view_sidebar.png';
 import explore from '../../../../assets/images/Frame 1000010742.png';
 import collective from '../../../../assets/images/collective.png';
-// import clothes from '../../../../assets/images/clothes.png';
 
 interface SideDrawerProps {
   open: boolean;
   onClose: () => void;
-  currentPage: 'collective' | 'explore';
   onNavigate: (page: 'collective' | 'explore') => void;
 }
 
-const SideDrawer: React.FC<SideDrawerProps> = ({ open, onClose, currentPage, onNavigate }) => {
+const SideDrawer: React.FC<SideDrawerProps> = ({ open, onClose, onNavigate }) => {
+  const location = useLocation();
+
+  // Determine current page from URL
+  const currentPage: 'collective' | 'explore' = location.pathname.includes('explore')
+    ? 'explore'
+    : 'collective';
+
+  // Use state to track selected tab, initialized from currentPage
   const [selectlookbook, setSelectlookbook] = useState<
     'Explore Designers' | 'Outfits' | 'Collective'
-  >('Collective');
+  >(currentPage === 'explore' ? 'Explore Designers' : 'Collective');
 
-  // eslint-disable-next-line no-console
-  console.log('Current Page in SideDrawer:', currentPage);
+  // Sync selectlookbook state whenever URL changes
+  useEffect(() => {
+    setSelectlookbook(currentPage === 'explore' ? 'Explore Designers' : 'Collective');
+  }, [currentPage]);
+
   const handleLookbookTabChange = (tab: typeof selectlookbook) => {
     setSelectlookbook(tab);
-    // Sync with currentPage state
 
     if (tab === 'Collective') {
       onNavigate('collective');
@@ -56,6 +63,7 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ open, onClose, currentPage, onN
             <span className="ml-3 text-[.9rem] font-semibold">Explore Designers</span>
           </div>
 
+          {/* Uncomment if you want the 'Outfits' tab back */}
           {/* <div
             onClick={() => handleLookbookTabChange('Outfits')}
             className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${

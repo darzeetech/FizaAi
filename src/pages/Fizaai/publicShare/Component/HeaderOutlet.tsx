@@ -4,17 +4,19 @@ import sidebar from '../../../../assets/images/view_sidebar.png';
 import './sidebar.css';
 
 interface HeaderWithSidedrawerProps {
-  currentPage: 'collective' | 'explore';
   onNavigate: (page: 'collective' | 'explore') => void;
   onSignup: () => void;
   onToggleDrawer: () => void;
   drawerOpen: boolean;
   onCloseDrawer: () => void; // add this prop for closing drawer
 }
+const currentPage: 'collective' | 'explore' = location.pathname.includes('explore')
+  ? 'explore'
+  : 'collective';
 
 const HeaderWithSidedrawer: React.FC<HeaderWithSidedrawerProps> = ({
   onNavigate,
-  currentPage,
+
   onSignup,
   onToggleDrawer,
   drawerOpen,
@@ -30,8 +32,9 @@ const HeaderWithSidedrawer: React.FC<HeaderWithSidedrawerProps> = ({
           onClick={onToggleDrawer}
         />
         <h1 className="text-[1rem] md:text-[1.8rem] font-medium text-[#79539F] select-none">
-          Collective Gallery
+          {currentPage === 'collective' ? 'Collective Gallery' : 'Portfolio Gallery'}
         </h1>
+
         <button
           className="flex items-center bg-[#79539F]  text-white px-3 py-1 rounded-md text-[.8rem] md:text-[1rem] font-medium transition"
           onClick={onSignup}
@@ -41,12 +44,7 @@ const HeaderWithSidedrawer: React.FC<HeaderWithSidedrawerProps> = ({
         </button>
       </header>
 
-      <SideDrawer
-        open={drawerOpen}
-        onClose={onCloseDrawer}
-        currentPage={currentPage}
-        onNavigate={onNavigate}
-      />
+      <SideDrawer open={drawerOpen} onClose={onCloseDrawer} onNavigate={onNavigate} />
     </>
   );
 };

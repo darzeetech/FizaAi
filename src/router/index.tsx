@@ -129,8 +129,10 @@ import PrivateWrapper from './PrivateWrapper';
 
 import FizaAI from '../pages/Fizaai/aifiza';
 import ShareFizaai from '../pages/Fizaai/shareFizaai';
-import CollectivePublic from '../pages/Fizaai/publicShare/CollectivePublic';
-import main from '../pages/Fizaai/publicShare/mainOutlet'; // Ensure this import is correct
+import FizaaiPublicLayout from '../pages/Fizaai/publicShare/maine';
+import CollectivePage from '../pages/Fizaai/publicShare/collec';
+import ExplorePage from '../pages/Fizaai/publicShare/design';
+// Ensure this import is correct
 
 const allRoutes = [
   {
@@ -169,13 +171,20 @@ const allRoutes = [
         path: '/:idd/:id',
         element: <PublicWrapper Content={ShareFizaai} showHeader={false} />,
       },
+
       {
-        path: '/shareCollective',
-        element: <PublicWrapper Content={CollectivePublic} showHeader={false} />,
-      },
-      {
-        path: '/collective',
-        element: <PublicWrapper Content={main} showHeader={false} />,
+        path: '/',
+        element: <FizaaiPublicLayout />,
+        children: [
+          {
+            path: 'collective',
+            element: <CollectivePage />,
+          },
+          {
+            path: 'explore',
+            element: <ExplorePage />,
+          },
+        ],
       },
     ],
   },

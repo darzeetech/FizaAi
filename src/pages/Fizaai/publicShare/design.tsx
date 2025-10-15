@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import Lookbook, { Portfolio as LookbookPortfolio } from './portfolio';
 import { api } from '../../../utils/apiRequest';
+import { useNavigate } from 'react-router-dom';
+
 // import { getTime } from 'date-fns';
 
 type Portfolio = LookbookPortfolio;
@@ -33,6 +35,15 @@ const ExplorePage: React.FC = () => {
     }
   };
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = localStorage.getItem('fizaaiuser');
+
+    if (user) {
+      navigate('/'); // redirect to home if user exists
+    }
+  }, [navigate]);
   useEffect(() => {
     fetchLocation();
   }, []);

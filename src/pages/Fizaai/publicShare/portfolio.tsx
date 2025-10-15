@@ -91,7 +91,7 @@ export default function Lookbook({
 
   const [selectedOutfitsr, setSelectedOutfitsr] = useState<number[]>([]);
 
-  const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const [showMobilePreview, setShowMobilePreview] = useState(true);
 
   // Store lat/lon from ipapi.co
   const [locationData, setLocationData] = useState<{ lat?: number; lon?: number }>({});

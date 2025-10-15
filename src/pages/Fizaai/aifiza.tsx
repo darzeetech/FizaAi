@@ -348,10 +348,8 @@ export default function FizaAI() {
   const [loadingFavourites, setLoadingFavourites] = useState(false);
 
   // Store lat/lon from ipapi.co
-  const [locationData, setLocationData] = useState<{ lat?: number; lon?: number }>({
-    lat: 99,
-    lon: 55,
-  });
+
+  const [locationData] = useState<{ lat?: number; lon?: number }>({});
 
   const handleTabChange = (tab: 'studio' | 'lookbook') => {
     setSelectedTab(tab);
@@ -495,44 +493,6 @@ export default function FizaAI() {
     };
 
     fetchSkinColors();
-  }, []);
-
-  // Fetch lat/lon only once on mount
-  useEffect(() => {
-    // Try to get from localStorage first
-    let ipapiData: any = null;
-    try {
-      const stored = localStorage.getItem('ipapidata');
-
-      if (stored) {
-        ipapiData = JSON.parse(stored);
-      }
-    } catch (e) {
-      ipapiData = null;
-    }
-
-    if (
-      ipapiData &&
-      typeof ipapiData.latitude === 'number' &&
-      typeof ipapiData.longitude === 'number'
-    ) {
-      setLocationData({ lat: ipapiData.latitude, lon: ipapiData.longitude });
-    } else {
-      // Fallback to fetch from ipapi.co
-      const fetchLocation = async () => {
-        try {
-          const ipRes = await fetch('https://ipapi.co/json/');
-
-          if (ipRes.ok) {
-            const ipData = await ipRes.json();
-            setLocationData({ lat: ipData.latitude, lon: ipData.longitude });
-          }
-        } catch (e) {
-          setLocationData({});
-        }
-      };
-      fetchLocation();
-    }
   }, []);
 
   // Add this useEffect to fetch weight units when component mounts
@@ -1208,7 +1168,29 @@ export default function FizaAI() {
         setLoadingPortfolios(true);
       }
       setError(null);
-      const { lat, lon } = locationData;
+
+      // Try to get lat/lon from localStorage if not present in locationData
+      let lat = locationData?.lat;
+      let lon = locationData?.lon;
+
+      if (lat === undefined || lon === undefined) {
+        const ipapiRaw = localStorage.getItem('ipapidata');
+
+        if (ipapiRaw) {
+          try {
+            const ipapiData = JSON.parse(ipapiRaw);
+
+            if (ipapiData.latitude !== undefined && ipapiData.longitude !== undefined) {
+              lat = ipapiData.latitude;
+              lon = ipapiData.longitude;
+            }
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to parse ipapidata from localStorage', error);
+          }
+        }
+      }
+
       const res = await api.getRequest(
         `portfolio/fetch-all?pageNo=${pageNo}&pageSize=10${
           lat !== undefined && lon !== undefined ? `&lat=${lat}&lon=${lon}` : ''
@@ -1216,7 +1198,7 @@ export default function FizaAI() {
       );
 
       if (res.status && res.data && Array.isArray(res.data.content)) {
-        const content = res.data.content as Portfolio[];
+        const content = res.data.content;
         const lastPage = Boolean(res.data.lastPage);
         const currentPage =
           typeof res.data.currentPage === 'number' ? res.data.currentPage : pageNo;
@@ -1226,7 +1208,6 @@ export default function FizaAI() {
           setPortfolios((prev) => [...prev, ...content]);
         } else {
           setPortfolios(content);
-          // set first item selected by default
 
           if (content.length > 0) {
             setSelectedPortfolio(content[0]);

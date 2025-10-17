@@ -645,7 +645,14 @@ export default function Lookbook({
                         src={whatapp}
                         alt="whatsapp"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => window.open(detail.social_media_handlers.whatsapp, '_blank')}
+                        onClick={() => {
+                          const phoneNumber = detail?.social_media_handlers?.whatsapp;
+                          const message = encodeURIComponent(
+                            'Hi, I saw your portfolio on fizaai.com by Darzee.'
+                          );
+                          const url = `https://wa.me/${phoneNumber}?text=${message}`;
+                          window.open(url, '_blank');
+                        }}
                       />
                     )}
                     {detail?.port_folio_link && (

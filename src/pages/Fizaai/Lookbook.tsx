@@ -24,6 +24,8 @@ import { api } from '../../utils/apiRequest';
 import { TiArrowLeft } from 'react-icons/ti';
 import { useSwipeable } from 'react-swipeable';
 
+// import QRCode from 'react-qr-code';
+
 export type Portfolio = {
   id: number;
   profilePictureUrl?: string | null;
@@ -99,6 +101,8 @@ export default function Lookbook({
   const [currentDesignerIndex, setCurrentDesignerIndex] = useState(0);
 
   const [showSwapDiv, setShowSwapDiv] = useState(true);
+
+  // const ap = process.env.REACT_APP_BASE_API_URL;
 
   type FilteredOutfit = {
     outfit_type: string;
@@ -345,20 +349,23 @@ export default function Lookbook({
   };
 
   const handleCopyClick = () => {
-    navigator.clipboard.writeText(detail?.port_folio_link);
+    const ap = process.env.REACT_APP_BASE_API_URL;
+    navigator.clipboard.writeText(`${ap}explore`);
     alert('Link copied to clipboard!');
   };
 
   const handleShareClick = () => {
+    const ap = process.env.REACT_APP_BASE_API_URL;
+
     if (navigator.share) {
       navigator
         .share({
           title: 'Check Portfolio',
-          url: detail?.port_folio_link,
+          url: `${ap}explore`,
         })
         .catch(() => {});
     } else {
-      navigator.clipboard.writeText(detail?.port_folio_link);
+      navigator.clipboard.writeText(`${ap}explore`);
       alert('Link copied! Native share is not supported in this browser.');
     }
   };
@@ -616,6 +623,12 @@ export default function Lookbook({
                           className="h-5 md:h-4 aspect-auto cursor-pointer"
                           onClick={handleShareClick}
                         />
+                        {/* <QRCode
+                          size={160}
+                          bgColor="white"
+                          fgColor="black"
+                          value={`${ap}explore` || ''}
+                        /> */}
                         <img src={qr} alt="qr" className="h-5 md:h-4 aspect-auto cursor-pointer" />
                       </div>
                     </div>

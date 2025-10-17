@@ -23,6 +23,7 @@ import right_swap from '../../../assets/images/right_swipe.gif';
 import { api } from '../../../utils/apiRequest';
 import { TiArrowLeft } from 'react-icons/ti';
 import { useSwipeable } from 'react-swipeable';
+import { useNavigate } from 'react-router-dom';
 
 export type Portfolio = {
   id: number;
@@ -99,6 +100,7 @@ export default function Lookbook({
   const [currentDesignerIndex, setCurrentDesignerIndex] = useState(0);
 
   const [showSwapDiv, setShowSwapDiv] = useState(true);
+  const navigate = useNavigate();
 
   type FilteredOutfit = {
     outfit_type: string;
@@ -332,6 +334,13 @@ export default function Lookbook({
   };
 
   const handleMapClick = () => {
+    const t = 1;
+
+    if (t === 1) {
+      navigate('/');
+
+      return;
+    }
     // Optional chaining protects from null/undefined errors
     const lat = detail?.address_details?.address?.lat;
     const lon = detail?.address_details?.address?.lon;
@@ -345,11 +354,26 @@ export default function Lookbook({
   };
 
   const handleCopyClick = () => {
+    const t = 1;
+
+    if (t === 1) {
+      navigate('/');
+
+      return;
+    }
     navigator.clipboard.writeText(detail?.port_folio_link);
     alert('Link copied to clipboard!');
   };
 
   const handleShareClick = () => {
+    const t = 1;
+
+    if (t === 1) {
+      navigate('/');
+
+      return;
+    }
+
     if (navigator.share) {
       navigator
         .share({
@@ -364,6 +388,13 @@ export default function Lookbook({
   };
 
   const handleUPIPayment = () => {
+    const t = 1;
+
+    if (t === 1) {
+      navigate('/');
+
+      return;
+    }
     const paymentLink = detail?.social_media_handlers?.upi;
     const upiPaymentLink = `http://www.upi.me/pay?pa=${paymentLink}`;
     // Try opening in new window first
@@ -627,7 +658,16 @@ export default function Lookbook({
                         src={facebook}
                         alt="facebook"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => window.open(detail.social_media_handlers.facebook, '_blank')}
+                        onClick={() => {
+                          const t = 1;
+
+                          if (t === 1) {
+                            navigate('/');
+
+                            return;
+                          }
+                          window.open(detail.social_media_handlers.facebook, '_blank');
+                        }}
                       />
                     )}
                     {detail?.social_media_handlers?.instagram && (
@@ -635,9 +675,16 @@ export default function Lookbook({
                         src={insta}
                         alt="instagram"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() =>
-                          window.open(detail.social_media_handlers.instagram, '_blank')
-                        }
+                        onClick={() => {
+                          const t = 1;
+
+                          if (t === 1) {
+                            navigate('/');
+
+                            return;
+                          }
+                          window.open(detail.social_media_handlers.instagram, '_blank');
+                        }}
                       />
                     )}
                     {detail?.social_media_handlers?.whatsapp && (
@@ -645,7 +692,16 @@ export default function Lookbook({
                         src={whatapp}
                         alt="whatsapp"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => window.open(detail.social_media_handlers.whatsapp, '_blank')}
+                        onClick={() => {
+                          const t = 1;
+
+                          if (t === 1) {
+                            navigate('/');
+
+                            return;
+                          }
+                          window.open(detail.social_media_handlers.whatsapp, '_blank');
+                        }}
                       />
                     )}
                     {detail?.port_folio_link && (
@@ -653,7 +709,16 @@ export default function Lookbook({
                         src={glove}
                         alt="whatsapp"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => window.open(detail?.port_folio_link, '_blank')}
+                        onClick={() => {
+                          const t = 1;
+
+                          if (t === 1) {
+                            navigate('/');
+
+                            return;
+                          }
+                          window.open(detail?.port_folio_link, '_blank');
+                        }}
                       />
                     )}
                     {detail?.social_media_handlers?.upi && (

@@ -104,7 +104,7 @@ export default function Lookbook({
   const [showSwapDiv, setShowSwapDiv] = useState(true);
   const [showqr, setShowqr] = useState(false);
 
-  const ap = process.env.REACT_APP_BASE_API_URL;
+  const ap = process.env.REACT_APP_BASE_AP_URL;
 
   type FilteredOutfit = {
     outfit_type: string;

@@ -351,13 +351,13 @@ export default function Lookbook({
   };
 
   const handleCopyClick = () => {
-    const ap = process.env.REACT_APP_BASE_API_URL;
+    const ap = process.env.REACT_APP_BASE_AP_URL;
     navigator.clipboard.writeText(`${ap}explore`);
     alert('Link copied to clipboard!');
   };
 
   const handleShareClick = () => {
-    const ap = process.env.REACT_APP_BASE_API_URL;
+    const ap = process.env.REACT_APP_BASE_AP_URL;
 
     if (navigator.share) {
       navigator

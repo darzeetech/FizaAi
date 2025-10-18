@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-// import './sidebar.css';
+// import '../';
 import location from '../../../assets/images/location_on.png';
 import person from '../../../assets/images/Vector1.png';
 import qr from '../../../assets/images/qr_code_scanner.png';
@@ -23,7 +23,8 @@ import right_swap from '../../../assets/images/right_swipe.gif';
 import { api } from '../../../utils/apiRequest';
 import { TiArrowLeft } from 'react-icons/ti';
 import { useSwipeable } from 'react-swipeable';
-import { useNavigate } from 'react-router-dom';
+
+// import QRCode from 'react-qr-code';
 
 export type Portfolio = {
   id: number;
@@ -100,7 +101,8 @@ export default function Lookbook({
   const [currentDesignerIndex, setCurrentDesignerIndex] = useState(0);
 
   const [showSwapDiv, setShowSwapDiv] = useState(true);
-  const navigate = useNavigate();
+
+  // const ap = process.env.REACT_APP_BASE_API_URL;
 
   type FilteredOutfit = {
     outfit_type: string;
@@ -334,13 +336,6 @@ export default function Lookbook({
   };
 
   const handleMapClick = () => {
-    const t = 1;
-
-    if (t === 1) {
-      navigate('/');
-
-      return;
-    }
     // Optional chaining protects from null/undefined errors
     const lat = detail?.address_details?.address?.lat;
     const lon = detail?.address_details?.address?.lon;
@@ -354,47 +349,28 @@ export default function Lookbook({
   };
 
   const handleCopyClick = () => {
-    const t = 1;
-
-    if (t === 1) {
-      navigate('/');
-
-      return;
-    }
-    navigator.clipboard.writeText(detail?.port_folio_link);
+    const ap = process.env.REACT_APP_BASE_AP_URL;
+    navigator.clipboard.writeText(`${ap}explore`);
     alert('Link copied to clipboard!');
   };
 
   const handleShareClick = () => {
-    const t = 1;
-
-    if (t === 1) {
-      navigate('/');
-
-      return;
-    }
+    const ap = process.env.REACT_APP_BASE_AP_URL;
 
     if (navigator.share) {
       navigator
         .share({
           title: 'Check Portfolio',
-          url: detail?.port_folio_link,
+          url: `${ap}explore`,
         })
         .catch(() => {});
     } else {
-      navigator.clipboard.writeText(detail?.port_folio_link);
+      navigator.clipboard.writeText(`${ap}explore`);
       alert('Link copied! Native share is not supported in this browser.');
     }
   };
 
   const handleUPIPayment = () => {
-    const t = 1;
-
-    if (t === 1) {
-      navigate('/');
-
-      return;
-    }
     const paymentLink = detail?.social_media_handlers?.upi;
     const upiPaymentLink = `http://www.upi.me/pay?pa=${paymentLink}`;
     // Try opening in new window first
@@ -647,6 +623,12 @@ export default function Lookbook({
                           className="h-5 md:h-4 aspect-auto cursor-pointer"
                           onClick={handleShareClick}
                         />
+                        {/* <QRCode
+                          size={160}
+                          bgColor="white"
+                          fgColor="black"
+                          value={`${ap}explore` || ''}
+                        /> */}
                         <img src={qr} alt="qr" className="h-5 md:h-4 aspect-auto cursor-pointer" />
                       </div>
                     </div>
@@ -658,16 +640,7 @@ export default function Lookbook({
                         src={facebook}
                         alt="facebook"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => {
-                          const t = 1;
-
-                          if (t === 1) {
-                            navigate('/');
-
-                            return;
-                          }
-                          window.open(detail.social_media_handlers.facebook, '_blank');
-                        }}
+                        onClick={() => window.open(detail.social_media_handlers.facebook, '_blank')}
                       />
                     )}
                     {detail?.social_media_handlers?.instagram && (
@@ -675,16 +648,9 @@ export default function Lookbook({
                         src={insta}
                         alt="instagram"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => {
-                          const t = 1;
-
-                          if (t === 1) {
-                            navigate('/');
-
-                            return;
-                          }
-                          window.open(detail.social_media_handlers.instagram, '_blank');
-                        }}
+                        onClick={() =>
+                          window.open(detail.social_media_handlers.instagram, '_blank')
+                        }
                       />
                     )}
                     {detail?.social_media_handlers?.whatsapp && (
@@ -693,14 +659,12 @@ export default function Lookbook({
                         alt="whatsapp"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
                         onClick={() => {
-                          const t = 1;
-
-                          if (t === 1) {
-                            navigate('/');
-
-                            return;
-                          }
-                          window.open(detail.social_media_handlers.whatsapp, '_blank');
+                          const phoneNumber = detail?.social_media_handlers?.whatsapp;
+                          const message = encodeURIComponent(
+                            'Hi, I saw your portfolio on fizaai.com by Darzee.'
+                          );
+                          const url = `https://wa.me/${phoneNumber}?text=${message}`;
+                          window.open(url, '_blank');
                         }}
                       />
                     )}
@@ -709,16 +673,7 @@ export default function Lookbook({
                         src={glove}
                         alt="whatsapp"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => {
-                          const t = 1;
-
-                          if (t === 1) {
-                            navigate('/');
-
-                            return;
-                          }
-                          window.open(detail?.port_folio_link, '_blank');
-                        }}
+                        onClick={() => window.open(detail?.port_folio_link, '_blank')}
                       />
                     )}
                     {detail?.social_media_handlers?.upi && (
@@ -805,14 +760,6 @@ export default function Lookbook({
                         alt="Remove from favorite"
                         className="h-9 md:h-10 aspect-auto cursor-pointer"
                         onClick={async () => {
-                          const t = 1;
-
-                          if (t == 1) {
-                            navigate('/');
-
-                            return;
-                          }
-
                           if (detail && detail.port_folio_id) {
                             try {
                               await api.putRequest(
@@ -837,14 +784,6 @@ export default function Lookbook({
                         alt="Add to favorite"
                         className="h-9 md:h-10 aspect-auto cursor-pointer"
                         onClick={async () => {
-                          const t = 1;
-
-                          if (t == 1) {
-                            navigate('/');
-
-                            return;
-                          }
-
                           if (detail && detail.port_folio_id) {
                             try {
                               await api.putRequest(

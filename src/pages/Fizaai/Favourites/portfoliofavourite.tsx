@@ -23,8 +23,11 @@ import right_swap from '../../../assets/images/right_swipe.gif';
 import { api } from '../../../utils/apiRequest';
 import { TiArrowLeft } from 'react-icons/ti';
 import { useSwipeable } from 'react-swipeable';
+import { FaTimes } from 'react-icons/fa';
 
 // import QRCode from 'react-qr-code';
+
+import QRCode from 'react-qr-code';
 
 export type Portfolio = {
   id: number;
@@ -101,8 +104,9 @@ export default function Lookbook({
   const [currentDesignerIndex, setCurrentDesignerIndex] = useState(0);
 
   const [showSwapDiv, setShowSwapDiv] = useState(true);
+  const [showqr, setShowqr] = useState(false);
 
-  // const ap = process.env.REACT_APP_BASE_API_URL;
+  const ap = process.env.REACT_APP_BASE_AP_URL;
 
   type FilteredOutfit = {
     outfit_type: string;
@@ -623,13 +627,13 @@ export default function Lookbook({
                           className="h-5 md:h-4 aspect-auto cursor-pointer"
                           onClick={handleShareClick}
                         />
-                        {/* <QRCode
-                          size={160}
-                          bgColor="white"
-                          fgColor="black"
-                          value={`${ap}explore` || ''}
-                        /> */}
-                        <img src={qr} alt="qr" className="h-5 md:h-4 aspect-auto cursor-pointer" />
+
+                        <img
+                          src={qr}
+                          alt="qr"
+                          className="h-5 md:h-4 aspect-auto cursor-pointer"
+                          onClick={() => setShowqr(true)}
+                        />
                       </div>
                     </div>
                   </div>
@@ -1274,6 +1278,22 @@ export default function Lookbook({
           </div>
         )}
       </section>
+
+      {/* YouTube Modal */}
+      {showqr && (
+        <div className="fixed w-screen h-[100vh] inset-0 bg-[#0000009a] bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg   max-h-[90vh] overflow-hidden relative p-6">
+            <button
+              onClick={() => setShowqr(false)}
+              className="absolute top-4 right-4 text-gray-600 hover:text-black z-10 bg-white rounded-full p-2 shadow-lg"
+            >
+              <FaTimes size={20} />
+            </button>
+            <QRCode size={260} bgColor="white" fgColor="black" value={`${ap}explore` || ''} />
+            <p className="mx-auto text-center font-semibold text-[1.2rem] mt-4"> QR Portfolio</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

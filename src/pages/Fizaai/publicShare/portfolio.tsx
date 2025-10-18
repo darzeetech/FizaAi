@@ -805,6 +805,14 @@ export default function Lookbook({
                         alt="Remove from favorite"
                         className="h-9 md:h-10 aspect-auto cursor-pointer"
                         onClick={async () => {
+                          const t = 1;
+
+                          if (t == 1) {
+                            navigate('/');
+
+                            return;
+                          }
+
                           if (detail && detail.port_folio_id) {
                             try {
                               await api.putRequest(
@@ -829,6 +837,14 @@ export default function Lookbook({
                         alt="Add to favorite"
                         className="h-9 md:h-10 aspect-auto cursor-pointer"
                         onClick={async () => {
+                          const t = 1;
+
+                          if (t == 1) {
+                            navigate('/');
+
+                            return;
+                          }
+
                           if (detail && detail.port_folio_id) {
                             try {
                               await api.putRequest(

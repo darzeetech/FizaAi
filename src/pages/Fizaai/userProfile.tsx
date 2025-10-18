@@ -4,14 +4,15 @@ import React, { useState } from 'react';
 import { FaArrowLeft, FaYoutube, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firbase';
-import discord from '../../assets/icons/Discord.gif';
+//import discord from '../../assets/icons/Discord.gif';
 import fizzai from '../../assets/icons/share_aistylist.gif';
 import vision from '../../assets/icons/Vision_Fiza_AI.gif';
-import PaymentMethods from '../../assets/icons/Payment_Methods.png';
-import parcel from '../../assets/icons/searching-parcel.png';
-import address from '../../assets/icons/address.png';
+// import PaymentMethods from '../../assets/icons/Payment_Methods.png';
+// import parcel from '../../assets/icons/searching-parcel.png';
+// import address from '../../assets/icons/address.png';
 import femalelogo from '../../assets/icons/ai-stylist-female.png';
 import malelogo from '../../assets/icons/ai-stylist-male.png';
+import whatsapp from '../../assets/images/whatsapp3.png';
 
 interface UserProfileProps {
   showProfile: boolean;
@@ -66,7 +67,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
 
   const username = fullName;
   // const userInitial = username.charAt(0).toUpperCase();
-  const [selectedMenu, setSelectedMenu] = useState<'orders' | 'address' | 'payment'>('orders');
+  //const [selectedMenu, setSelectedMenu] = useState<'orders' | 'address' | 'payment'>('orders');
   const [showYouTubeModal, setShowYouTubeModal] = useState(false);
 
   if (!showProfile) {
@@ -106,7 +107,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
         {/* Menu Options Row-by-Row */}
         <div className="flex  flex-col w-full text-base text-black font-medium">
           {/* Orders */}
-          <div
+          {/* <div
             onClick={() => setSelectedMenu('orders')}
             className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
               selectedMenu === 'orders' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
@@ -114,10 +115,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
           >
             <img src={parcel} alt="Orders" className="w-5 h-5 ml-6" />
             <span className="ml-3">Orders</span>
-          </div>
+          </div> */}
 
           {/* Address */}
-          <div
+          {/* <div
             onClick={() => setSelectedMenu('address')}
             className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
               selectedMenu === 'address' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
@@ -125,10 +126,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
           >
             <img src={address} alt="Address" className="w-5 h-5 ml-6" />
             <span className="ml-3">Address</span>
-          </div>
+          </div> */}
 
           {/* Payment */}
-          <div
+          {/* <div
             onClick={() => setSelectedMenu('payment')}
             className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
               selectedMenu === 'payment' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
@@ -136,7 +137,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
           >
             <img src={PaymentMethods} alt="Payment Methods" className="w-5 h-5 ml-6" />
             <span className="ml-3">Payment Methods</span>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -171,8 +172,8 @@ const UserProfile: React.FC<UserProfileProps> = ({
           rel="noopener noreferrer"
           className="flex items-center gap-3 cursor-pointer px-4 whitespace-nowrap overflow-hidden text-ellipsis"
         >
-          <img src={discord} alt="Discord" className="w-5 h-5 shrink-0" />
-          <span className="truncate">Join Discord</span>
+          <img src={whatsapp} alt="Discord" className="w-5 h-5 shrink-0" />
+          <span className="truncate">Join Fiza AI Community</span>
         </a>
 
         <div

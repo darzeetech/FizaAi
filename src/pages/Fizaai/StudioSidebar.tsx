@@ -8,11 +8,11 @@ import design from '../../assets/images/design.png';
 import coins from '../../assets/images/coins.png';
 import explore from '../../assets/images/Frame 1000010742.png';
 import collective from '../../assets/images/collective.png';
-import clothes from '../../assets/images/clothes.png';
-import art from '../../assets/images/art.png';
+// import clothes from '../../assets/images/clothes.png';
+// import art from '../../assets/images/art.png';
 import star from '../../assets/images/star.png';
-import tree from '../../assets/images/tree.png';
-import pending from '../../assets/images/pending.png';
+// import tree from '../../assets/images/tree.png';
+// import pending from '../../assets/images/pending.png';
 import './sidebar.css';
 import UserProfile from './userProfile';
 import { FaChevronDown, FaSearch } from 'react-icons/fa';
@@ -336,7 +336,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
               <span className="ml-3 text-[.9rem]  font-semibold ">Explore Designers</span>
             </div>
             {/* Outfits */}
-            <div
+            {/* <div
               onClick={() => handleLookbookTabChange('Outfits')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Outfits' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
@@ -348,7 +348,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
                 className="w-[1.2rem] aspect-auto rounded-xl  ml-6"
               />
               <span className="ml-3 text-[.9rem]  font-semibold">Outfits</span>
-            </div>
+            </div> */}
 
             {/* Collective */}
             <div
@@ -366,7 +366,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
             </div>
 
             {/* My Designs */}
-            <div
+            {/* <div
               onClick={() => handleLookbookTabChange('My Designs')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'My Designs' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
@@ -374,7 +374,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
             >
               <img src={art} alt="Address" className="w-[1.2rem] aspect-auto rounded-xl  ml-6" />
               <span className="ml-3 text-[.9rem]  font-semibold">My Designs</span>
-            </div>
+            </div> */}
 
             {/* Favorites */}
             <div
@@ -388,7 +388,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
             </div>
 
             {/* Brought to life */}
-            <div
+            {/* <div
               onClick={() => handleLookbookTabChange('Brought to life')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Brought to life' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
@@ -396,10 +396,10 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
             >
               <img src={tree} alt="Address" className="w-[1.2rem] aspect-auto rounded-xl  ml-6" />
               <span className="ml-3 text-[.9rem]  font-semibold">Brought to life</span>
-            </div>
+            </div> */}
 
             {/* Awaiting Artisan */}
-            <div
+            {/* <div
               onClick={() => setSelectlookbook('Awaiting Artisan')}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Awaiting Artisan' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
@@ -411,7 +411,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
                 className="w-[1.2rem] aspect-auto rounded-xl  ml-6"
               />
               <span className="ml-3 text-[.9rem]  font-semibold">Awaiting Artisan</span>
-            </div>
+            </div> */}
           </div>
         </div>
       ) : null}

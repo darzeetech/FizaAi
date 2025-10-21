@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import BulkImageUploadField from '../../components/FormComponents/BulkImageUploadField';
 import BulkImageUploadFieldp from '../../components/FormComponents/BulkImageUploadFieldp';
 import './sidebar.css';
@@ -346,6 +346,8 @@ export default function FizaAI() {
   const [favouriteTotalPages, setFavouriteTotalPages] = useState(1);
   const [favouriteLastPage, setFavouriteLastPage] = useState(false);
   const [loadingFavourites, setLoadingFavourites] = useState(false);
+
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Store lat/lon from ipapi.co
 
@@ -1159,84 +1161,84 @@ export default function FizaAI() {
     }
   };
 
-  // Fetch portfolios (supports paging and append)
-  const fetchPortfolios = async (pageNo = 0, append = false) => {
-    try {
-      if (append) {
-        setLoadingPortfoliosMore(true);
-      } else {
-        setLoadingPortfolios(true);
-      }
-      setError(null);
+  // // Fetch portfolios (supports paging and append)
+  // const fetchPortfolios = async (pageNo = 0, append = false) => {
+  //   try {
+  //     if (append) {
+  //       setLoadingPortfoliosMore(true);
+  //     } else {
+  //       setLoadingPortfolios(true);
+  //     }
+  //     setError(null);
 
-      // Try to get lat/lon from localStorage if not present in locationData
-      let lat = locationData?.lat;
-      let lon = locationData?.lon;
+  //     // Try to get lat/lon from localStorage if not present in locationData
+  //     let lat = locationData?.lat;
+  //     let lon = locationData?.lon;
 
-      if (lat === undefined || lon === undefined) {
-        const ipapiRaw = localStorage.getItem('ipapidata');
+  //     if (lat === undefined || lon === undefined) {
+  //       const ipapiRaw = localStorage.getItem('ipapidata');
 
-        if (ipapiRaw) {
-          try {
-            const ipapiData = JSON.parse(ipapiRaw);
+  //       if (ipapiRaw) {
+  //         try {
+  //           const ipapiData = JSON.parse(ipapiRaw);
 
-            if (ipapiData.latitude !== undefined && ipapiData.longitude !== undefined) {
-              lat = ipapiData.latitude;
-              lon = ipapiData.longitude;
-            }
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Failed to parse ipapidata from localStorage', error);
-          }
-        }
-      }
+  //           if (ipapiData.latitude !== undefined && ipapiData.longitude !== undefined) {
+  //             lat = ipapiData.latitude;
+  //             lon = ipapiData.longitude;
+  //           }
+  //         } catch (error) {
+  //           // eslint-disable-next-line no-console
+  //           console.error('Failed to parse ipapidata from localStorage', error);
+  //         }
+  //       }
+  //     }
 
-      const res = await api.getRequest(
-        `portfolio/fetch-all?pageNo=${pageNo}&pageSize=10${
-          lat !== undefined && lon !== undefined ? `&lat=${lat}&lon=${lon}` : ''
-        }`
-      );
+  //     const res = await api.getRequest(
+  //       `portfolio/fetch-all?pageNo=${pageNo}&pageSize=10${
+  //         lat !== undefined && lon !== undefined ? `&lat=${lat}&lon=${lon}` : ''
+  //       }`
+  //     );
 
-      if (res.status && res.data && Array.isArray(res.data.content)) {
-        const content = res.data.content;
-        const lastPage = Boolean(res.data.lastPage);
-        const currentPage =
-          typeof res.data.currentPage === 'number' ? res.data.currentPage : pageNo;
-        const totalPages = typeof res.data.totalPages === 'number' ? res.data.totalPages : 1;
+  //     if (res.status && res.data && Array.isArray(res.data.content)) {
+  //       const content = res.data.content;
+  //       const lastPage = Boolean(res.data.lastPage);
+  //       const currentPage =
+  //         typeof res.data.currentPage === 'number' ? res.data.currentPage : pageNo;
+  //       const totalPages = typeof res.data.totalPages === 'number' ? res.data.totalPages : 1;
 
-        if (append) {
-          setPortfolios((prev) => [...prev, ...content]);
-        } else {
-          setPortfolios(content);
+  //       if (append) {
+  //         setPortfolios((prev) => [...prev, ...content]);
+  //       } else {
+  //         setPortfolios(content);
 
-          if (content.length > 0) {
-            setSelectedPortfolio(content[0]);
-          } else {
-            setSelectedPortfolio(null);
-          }
-        }
+  //         if (content.length > 0) {
+  //           setSelectedPortfolio(content[0]);
+  //         } else {
+  //           setSelectedPortfolio(null);
+  //         }
+  //       }
 
-        setPortfoliosPage(currentPage);
-        setPortfoliosTotalPages(totalPages);
-        setPortfoliosLastPage(lastPage);
-      } else {
-        if (!append) {
-          setPortfolios([]);
-          setSelectedPortfolio(null);
-        }
-      }
-    } catch (err) {
-      if (!append) {
-        setPortfolios([]);
-        setSelectedPortfolio(null);
-      }
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch portfolios', err);
-    } finally {
-      setLoadingPortfolios(false);
-      setLoadingPortfoliosMore(false);
-    }
-  };
+  //       setPortfoliosPage(currentPage);
+  //       setPortfoliosTotalPages(totalPages);
+  //       setPortfoliosLastPage(lastPage);
+  //     } else {
+  //       if (!append) {
+  //         setPortfolios([]);
+  //         setSelectedPortfolio(null);
+  //       }
+  //     }
+  //   } catch (err) {
+  //     if (!append) {
+  //       setPortfolios([]);
+  //       setSelectedPortfolio(null);
+  //     }
+  //     // eslint-disable-next-line no-console
+  //     console.error('Failed to fetch portfolios', err);
+  //   } finally {
+  //     setLoadingPortfolios(false);
+  //     setLoadingPortfoliosMore(false);
+  //   }
+  // };
 
   // Update form data for section 1
   const updateFormDataSection1 = (field: keyof FormDataSection1, value: any) => {
@@ -1602,6 +1604,85 @@ export default function FizaAI() {
     } finally {
       // setIsDownloading(false); // Hide loader
       setIsDownloading(false);
+    }
+  };
+
+  // Fetch portfolios with optional search query
+  const fetchPortfolios = async (pageNo = 0, append = false, query = '') => {
+    try {
+      if (append) {
+        setLoadingPortfoliosMore(true);
+      } else {
+        setLoadingPortfolios(true);
+      }
+
+      setError(null);
+
+      // Get lat/lon
+      let lat = locationData?.lat;
+      let lon = locationData?.lon;
+
+      if (lat === undefined || lon === undefined) {
+        const ipapiRaw = localStorage.getItem('ipapidata');
+        try {
+          const ipapiData = ipapiRaw ? JSON.parse(ipapiRaw) : undefined;
+
+          if (ipapiData?.latitude && ipapiData?.longitude) {
+            lat = ipapiData.latitude;
+            lon = ipapiData.longitude;
+          }
+        } catch {
+          // eslint-disable-next-line no-console
+          console.error('Failed to parse location data');
+        }
+      }
+
+      // Compose URL dynamically
+      let url = `portfolio/fetch-all?pageNo=${pageNo}&pageSize=10`;
+
+      if (lat && lon) {
+        url += `&lat=${lat}&lon=${lon}`;
+      }
+
+      if (query) {
+        url += `&query=${encodeURIComponent(query)}`;
+      }
+
+      // API call
+      const res = await api.getRequest(url);
+
+      if (res?.status && Array.isArray(res.data?.content)) {
+        const content = res.data.content;
+        const lastPage = Boolean(res.data.lastPage);
+        const currentPage =
+          typeof res.data.currentPage === 'number' ? res.data.currentPage : pageNo;
+        const totalPages = typeof res.data.totalPages === 'number' ? res.data.totalPages : 1;
+
+        if (append) {
+          setPortfolios((prev) => [...prev, ...content]);
+        } else {
+          setPortfolios(content);
+        }
+
+        setSelectedPortfolio(content.length > 0 ? content[0] : null);
+        setPortfoliosPage(currentPage);
+        setPortfoliosTotalPages(totalPages);
+        setPortfoliosLastPage(lastPage);
+      } else if (!append) {
+        setPortfolios([]);
+        setSelectedPortfolio(null);
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch portfolios:', err);
+
+      if (!append) {
+        setPortfolios([]);
+        setSelectedPortfolio(null);
+      }
+    } finally {
+      setLoadingPortfolios(false);
+      setLoadingPortfoliosMore(false);
     }
   };
 
@@ -3296,7 +3377,16 @@ export default function FizaAI() {
                         onRefresh={() => fetchPortfolios(0, false)}
                         onLoadMore={handleLoadMorePortfolios}
                         searchTerm={searchTerm}
-                        onSearchChange={(v) => setSearchTerm(v)}
+                        onSearchChange={(v) => {
+                          setSearchTerm(v);
+
+                          if (searchDebounceRef.current) {
+                            clearTimeout(searchDebounceRef.current);
+                          }
+                          searchDebounceRef.current = setTimeout(() => {
+                            fetchPortfolios(0, false, v);
+                          }, 100);
+                        }}
                         pageInfo={{
                           currentPage: portfoliosPage,
                           totalPages: portfoliosTotalPages,

@@ -434,13 +434,13 @@ export default function Lookbook({
             )}
           </div>
         </div>
-        <div className="relative mb-3 ">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg text-black ">🔍 </span>
+        <div className="relative mb-3">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg text-black">🔍</span>
           <input
             value={searchTerm}
             onChange={(e) => onSearchChange?.(e.target.value)}
             placeholder="Search designers"
-            className="w-full text-black pl-10 pr-3 py-2 rounded-full bg-[#c8bda5] text-base font[400] placeholder-black"
+            className="w-full text-black pl-10 pr-3 py-2 rounded-full bg-[#c8bda5] text-base font-[400] placeholder-black"
           />
         </div>
 

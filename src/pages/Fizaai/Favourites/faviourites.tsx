@@ -1,5 +1,5 @@
 import Collective from './Collective';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Lookbook, { Portfolio as LookbookPortfolio } from './portfoliofavourite';
 import { api } from '../../../utils/apiRequest';
 
@@ -50,49 +50,54 @@ const Favourites: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
   const [locationData] = useState<{ lat?: number; lon?: number }>({});
   const [searchTerm, setSearchTerm] = useState('');
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setActiveTab('collective');
   }, []);
 
-  const fetchPortfolios = async (pageNo = 0, append = false) => {
+  const fetchPortfolios = async (pageNo = 0, append = false, query = '') => {
     try {
       if (append) {
         setLoadingPortfoliosMore(true);
       } else {
         setLoadingPortfolios(true);
       }
-      //setError(null);
 
-      // Try to get lat/lon from localStorage if not present in locationData
+      // Get lat/lon
       let lat = locationData?.lat;
       let lon = locationData?.lon;
 
       if (lat === undefined || lon === undefined) {
         const ipapiRaw = localStorage.getItem('ipapidata');
+        try {
+          const ipapiData = ipapiRaw ? JSON.parse(ipapiRaw) : undefined;
 
-        if (ipapiRaw) {
-          try {
-            const ipapiData = JSON.parse(ipapiRaw);
-
-            if (ipapiData.latitude !== undefined && ipapiData.longitude !== undefined) {
-              lat = ipapiData.latitude;
-              lon = ipapiData.longitude;
-            }
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Failed to parse ipapidata from localStorage', error);
+          if (ipapiData?.latitude && ipapiData?.longitude) {
+            lat = ipapiData.latitude;
+            lon = ipapiData.longitude;
           }
+        } catch {
+          // eslint-disable-next-line no-console
+          console.error('Failed to parse location data');
         }
       }
 
-      const res = await api.getRequest(
-        `portfolio/fav-list?pageNo=${pageNo}&pageSize=10${
-          lat !== undefined && lon !== undefined ? `&lat=${lat}&lon=${lon}` : ''
-        }`
-      );
+      // Compose URL dynamically
+      let url = `portfolio/fetch-all?pageNo=${pageNo}&pageSize=10`;
 
-      if (res.status && res.data && Array.isArray(res.data.content)) {
+      if (lat && lon) {
+        url += `&lat=${lat}&lon=${lon}`;
+      }
+
+      if (query) {
+        url += `&query=${encodeURIComponent(query)}`;
+      }
+
+      // API call
+      const res = await api.getRequest(url);
+
+      if (res?.status && Array.isArray(res.data?.content)) {
         const content = res.data.content;
         const lastPage = Boolean(res.data.lastPage);
         const currentPage =
@@ -103,30 +108,24 @@ const Favourites: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
           setPortfolios((prev) => [...prev, ...content]);
         } else {
           setPortfolios(content);
-
-          if (content.length > 0) {
-            setSelectedPortfolio(content[0]);
-          } else {
-            setSelectedPortfolio(null);
-          }
         }
 
+        setSelectedPortfolio(content.length > 0 ? content[0] : null);
         setPortfoliosPage(currentPage);
         setPortfoliosTotalPages(totalPages);
         setPortfoliosLastPage(lastPage);
-      } else {
-        if (!append) {
-          setPortfolios([]);
-          setSelectedPortfolio(null);
-        }
+      } else if (!append) {
+        setPortfolios([]);
+        setSelectedPortfolio(null);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch portfolios:', err);
+
       if (!append) {
         setPortfolios([]);
         setSelectedPortfolio(null);
       }
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch portfolios', err);
     } finally {
       setLoadingPortfolios(false);
       setLoadingPortfoliosMore(false);
@@ -185,7 +184,16 @@ const Favourites: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
             onRefresh={() => fetchPortfolios(0, false)}
             onLoadMore={handleLoadMore}
             searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
+            onSearchChange={(v) => {
+              setSearchTerm(v);
+
+              if (searchDebounceRef.current) {
+                clearTimeout(searchDebounceRef.current);
+              }
+              searchDebounceRef.current = setTimeout(() => {
+                fetchPortfolios(0, false, v);
+              }, 100);
+            }}
             pageInfo={{
               currentPage: portfoliosPage,
               totalPages: portfoliosTotalPages,

@@ -167,7 +167,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
         </div>
 
         <a
-          href="https://discord.com/invite/nBzEYku69N"
+          href="https://chat.whatsapp.com/LC7uH7BYVxTIAoAd2UekoP?mode=wwc"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-3 cursor-pointer px-4 whitespace-nowrap overflow-hidden text-ellipsis"

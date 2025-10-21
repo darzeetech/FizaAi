@@ -346,6 +346,7 @@ export default function FizaAI() {
   const [favouriteTotalPages, setFavouriteTotalPages] = useState(1);
   const [favouriteLastPage, setFavouriteLastPage] = useState(false);
   const [loadingFavourites, setLoadingFavourites] = useState(false);
+  const [searchhTerm, setSearchhTerm] = useState('');
 
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -3376,9 +3377,9 @@ export default function FizaAI() {
                         onSelect={(p) => setSelectedPortfolio(p)}
                         onRefresh={() => fetchPortfolios(0, false)}
                         onLoadMore={handleLoadMorePortfolios}
-                        searchTerm={searchTerm}
+                        searchTerm={searchhTerm}
                         onSearchChange={(v) => {
-                          setSearchTerm(v);
+                          setSearchhTerm(v);
 
                           if (searchDebounceRef.current) {
                             clearTimeout(searchDebounceRef.current);

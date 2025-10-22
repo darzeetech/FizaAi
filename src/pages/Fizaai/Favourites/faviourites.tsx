@@ -84,7 +84,7 @@ const Favourites: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
       }
 
       // Compose URL dynamically
-      let url = `portfolio/fetch-all?pageNo=${pageNo}&pageSize=10`;
+      let url = `portfolio/fav-list?pageNo=${pageNo}&pageSize=10`;
 
       if (lat && lon) {
         url += `&lat=${lat}&lon=${lon}`;

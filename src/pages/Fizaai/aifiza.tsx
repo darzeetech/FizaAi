@@ -844,7 +844,7 @@ export default function FizaAI() {
             // Save full response for future use
             localStorage.setItem('ipapidata', JSON.stringify(ipData));
             // eslint-disable-next-line no-console
-            console.log('User timezone:', zone);
+            // console.log('User timezone:', zone);
 
             if (ipData?.timezone) {
               zone = ipData.timezone;
@@ -927,14 +927,11 @@ export default function FizaAI() {
   const fetchCollective = async (pageNo = 0, append = false) => {
     setLoadingCollective(true);
 
-    // eslint-disable-next-line no-console
-    console.log('hhhh');
-
     try {
       const user = auth.currentUser;
       const token = user && (await user.getIdToken());
       // eslint-disable-next-line no-console
-      console.log(token);
+      // console.log(token);
       const response = await api.getRequest(
         `fiza/collective/feed?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`,
         {
@@ -1581,7 +1578,7 @@ export default function FizaAI() {
 
     // const ap1 = 'https://app.fizaai.com/';
     // eslint-disable-next-line no-console
-    console.log(ap);
+    // console.log(ap);
 
     try {
       const apiUrl = `${ap}file/download-file?fileUrl=${encodeURIComponent(generatedImageUrl)}`;

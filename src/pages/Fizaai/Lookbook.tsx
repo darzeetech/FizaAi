@@ -84,7 +84,6 @@ export default function Lookbook({
 
   // filters / store data state
   const [filtersData, setFiltersData] = useState<any | null>(null);
-  const [filtersError, setFiltersError] = useState<string | null>(null);
 
   const [selectedOutfits, setSelectedOutfits] = useState<number[]>([]);
   const [selectedSubOutfits, setSelectedSubOutfits] = useState<number[]>([]);
@@ -222,7 +221,6 @@ export default function Lookbook({
     const username = selected?.userName || '';
     const tailorId = detail?.tailor_id ?? undefined;
     setFiltersData(null);
-    setFiltersError(null);
 
     if (!username || !tailorId) {
       return;
@@ -289,8 +287,6 @@ export default function Lookbook({
       return;
     }
 
-    setFiltersError(null);
-
     try {
       const qs = `tailor_id=${encodeURIComponent(tailorId ?? 92)}&username=${encodeURIComponent(
         username
@@ -303,7 +299,6 @@ export default function Lookbook({
 
       setFiltersData(res.data);
     } catch (err: any) {
-      setFiltersError(err?.message || 'Failed to load filters');
       setFiltersData(null);
     }
   };
@@ -385,13 +380,13 @@ export default function Lookbook({
   };
 
   // eslint-disable-next-line no-console
-  console.log(filtersData, filtersError, selectedOutfits, selectedColors);
+  // console.log(filtersData, filtersError, selectedOutfits, selectedColors);
 
-  // eslint-disable-next-line no-console
-  console.log(selectedOutfits, selectedSubOutfits, selectedColors);
+  // // eslint-disable-next-line no-console
+  // console.log(selectedOutfits, selectedSubOutfits, selectedColors);
 
-  // eslint-disable-next-line no-console
-  console.log(filteredOutfits);
+  // // eslint-disable-next-line no-console
+  // console.log(filteredOutfits);
 
   const handleSwipeLeft = () => {
     const nextIndex = currentDesignerIndex < portfolios.length - 1 ? currentDesignerIndex + 1 : 0;

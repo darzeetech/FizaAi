@@ -127,13 +127,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
         ? `fiza/collective/remove_from_fav?elementId=${item.id}`
         : `fiza/collective/add_to_fav?elementId=${item.id}`;
 
-      const res = await api.putRequest(endpoint, {
+      await api.putRequest(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      const data = res.data;
-      // eslint-disable-next-line no-console
-      console.log(data);
 
       if (!favorited) {
         setFavCount((prev) => prev + 1);
@@ -158,13 +154,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
         ? `fiza/collective/unlike_feed?elementId=${item.id}`
         : `fiza/collective/like_feed?elementId=${item.id}`;
 
-      const res = await api.putRequest(endpoint, {
+      await api.putRequest(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = res.data;
-      // eslint-disable-next-line no-console
-      console.log(data);
       // Optimistically update like count
       setLikeCount((prev) => (liked ? Math.max(prev - 1, 0) : prev + 1));
       setLiked(!liked);

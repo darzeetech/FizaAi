@@ -56,14 +56,14 @@ const Collective: React.FC<CollectiveProps> = ({ data, loading, onLoadMore, page
 
     const handleScroll = () => {
       // eslint-disable-next-line no-console
-      console.log(
-        'scrollTop:',
-        el.scrollTop,
-        'scrollHeight:',
-        el.scrollHeight,
-        'clientHeight:',
-        el.clientHeight
-      );
+      // console.log(
+      //   'scrollTop:',
+      //   el.scrollTop,
+      //   'scrollHeight:',
+      //   el.scrollHeight,
+      //   'clientHeight:',
+      //   el.clientHeight
+      // );
 
       if (loading || !pageInfo || pageInfo.lastPage) {
         return;

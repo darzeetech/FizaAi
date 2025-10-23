@@ -603,7 +603,7 @@ export default function Lookbook({
                       </div>
                     )}
                     <div className=" w-full flex  items-center justify-between   ">
-                      <div>
+                      <div className="w-[70%] flex flex-col flex-wrap">
                         <div className="font-semibold text-nowrap">{selected.tailorName}</div>
                         <div className="text-sm text-gray-500">{selected.userName}</div>
                       </div>

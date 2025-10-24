@@ -603,13 +603,14 @@ export default function Lookbook({
                       </div>
                     )}
                     <div className=" w-full flex  items-center justify-between   ">
-                      <div className="w-[70%] flex flex-col flex-wrap">
-                        <div className="font-semibold text-nowrap w-full flex flex-wrap">
+                      <div className="w-[60%] flex flex-col">
+                        <div className="font-semibold w-full break-words leading-5">
                           {selected.tailorName}
                         </div>
-                        <div className="text-sm text-gray-500">{selected.userName}</div>
+                        <div className="text-sm text-gray-500 break-words">{selected.userName}</div>
                       </div>
-                      <div className="w-[30%] flex items-center gap-4">
+
+                      <div className="w-[40%] flex items-center gap-4">
                         <img
                           src={copy}
                           alt="copy"
@@ -672,7 +673,12 @@ export default function Lookbook({
                         src={glove}
                         alt="whatsapp"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => window.open(detail?.port_folio_link, '_blank')}
+                        onClick={() => {
+                          const link = detail?.port_folio_link.startsWith('http')
+                            ? detail?.port_folio_link
+                            : 'https://' + detail?.port_folio_link;
+                          window.open(link, '_blank');
+                        }}
                       />
                     )}
                     {detail?.social_media_handlers?.upi && (

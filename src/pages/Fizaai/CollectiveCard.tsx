@@ -227,7 +227,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                   alt="Profile"
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
                 />
-                <div className="font-semibold text-white">{designerName}</div>
+                <div className="font-semibold text-white text-sm">{designerName}</div>
               </div>
             </motion.div>
 
@@ -298,7 +298,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-lg md:text-xl font-semibold">
+        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-sm md:text-xl font-semibold">
           <span>{outfitName}</span>
           <button
             type="button"

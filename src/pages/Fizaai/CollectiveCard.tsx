@@ -191,6 +191,15 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     trackMouse: true,
   });
 
+  const maxLength = 15;
+
+  const truncateText = (text: string, maxLength: number): string => {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + '...';
+    }
+    return text;
+  };
+
   return (
     <motion.div
       className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-2 ${
@@ -284,7 +293,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           />
           {/* Mobile Dots Above Image */}
           {totalImages > 1 && (
-            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
               {item.images.map((_, index) => (
                 <button
                   key={index}

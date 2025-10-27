@@ -382,7 +382,7 @@ export default function FizaAI() {
         fetchCollective(0, false);
       }
     }
-  }, []);
+  }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);

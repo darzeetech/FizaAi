@@ -374,13 +374,14 @@ export default function FizaAI() {
   }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
 
   useEffect(() => {
-    if (selectedTab === 'lookbook' && selectlookbook) {
-      // Fetch for initial value
-      if (selectlookbook === 'Favorites') {
-        fetchFavourites(0, false);
-      } else if (selectlookbook === 'Collective') {
-        fetchCollective(0, false);
-      }
+    if (!isLoggedIn || !auth.currentUser || selectedTab !== 'lookbook') {
+      return;
+    }
+
+    if (selectlookbook === 'Collective') {
+      fetchCollective(0, false);
+    } else if (selectlookbook === 'Favorites') {
+      fetchFavourites(0, false);
     }
   }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
 

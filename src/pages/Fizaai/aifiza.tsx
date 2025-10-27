@@ -374,10 +374,15 @@ export default function FizaAI() {
   }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
 
   useEffect(() => {
-    if (selectlookbook === 'Favorites') {
-      fetchFavourites(0, false);
+    if (selectedTab === 'lookbook' && selectlookbook) {
+      // Fetch for initial value
+      if (selectlookbook === 'Favorites') {
+        fetchFavourites(0, false);
+      } else if (selectlookbook === 'Collective') {
+        fetchCollective(0, false);
+      }
     }
-  }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
+  }, []);
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);

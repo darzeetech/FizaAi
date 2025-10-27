@@ -198,7 +198,7 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
   }, [generatedImageUrl]);
 
   return (
-    <div className="w-[300px] min-w-[260px] h-[100dvh] bg-[#F9F6F1] border-r shadow-md fixed left-0 top-0 z-40 flex flex-col">
+    <div className="w-[300px] min-w-[260px] h-[100dvh] bg-[#F9F6F1] border-r shadow-md fixed left-0 top-0 z-[200] flex flex-col">
       {/* Header (Hidden when user profile is open) */}
       {!showProfile && (
         <div className="sticky top-0 z-10 bg-[#F9F6F1] px-4 pt-4 pb-2">

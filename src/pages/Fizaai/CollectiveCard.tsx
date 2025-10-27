@@ -236,7 +236,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                   alt="Profile"
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
                 />
-                <div className="font-semibold text-white text-sm">{designerName}</div>
+                <div className="font-semibold text-white text-sm">
+                  {truncateText(designerName, maxLength)}
+                </div>
               </div>
             </motion.div>
 

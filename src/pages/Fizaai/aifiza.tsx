@@ -359,6 +359,32 @@ export default function FizaAI() {
     localStorage.setItem('selected_tab', tab);
   };
 
+  // ✅ Lookbook Tab Change Trigger Integration
+
+  useEffect(() => {
+    if (!isLoggedIn || !auth.currentUser || selectedTab !== 'lookbook') {
+      return;
+    }
+
+    if (selectlookbook === 'Collective') {
+      fetchCollective(0, false);
+    } else if (selectlookbook === 'Favorites') {
+      fetchFavourites(0, false);
+    }
+  }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !auth.currentUser || selectedTab !== 'lookbook') {
+      return;
+    }
+
+    if (selectlookbook === 'Collective') {
+      fetchCollective(0, false);
+    } else if (selectlookbook === 'Favorites') {
+      fetchFavourites(0, false);
+    }
+  }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
+
   const handleShowStudio = () => {
     setSidebarAnimating(true);
     // Use setTimeout to ensure the element is rendered before applying the show animation

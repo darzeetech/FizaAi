@@ -191,6 +191,16 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     trackMouse: true,
   });
 
+  const maxLength = 17;
+
+  const truncateText = (text: string, maxLength: number): string => {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + '...';
+    }
+
+    return text;
+  };
+
   return (
     <motion.div
       className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-2 ${
@@ -227,7 +237,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                   alt="Profile"
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
                 />
-                <div className="font-semibold text-white">{designerName}</div>
+                <div className="font-semibold text-white text-sm">
+                  {truncateText(designerName, maxLength)}
+                </div>
               </div>
             </motion.div>
 
@@ -284,7 +296,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           />
           {/* Mobile Dots Above Image */}
           {totalImages > 1 && (
-            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
               {item.images.map((_, index) => (
                 <button
                   key={index}
@@ -298,8 +310,8 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-lg md:text-xl font-semibold">
-          <span>{outfitName}</span>
+        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-sm md:text-xl font-semibold">
+          <span> {truncateText(outfitName, maxLength)}</span>
           <button
             type="button"
             aria-label={liked ? 'Unlike' : 'Like'}
@@ -401,7 +413,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       {/* Mobile Bottom Bar */}
       <div className="md:hidden px-4 pb-3 bg-white rounded-b-[30px] shadow-md">
         <div className="flex items-center justify-between w-full px-2 text-sm">
-          <span className="font-semibold text-base truncate">{outfitName}</span>
+          <span className="font-semibold text-base truncate">
+            {' '}
+            {truncateText(outfitName, maxLength)}
+          </span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               {item.platForm == 'FIZA' && (

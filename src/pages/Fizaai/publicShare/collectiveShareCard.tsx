@@ -68,6 +68,15 @@ const formatTimeline = (createdAt: string): string => {
   return `Prompt Created - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
 };
 
+const maxLength = 17;
+const truncateText = (text: string, maxLength: number): string => {
+  if (text.length > maxLength) {
+    return text.substring(0, maxLength) + '...';
+  }
+
+  return text;
+};
+
 const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange }) => {
   const outfitName = item.dressInfo?.selectedOutfit
     ? item.dressInfo.selectedOutfit.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -293,7 +302,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           />
           {/* Mobile Dots Above Image */}
           {totalImages > 1 && (
-            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[30]">
               {item.images.map((_, index) => (
                 <button
                   key={index}
@@ -387,7 +396,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               />
 
               <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
-                {designerName}
+                {truncateText(designerName, maxLength)}
               </span>
             </div>
           </div>
@@ -410,7 +419,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       {/* Mobile Bottom Bar */}
       <div className="md:hidden px-4 pb-3 bg-white rounded-b-[30px] shadow-md">
         <div className="flex items-center justify-between w-full px-2 text-sm">
-          <span className="font-semibold text-base truncate">{outfitName}</span>
+          <span className="font-semibold text-base truncate">
+            {truncateText(outfitName, maxLength)}
+          </span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               {item.platForm == 'FIZA' && (

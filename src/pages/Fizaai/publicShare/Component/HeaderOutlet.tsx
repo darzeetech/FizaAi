@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import SideDrawer from './SIdedrawer';
 import sidebar from '../../../../assets/images/view_sidebar.png';
 import './sidebar.css';
@@ -10,9 +11,6 @@ interface HeaderWithSidedrawerProps {
   drawerOpen: boolean;
   onCloseDrawer: () => void; // add this prop for closing drawer
 }
-const currentPage: 'collective' | 'explore' = location.pathname.includes('explore')
-  ? 'explore'
-  : 'collective';
 
 const HeaderWithSidedrawer: React.FC<HeaderWithSidedrawerProps> = ({
   onNavigate,
@@ -22,6 +20,21 @@ const HeaderWithSidedrawer: React.FC<HeaderWithSidedrawerProps> = ({
   drawerOpen,
   onCloseDrawer,
 }) => {
+  const location = useLocation(); // ✅ Must be inside the component
+
+  const [currentPage, setCurrentPage] = useState<'collective' | 'explore'>(
+    location.pathname.includes('explore') ? 'explore' : 'collective'
+  );
+
+  useEffect(() => {
+    // ✅ This will run whenever the URL changes
+    if (location.pathname.includes('explore')) {
+      setCurrentPage('explore');
+    } else {
+      setCurrentPage('collective');
+    }
+  }, [location.pathname]);
+
   return (
     <>
       <header className="w-full flex justify-between items-center bg-white p-4 border-b border-gray-300 sticky top-0 z-20">

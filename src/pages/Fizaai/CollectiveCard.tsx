@@ -191,7 +191,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     trackMouse: true,
   });
 
-  const maxLength = 15;
+  const maxLength = 13;
 
   const truncateText = (text: string, maxLength: number): string => {
     if (text.length > maxLength) {
@@ -311,7 +311,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
         </div>
 
         <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-sm md:text-xl font-semibold">
-          <span>{outfitName}</span>
+          <span> {truncateText(outfitName, maxLength)}</span>
           <button
             type="button"
             aria-label={liked ? 'Unlike' : 'Like'}
@@ -390,7 +390,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               />
 
               <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
-                {designerName}
+                {truncateText(designerName, maxLength)}
               </span>
             </div>
           </div>
@@ -413,7 +413,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       {/* Mobile Bottom Bar */}
       <div className="md:hidden px-4 pb-3 bg-white rounded-b-[30px] shadow-md">
         <div className="flex items-center justify-between w-full px-2 text-sm">
-          <span className="font-semibold text-base truncate">{outfitName}</span>
+          <span className="font-semibold text-base truncate">
+            {' '}
+            {truncateText(outfitName, maxLength)}
+          </span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               {item.platForm == 'FIZA' && (

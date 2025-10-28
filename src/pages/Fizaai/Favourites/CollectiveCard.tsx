@@ -110,6 +110,16 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
     onShowInfoChange?.(val);
   };
 
+  const maxLength = 13;
+
+  const truncateText = (text: string, maxLength: number): string => {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + '...';
+    }
+
+    return text;
+  };
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
@@ -218,7 +228,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
                   alt="Profile"
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
                 />
-                <div className="font-semibold text-white">{designerName}</div>
+                <div className="font-semibold text-white">
+                  {' '}
+                  {truncateText(designerName, maxLength)}
+                </div>
               </div>
             </motion.div>
 
@@ -275,7 +288,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
           />
           {/* Mobile Dots Above Image */}
           {totalImages > 1 && (
-            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[30]">
               {item.images.map((_, index) => (
                 <button
                   key={index}
@@ -290,7 +303,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
         </div>
 
         <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-lg md:text-xl font-semibold">
-          <span>{outfitName}</span>
+          <span> {truncateText(outfitName, maxLength)}</span>
           <button
             type="button"
             aria-label={liked ? 'Unlike' : 'Like'}
@@ -369,7 +382,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
               />
 
               <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
-                {designerName}
+                {truncateText(designerName, maxLength)}
               </span>
             </div>
           </div>

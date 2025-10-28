@@ -68,7 +68,7 @@ const formatTimeline = (createdAt: string): string => {
   return `Prompt Created - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
 };
 
-const maxLength = 10;
+const maxLength = 17;
 const truncateText = (text: string, maxLength: number): string => {
   if (text.length > maxLength) {
     return text.substring(0, maxLength) + '...';

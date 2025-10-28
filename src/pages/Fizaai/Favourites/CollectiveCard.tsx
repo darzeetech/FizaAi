@@ -110,7 +110,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
     onShowInfoChange?.(val);
   };
 
-  const maxLength = 13;
+  const maxLength = 17;
 
   const truncateText = (text: string, maxLength: number): string => {
     if (text.length > maxLength) {

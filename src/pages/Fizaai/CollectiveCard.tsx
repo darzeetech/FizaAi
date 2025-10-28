@@ -390,7 +390,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               />
 
               <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
-                {truncateText(designerName, maxLength)}
+                {designerName}
               </span>
             </div>
           </div>

@@ -670,7 +670,12 @@ export default function Lookbook({
                         src={glove}
                         alt="whatsapp"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
-                        onClick={() => window.open(detail?.port_folio_link, '_blank')}
+                        onClick={() => {
+                          const link = detail?.port_folio_link.startsWith('http')
+                            ? detail?.port_folio_link
+                            : 'https://' + detail?.port_folio_link;
+                          window.open(link, '_blank');
+                        }}
                       />
                     )}
                     {detail?.social_media_handlers?.upi && (

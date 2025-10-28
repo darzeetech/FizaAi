@@ -659,7 +659,14 @@ export default function Lookbook({
                         alt="whatsapp"
                         className="h-5 md:h-5 aspect-auto cursor-pointer"
                         onClick={() => {
-                          const phoneNumber = detail?.social_media_handlers?.whatsapp;
+                          let phoneNumber = detail?.social_media_handlers?.whatsapp;
+                          // Remove any non-digit characters first
+                          phoneNumber = phoneNumber.replace(/\D/g, '');
+                          // If 10 digits, prepend '91'
+
+                          if (phoneNumber.length === 10) {
+                            phoneNumber = '+91' + phoneNumber;
+                          }
                           const message = encodeURIComponent(
                             'Hi, I saw your portfolio on fizaai.com by Darzee.'
                           );
@@ -668,6 +675,7 @@ export default function Lookbook({
                         }}
                       />
                     )}
+
                     {detail?.port_folio_link && (
                       <img
                         src={glove}

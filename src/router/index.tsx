@@ -133,6 +133,7 @@ import FizaaiPublicLayout from '../pages/Fizaai/publicShare/maine';
 import CollectivePage from '../pages/Fizaai/publicShare/collec';
 import ExplorePage from '../pages/Fizaai/publicShare/design';
 import singleportfolio from '../pages/Fizaai/singlePortfolio/portfolio';
+import SingleCollectiveCardPage from '../pages/Fizaai/singlepublicCollective/collective';
 // Ensure this import is correct
 
 const allRoutes = [
@@ -175,6 +176,10 @@ const allRoutes = [
       {
         path: '/designer/:desginername',
         element: <PublicWrapper Content={singleportfolio} showHeader={false} />,
+      },
+      {
+        path: '/collective/:hashedId',
+        element: <PublicWrapper Content={SingleCollectiveCardPage} showHeader={false} />,
       },
 
       {

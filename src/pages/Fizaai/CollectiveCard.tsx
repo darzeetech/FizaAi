@@ -102,8 +102,41 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [favorited, setFavorited] = useState(item.addedToFav ?? false);
   const [favCount, setFavCount] = useState(item.favCount ?? 0);
+  const [whatsAppLoading, setWhatsAppLoading] = useState(false);
 
   const totalImages = item.images.length;
+
+  const handleWhatsAppClick = async () => {
+    if (!item) {
+      return;
+    }
+    setWhatsAppLoading(true);
+
+    try {
+      const body = {
+        imageId: item.id,
+        parameters: ['collective'],
+      };
+
+      const data = await api.postRequest('collective_link_share/generate', body);
+
+      // eslint-disable-next-line no-console
+      console.log('WhatsApp Link Response:', data);
+
+      if (data?.data?.link) {
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(data?.data?.link)}`;
+        window.open(whatsappUrl, '_blank');
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('No link returned from API');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error generating WhatsApp link:', error);
+    } finally {
+      setWhatsAppLoading(false);
+    }
+  };
 
   useEffect(() => {
     setLiked(item.likeByCurrentUser);
@@ -222,23 +255,80 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       <AnimatePresence>
         {showInfo && (
           <>
-            {/* Designed By */}
+            {/* Designed By + Location + Actions */}
             <motion.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2  text-sm font-medium shadow-md md:hidden"
+              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-3 text-sm font-medium shadow-md md:hidden"
             >
-              DESIGNED BY
-              <div className="flex items-center gap-1 mt-1">
-                <img
-                  src={getProfilePic()}
-                  alt="Profile"
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
-                />
-                <div className="font-semibold text-white text-sm">
-                  {truncateText(designerName, maxLength)}
+              <div className="flex flex-col gap-2">
+                <div>
+                  <div className="text-xs uppercase tracking-wide opacity-80">DESIGNED BY</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <img
+                      src={getProfilePic()}
+                      alt="Profile"
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+                    />
+                    <div className="font-semibold text-white text-sm">
+                      {truncateText(designerName, maxLength)}
+                    </div>
+                    <img src="/icons/verified.svg" alt="verified" className="w-4 h-4 ml-1" />
+                  </div>
+                  {/* Location */}
+                  <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
+                    <span>📍</span>
+                    <span>Mumbai, India</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 mt-2">
+                  <button
+                    //onClick={() => navigate(`/designer/${item.userId}`)}
+                    className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
+                  >
+                    View More
+                  </button>
+
+                  <button
+                    onClick={handleWhatsAppClick}
+                    disabled={whatsAppLoading}
+                    className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 hover:bg-green-600 transition disabled:opacity-70"
+                  >
+                    {whatsAppLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin h-3.5 w-3.5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          ></path>
+                        </svg>
+                        <span>Sending</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa fa-whatsapp"></i>
+                        WhatsApp
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -249,9 +339,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className=" absolute top-[104px] right-[20px] -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              className="absolute top-[148px] right-[20px] -translate-x-1/2 text-white w-3/4 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
             >
-              TIMELINE{' '}
+              <div className="text-xs uppercase tracking-wide opacity-80">TIMELINE</div>
               <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
             </motion.div>
           </>

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeable } from 'react-swipeable';
-import coins from '../../assets/images/coins.png';
-import Ai_refresh from '../../assets/icons/Ai_Loader.gif';
-import { api } from '../../utils/apiRequest';
-import circle from '../../assets/icons/circle.png';
-import like from '../../assets/icons/lked.png';
-import notlike from '../../assets/icons/not-liked.png';
-import femalelogo from '../../assets/icons/ai-stylist-female.png';
-import malelogo from '../../assets/icons/ai-stylist-male.png';
-import life from '../../assets/icons/life.png';
-import notfavorite from '../../assets/icons/favorite.png';
-import favorite from '../../assets/icons/favoritselected.png';
+import { useNavigate, useParams } from 'react-router-dom';
+import coins from '../../../assets/images/coins.png';
+import Ai_refresh from '../../../assets/icons/Ai_Loader.gif';
+import { api } from '../../../utils/apiRequest';
+import circle from '../../../assets/icons/circle.png';
+import like from '../../../assets/icons/lked.png';
+import notlike from '../../../assets/icons/not-liked.png';
+import femalelogo from '../../../assets/icons/ai-stylist-female.png';
+import malelogo from '../../../assets/icons/ai-stylist-male.png';
+import life from '../../../assets/icons/life.png';
+import notfavorite from '../../../assets/icons/favorite.png';
+import favorite from '../../../assets/icons/favoritselected.png';
 
 export interface CollectiveItem {
   id: number;
@@ -38,11 +39,7 @@ export interface CollectiveItem {
   };
 }
 
-interface CollectiveCardProps {
-  item: CollectiveItem;
-  onShowInfoChange?: (isShown: boolean) => void;
-}
-
+// Timeline formatter (same as before)
 const formatTimeline = (createdAt: string): string => {
   const createdDate = new Date(createdAt);
   const now = new Date();
@@ -67,156 +64,136 @@ const formatTimeline = (createdAt: string): string => {
   return `Prompt Created - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
 };
 
-const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange }) => {
-  const outfitName = item.dressInfo?.selectedOutfit
-    ? item.dressInfo.selectedOutfit.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-    : 'Outfit';
+const maxLength = 17;
+const truncateText = (text: string, maxLength: number): string =>
+  text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 
-  const designerName = item.userInfo?.fullName?.trim()
-    ? item.userInfo.fullName.trim()
-    : 'Unknown Designer';
+// Get designer profile image
 
-  const getProfilePic = () => {
-    const profilePic = item.userInfo?.profilePicture?.trim();
-    const userGender = item.dressInfo?.gender?.toLowerCase() || '';
+const getProfilePic = (item: any) => {
+  const profilePic = item.userInfo?.profilePicture?.trim();
+  const userGender = item.dressInfo?.gender?.toLowerCase() || '';
 
-    if (profilePic) {
-      return profilePic;
-    }
+  if (profilePic) {
+    return profilePic;
+  }
 
-    if (userGender === 'female') {
-      return femalelogo;
-    }
+  if (userGender === 'female') {
+    return femalelogo;
+  }
 
-    if (userGender === 'male') {
-      return malelogo;
-    }
+  return malelogo;
+};
 
-    // fallback if gender unknown
-    return malelogo;
-  };
-
-  const [liked, setLiked] = useState(item.likeByCurrentUser);
-  const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
+const SingleCollectiveCardPage: React.FC = () => {
+  const { hashedId } = useParams<{ hashedId: string }>();
+  const [item, setItem] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [favorited, setFavorited] = useState(item.addedToFav ?? false);
-  const [favCount, setFavCount] = useState(item.favCount ?? 0);
-  const [whatsAppLoading, setWhatsAppLoading] = useState(false);
-
-  const totalImages = item.images.length;
-
-  const handleWhatsAppClick = async () => {
-    if (!item) {
-      return;
-    }
-    setWhatsAppLoading(true);
-
-    try {
-      const body = {
-        imageId: item.id,
-        parameters: ['collective'],
-      };
-
-      const data = await api.postRequest('collective_link_share/generate', body);
-
-      // eslint-disable-next-line no-console
-      console.log('WhatsApp Link Response:', data);
-
-      if (data?.data?.link) {
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(data?.data?.link)}`;
-        window.open(whatsappUrl, '_blank');
-      } else {
-        // eslint-disable-next-line no-console
-        console.error('No link returned from API');
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error generating WhatsApp link:', error);
-    } finally {
-      setWhatsAppLoading(false);
-    }
-  };
+  const [favorited, setFavorited] = useState(false);
+  const [favCount, setFavCount] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setLiked(item.likeByCurrentUser);
-    setLikeCount(item.likeCount ?? 0);
-  }, [item.likeByCurrentUser, item.likeCount]);
+    if (!hashedId) {
+      return;
+    }
+    setLoading(true);
+    setFetchError('');
+    api
+      .getRequest(`collective_link_share/decode?hashedId=${hashedId}`)
+      .then((data) => {
+        // eslint-disable-next-line no-console
+        console.log('✅ API Response:', data?.data);
+        setItem(data?.data);
+        setLiked(data?.data.likeByCurrentUser);
+        setLikeCount(data?.data.likeCount ?? 0);
+        setFavorited(data?.data.addedToFav ?? false);
+        setFavCount(data?.data.favCount ?? 0);
+        setLoading(false);
+      })
+      .catch(() => {
+        setFetchError('Could not fetch card details. Please try again later.');
+        setLoading(false);
+      });
+  }, [hashedId]);
 
-  const setShowInfoAndNotify = (val: boolean) => {
-    setShowInfo(val);
-    onShowInfoChange?.(val);
-  };
-
+  // Info overlay timer (mobile)
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
     if (showInfo) {
-      timer = setTimeout(() => setShowInfoAndNotify(false), 3000);
+      timer = setTimeout(() => setShowInfo(false), 3000);
     }
 
     return () => clearTimeout(timer);
   }, [showInfo]);
 
+  // Favorite handler (same as card)
+
   const handleFavoriteToggle = async () => {
+    const token = 1;
+
+    if (token == 1) {
+      navigate('/');
+
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('userToken') || '';
+      const userToken = localStorage.getItem('userToken') || '';
       const endpoint = favorited
         ? `fiza/collective/remove_from_fav?elementId=${item.id}`
         : `fiza/collective/add_to_fav?elementId=${item.id}`;
 
-      const res = await api.putRequest(endpoint, {
-        headers: { Authorization: `Bearer ${token}` },
+      await api.putRequest(endpoint, {
+        headers: { Authorization: `Bearer ${userToken}` },
       });
 
-      const data = res.data;
-      // eslint-disable-next-line no-console
-      console.log(data);
-
-      // Optimistically update favorite count and state
-      if (!favorited) {
-        setFavCount((prev) => prev + 1);
-      } else {
-        setFavCount((prev) => Math.max(prev - 1, 0)); // Prevent negative counts
-      }
+      setFavCount((prev) => (favorited ? Math.max(prev - 1, 0) : prev + 1));
       setFavorited(!favorited);
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Error toggling favorite', err);
+      /* handle error */
     }
   };
 
+  // Like handler (same as card)
   const handleLikeToggle = async () => {
+    const token = 1;
+
+    if (token == 1) {
+      navigate('/');
+
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('userToken') || '';
+      const userToken = localStorage.getItem('userToken') || '';
       const endpoint = liked
         ? `fiza/collective/unlike_feed?elementId=${item.id}`
         : `fiza/collective/like_feed?elementId=${item.id}`;
 
-      const res = await api.putRequest(endpoint, {
-        headers: { Authorization: `Bearer ${token}` },
+      await api.putRequest(endpoint, {
+        headers: { Authorization: `Bearer ${userToken}` },
       });
 
-      const data = res.data;
-      // eslint-disable-next-line no-console
-      console.log(data);
-      // Optimistically update like count
       setLikeCount((prev) => (liked ? Math.max(prev - 1, 0) : prev + 1));
       setLiked(!liked);
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Error toggling like', e);
+      /* handle error */
     }
   };
 
-  const handlePrevImage = () => {
+  // Image swipe handlers
+  const totalImages = item?.images?.length || 0;
+  const handlePrevImage = () =>
     setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
-  };
-
-  const handleNextImage = () => {
+  const handleNextImage = () =>
     setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
-  };
-
   const handlers = useSwipeable({
     onSwipedLeft: handleNextImage,
     onSwipedRight: handlePrevImage,
@@ -224,28 +201,40 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     trackMouse: true,
   });
 
-  const maxLength = 17;
+  if (loading) {
+    return <div className="text-xl font-semibold text-gray-500 p-10">Loading...</div>;
+  }
 
-  const truncateText = (text: string, maxLength: number): string => {
-    if (text.length > maxLength) {
-      return text.substring(0, maxLength) + '...';
-    }
+  if (fetchError) {
+    return <div className="text-xl text-red-500">{fetchError}</div>;
+  }
 
-    return text;
-  };
+  if (!item) {
+    return null;
+  }
+
+  const outfitName = item.dressInfo?.selectedOutfit
+    ? item.dressInfo.selectedOutfit
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (c: string) => c.toUpperCase())
+    : 'Outfit';
+
+  const designerName = item.userInfo?.fullName?.trim()
+    ? item.userInfo.fullName.trim()
+    : 'Unknown Designer';
 
   return (
     <motion.div
-      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-2 ${
-        showInfo ? ' bg-black bg-opacity-25' : ''
-      } rounded-[30px] border-2 border-[#F3D7AC] p-0 sm:p-5 sm:mx-auto`}
+      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-2
+        ${showInfo ? ' bg-black bg-opacity-25' : ''}
+        rounded-[30px] border-2 border-[#F3D7AC] p-0 sm:p-5 sm:mx-auto`}
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
-      {/* Circle Button only visible on phone */}
+      {/* Mobile Info Overlay Button */}
       <button
-        onClick={() => setShowInfoAndNotify(true)}
+        onClick={() => setShowInfo(true)}
         className="md:hidden absolute top-6 right-[30px] z-20"
       >
         <img src={circle} alt="Info" className="h-5 w-5" />
@@ -255,100 +244,38 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       <AnimatePresence>
         {showInfo && (
           <>
-            {/* Designed By + Location + Actions */}
             <motion.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-3 text-sm font-medium shadow-md md:hidden"
+              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2  text-sm font-medium shadow-md md:hidden"
             >
-              <div className="flex flex-col gap-2">
-                <div>
-                  <div className="text-xs uppercase tracking-wide opacity-80">DESIGNED BY</div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <img
-                      src={getProfilePic()}
-                      alt="Profile"
-                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
-                    />
-                    <div className="font-semibold text-white text-sm">
-                      {truncateText(designerName, maxLength)}
-                    </div>
-                    <img src="/icons/verified.svg" alt="verified" className="w-4 h-4 ml-1" />
-                  </div>
-                  {/* Location */}
-                  <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
-                    <span>📍</span>
-                    <span>Mumbai, India</span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 mt-2">
-                  <button
-                    //onClick={() => navigate(`/designer/${item.userId}`)}
-                    className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
-                  >
-                    View More
-                  </button>
-
-                  <button
-                    onClick={handleWhatsAppClick}
-                    disabled={whatsAppLoading}
-                    className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 hover:bg-green-600 transition disabled:opacity-70"
-                  >
-                    {whatsAppLoading ? (
-                      <>
-                        <svg
-                          className="animate-spin h-3.5 w-3.5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8z"
-                          ></path>
-                        </svg>
-                        <span>Sending</span>
-                      </>
-                    ) : (
-                      <>
-                        <i className="fa fa-whatsapp"></i>
-                        WhatsApp
-                      </>
-                    )}
-                  </button>
-                </div>
+              DESIGNED BY
+              <div className="flex items-center gap-1 mt-1">
+                <img
+                  src={getProfilePic(item)}
+                  alt="Profile"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+                />
+                <div className="font-semibold text-white">{designerName}</div>
               </div>
             </motion.div>
-
-            {/* Timeline */}
             <motion.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="absolute top-[148px] right-[20px] -translate-x-1/2 text-white w-3/4 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              className=" absolute top-[104px] right-[20px] -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
             >
-              <div className="text-xs uppercase tracking-wide opacity-80">TIMELINE</div>
+              TIMELINE
               <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Left side */}
+      {/* Left side Main Image(s) */}
       <motion.div
         className="flex flex-col items-center md:items-start rounded-[30px] p-[10px]"
         initial={{ opacity: 0, scale: 0.9 }}
@@ -356,7 +283,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <div
-          className="w-full h-[70vh] md:h-[60vh] flex items-start  justify-center overflow-hidden rounded-[30px] md:rounded-[30px]  "
+          className="w-full h-[70vh] md:h-[60vh] flex items-start  justify-center overflow-hidden rounded-[30px] md:rounded-[30px]"
           {...(window.innerWidth < 768 ? handlers : {})}
         >
           {/* Slider Controls (Desktop) */}
@@ -378,30 +305,34 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               </button>
             </>
           )}
+          {Array.isArray(item.images) && item.images.length > 0 ? (
+            <img
+              src={item.images[currentImageIndex] || item.images[0]}
+              alt={`${outfitName} - Image ${currentImageIndex + 1}`}
+              className="object-fill h-full"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-[30px] text-gray-400 text-xl">
+              No image available
+            </div>
+          )}
 
-          <img
-            src={item.images[currentImageIndex]}
-            alt={`${outfitName} - Image ${currentImageIndex + 1}`}
-            className="object-fill h-full"
-          />
-          {/* Mobile Dots Above Image */}
+          {/* Mobile Image Dots */}
           {totalImages > 1 && (
-            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
-              {item.images.map((_, index) => (
+            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[30]">
+              {item.images.map((_: any, index: number) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-3 h-3 rounded-full  ${
-                    index === currentImageIndex ? 'bg-gray-500' : 'bg-gray-400'
-                  }`}
+                  className={`w-3 h-3 rounded-full
+                    ${index === currentImageIndex ? 'bg-gray-500' : 'bg-gray-400'}`}
                 />
               ))}
             </div>
           )}
         </div>
-
-        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-sm md:text-xl font-semibold">
-          <span> {truncateText(outfitName, maxLength)}</span>
+        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-lg md:text-xl font-semibold">
+          <span>{outfitName}</span>
           <button
             type="button"
             aria-label={liked ? 'Unlike' : 'Like'}
@@ -426,16 +357,15 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             ) : (
               <img src={notfavorite} alt="Not Favorited" className="h-5 w-auto" />
             )}
-            <span className="font-medium ">{favCount}</span>
+            <span className="font-medium">{favCount}</span>
           </button>
-          {item.platForm == 'FIZA' && (
+          {item.platForm === 'FIZA' && (
             <>
               <img src={coins} alt="Coin Icon" className="h-5 w-auto" />
               <span className="text-sm font-medium">{item.coinUsed}</span>
             </>
           )}
         </div>
-
         <div className="md:flex items-center gap-5 mt-3 hidden ">
           <span
             className={`${
@@ -459,7 +389,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
         </div>
       </motion.div>
 
-      {/* Right side (only desktop) */}
+      {/* Right side (desktop) */}
       <motion.div
         className="hidden md:flex flex-1 flex-col justify-start mt-6 md:mt-0 md:pl-32"
         initial={{ opacity: 0, x: 40 }}
@@ -474,17 +404,15 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             </div>
             <div className="flex items-center gap-2 mt-1">
               <img
-                src={getProfilePic()}
+                src={getProfilePic(item)}
                 alt="Profile"
                 className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
               />
-
               <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
-                {designerName}
+                {truncateText(designerName, maxLength)}
               </span>
             </div>
           </div>
-
           {/* Timeline */}
           <div>
             <div className="font-semibold text-[10px] sm:text-[11px] text-gray-500 tracking-wide">
@@ -499,17 +427,14 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       </motion.div>
 
       {/* Mobile Bottom Bar */}
-
-      {/* Mobile Bottom Bar */}
       <div className="md:hidden px-4 pb-3 bg-white rounded-b-[30px] shadow-md">
         <div className="flex items-center justify-between w-full px-2 text-sm">
           <span className="font-semibold text-base truncate">
-            {' '}
             {truncateText(outfitName, maxLength)}
           </span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              {item.platForm == 'FIZA' && (
+              {item.platForm === 'FIZA' && (
                 <>
                   <img src={coins} alt="Coin Icon" className="h-5 w-auto" />
                   <span className="text-sm font-medium">{item.coinUsed}</span>
@@ -540,11 +465,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               ) : (
                 <img src={notfavorite} alt="Not Favorited" className="h-5 w-auto" />
               )}
-              <span className="font-medium ">{favCount}</span>
+              <span className="font-medium">{favCount}</span>
             </button>
           </div>
         </div>
-
         <div className="flex items-center gap-1 px-2">
           <span
             className={`${
@@ -571,4 +495,4 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
   );
 };
 
-export default CollectiveCard;
+export default SingleCollectiveCardPage;

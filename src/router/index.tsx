@@ -132,6 +132,7 @@ import ShareFizaai from '../pages/Fizaai/shareFizaai';
 import FizaaiPublicLayout from '../pages/Fizaai/publicShare/maine';
 import CollectivePage from '../pages/Fizaai/publicShare/collec';
 import ExplorePage from '../pages/Fizaai/publicShare/design';
+import singleportfolio from '../pages/Fizaai/singlePortfolio/portfolio';
 // Ensure this import is correct
 
 const allRoutes = [
@@ -170,6 +171,10 @@ const allRoutes = [
       {
         path: '/:idd/:id',
         element: <PublicWrapper Content={ShareFizaai} showHeader={false} />,
+      },
+      {
+        path: '/designer/:desginername',
+        element: <PublicWrapper Content={singleportfolio} showHeader={false} />,
       },
 
       {

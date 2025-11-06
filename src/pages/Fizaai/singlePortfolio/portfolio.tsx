@@ -459,17 +459,21 @@ export default function SinglePortfolio({
                     ) : (
                       <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                         <span className="text-md font-semibold text-gray-700">
-                          {(selected.tailorName && selected.tailorName.charAt(0).toUpperCase()) ||
+                          {(detail?.base_info?.user_name &&
+                            detail?.base_info?.user_name.charAt(0).toUpperCase()) ||
                             '?'}
                         </span>
                       </div>
                     )}
+
                     <div className=" w-full flex  items-center justify-between   ">
                       <div className="w-[60%] flex flex-col">
                         <div className="font-semibold w-full break-words leading-5">
-                          {selected.tailorName}
+                          {detail?.base_info?.tailor_name}
                         </div>
-                        <div className="text-sm text-gray-500 break-words">{selected.userName}</div>
+                        <div className="text-sm text-gray-500 break-words">
+                          {detail?.base_info?.user_name}
+                        </div>
                       </div>
 
                       <div className="w-[40%] flex items-center gap-4">
@@ -495,7 +499,7 @@ export default function SinglePortfolio({
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 w-full justify-center my-1 md:py-1 ">
+                  <div className="flex items-center gap-6 w-full justify-center my-1 md:py-1 ">
                     {/* Social media icons with links */}
                     {detail?.social_media_handlers?.facebook && (
                       <img
@@ -956,7 +960,7 @@ export default function SinglePortfolio({
                           <img
                             key={idx}
                             src={imgUrl}
-                            className="w-full h-[8rem] object-cover rounded-md"
+                            className="w-full h-[12rem] object-cover rounded-md"
                             alt=""
                           />
                         ))}
@@ -1068,40 +1072,43 @@ export default function SinglePortfolio({
                                   <div className="text-xs text-[#525252] mb-2">
                                     {item.creation_time}
                                   </div>
-                                  {/* First image */}
-                                  <div className="w-full h-[60vh] md:h-[55vh] flex items-start  justify-center overflow-hidden rounded-[20px] md:rounded-[10px]">
-                                    {item.image_url && item.image_url.length > 0 && (
-                                      <img
-                                        src={item.image_url[selectedImageIndexes[item.id] ?? 0]}
-                                        alt={item.title}
-                                        className=" object-fill h-full"
-                                      />
+
+                                  <div className="w-full flex justify-between gap-[2rem]">
+                                    {/* First image */}
+                                    <div className="w-[70%] h-[70vh] flex items-start  justify-center overflow-hidden rounded-[20px] md:rounded-[10px]">
+                                      {item.image_url && item.image_url.length > 0 && (
+                                        <img
+                                          src={item.image_url[selectedImageIndexes[item.id] ?? 0]}
+                                          alt={item.title}
+                                          className=" object-fill h-full"
+                                        />
+                                      )}
+                                    </div>
+
+                                    {/* More images (if any) */}
+                                    {item.image_url && item.image_url.length > 1 && (
+                                      <div className="grid grid-cols-1 grid-rows-4 gap-2 mt-[1rem]">
+                                        {item.image_url?.map((img, idx) => (
+                                          <img
+                                            key={idx}
+                                            src={img}
+                                            alt={`${item.title} extra ${idx + 1}`}
+                                            className={`w-full h-[8rem] object-fill rounded-md cursor-pointer ${
+                                              (selectedImageIndexes[item.id] ?? 0) === idx
+                                                ? 'ring-2 ring-[#79539f]'
+                                                : ''
+                                            }`}
+                                            onClick={() => {
+                                              setSelectedImageIndexes((prev) => ({
+                                                ...prev,
+                                                [item.id]: idx,
+                                              }));
+                                            }}
+                                          />
+                                        ))}
+                                      </div>
                                     )}
                                   </div>
-
-                                  {/* More images (if any) */}
-                                  {item.image_url && item.image_url.length > 1 && (
-                                    <div className="grid grid-cols-4 gap-2 mt-[1rem]">
-                                      {item.image_url?.map((img, idx) => (
-                                        <img
-                                          key={idx}
-                                          src={img}
-                                          alt={`${item.title} extra ${idx + 1}`}
-                                          className={`w-full h-[8rem] object-fill rounded-md cursor-pointer ${
-                                            (selectedImageIndexes[item.id] ?? 0) === idx
-                                              ? 'ring-2 ring-[#79539f]'
-                                              : ''
-                                          }`}
-                                          onClick={() => {
-                                            setSelectedImageIndexes((prev) => ({
-                                              ...prev,
-                                              [item.id]: idx,
-                                            }));
-                                          }}
-                                        />
-                                      ))}
-                                    </div>
-                                  )}
                                 </div>
                               ))}
                             </div>

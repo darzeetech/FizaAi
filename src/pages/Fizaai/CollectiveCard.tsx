@@ -299,104 +299,99 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       <AnimatePresence>
         {showInfo && (
           <>
-            {/* Designed By + Location + Actions */}
+            {/* DESIGNED BY + Location + Actions */}
             <motion.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-3 text-sm font-medium shadow-md md:hidden"
+              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4 max-w-xs min-w-[230px] bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-3 text-sm font-medium shadow-md md:hidden"
+              style={{ zIndex: 10 }}
             >
-              <div className="flex flex-col gap-2">
-                <div>
-                  <div className="text-xs uppercase tracking-wide opacity-80">DESIGNED BY</div>
-
-                  {/* Profile, name, verified tick - all in one line */}
-                  <div className="flex items-center gap-1 mt-1">
-                    <img
-                      src={getProfilePic()}
-                      alt="Profile"
-                      className="w-5 h-5 rounded-full object-cover"
-                    />
-                    <span className="font-semibold text-white text-xs">
-                      {truncateText(designerName, maxLength)}
-                    </span>
-                    {item.userInfo?.activeSuscription && (
-                      <img src={verified} alt="verified" className="w-3 h-3" />
-                    )}
-                  </div>
-
-                  {/* Location (only for DARZEE) in one line with small icon */}
-                  {item.platForm === 'DARZEE' && (
-                    <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
-                      <img src={location} alt="location" className="w-5 h-6" />
-                      <span>{formatAddress(item.address)}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons in one line with small icons */}
-                {item.platForm === 'DARZEE' && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <button
-                      onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
-                      className="flex items-center gap-1 bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
-                    >
-                      <img src={vec} alt="vector icon" className="w-4 h-4" />
-                      View More
-                    </button>
-
-                    <button
-                      onClick={handleWhatsAppClick}
-                      disabled={whatsAppLoading}
-                      className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 hover:bg-green-600 transition disabled:opacity-70"
-                    >
-                      {whatsAppLoading ? (
-                        <>
-                          <svg
-                            className="animate-spin h-3 w-3 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8v8z"
-                            ></path>
-                          </svg>
-                          <span>Sending</span>
-                        </>
-                      ) : (
-                        <>
-                          <img src={what} alt="WhatsApp" className="w-4 h-4" />
-                          WhatsApp
-                        </>
-                      )}
-                    </button>
-                  </div>
+              <div className="text-xs uppercase tracking-wide opacity-80">DESIGNED BY</div>
+              <div className="flex items-center gap-1 mt-1">
+                <img
+                  src={getProfilePic()}
+                  alt="Profile"
+                  className="w-5 h-5 rounded-full object-cover"
+                />
+                <span className="font-semibold text-white text-xs">
+                  {truncateText(designerName, maxLength)}
+                </span>
+                {item.userInfo?.activeSuscription && (
+                  <img src={verified} alt="verified" className="w-3 h-3" />
                 )}
               </div>
-
-              {/* Timeline */}
-              <motion.div
-                initial={{ x: '100%', opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: '100%', opacity: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="absolute top-[148px] right-[20px] -translate-x-1/2 text-white w-3/4 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
-              >
-                <div className="text-xs uppercase tracking-wide opacity-80">TIMELINE</div>
-                <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
-              </motion.div>
+              {item.platForm === 'DARZEE' && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
+                  <img src={location} alt="location" className="w-4 h-4" />
+                  <span>{formatAddress(item.address)}</span>
+                </div>
+              )}
+              {item.platForm === 'DARZEE' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
+                    className="flex items-center gap-1 bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
+                  >
+                    <img src={vec} alt="vector icon" className="w-4 h-4" />
+                    View More
+                  </button>
+                  <button
+                    onClick={handleWhatsAppClick}
+                    disabled={whatsAppLoading}
+                    className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 hover:bg-green-600 transition disabled:opacity-70"
+                  >
+                    {whatsAppLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin h-3 w-3 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          ></path>
+                        </svg>
+                        <span>Sending</span>
+                      </>
+                    ) : (
+                      <>
+                        <img src={what} alt="WhatsApp" className="w-4 h-4" />
+                        WhatsApp
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </motion.div>
+            {/* TIMELINE - spacing varies by platform */}
+            <motion.div
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="absolute right-[20px] -translate-x-1/2 text-white w-3/4 max-w-xs min-w-[230px] bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              style={{
+                top:
+                  item.platForm === 'DARZEE'
+                    ? 'calc(6rem + 80px)' // spacing for DARZEE
+                    : 'calc(6rem)', // spacing for FIZA
+              }}
+            >
+              <div className="text-xs uppercase tracking-wide opacity-80">TIMELINE</div>
+              <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
             </motion.div>
           </>
         )}

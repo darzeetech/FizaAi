@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeable } from 'react-swipeable';
 import coins from '../../assets/images/coins.png';
@@ -36,6 +37,20 @@ export interface CollectiveItem {
     fullName?: string | null;
     profilePicture?: string | null;
   };
+  address?: {
+    id?: number;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    lat?: number | null;
+    lon?: number | null;
+  };
+  portfolioUserName?: string;
 }
 
 interface CollectiveCardProps {
@@ -234,6 +249,30 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     return text;
   };
 
+  const formatAddress = (address?: {
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  }) => {
+    if (!address) {
+      return 'Location Not Available';
+    }
+
+    // Only include non-empty fields
+    return [
+      address.addressLine1,
+      address.addressLine2,
+      address.city,
+      address.state,
+      address.country,
+    ]
+      .filter(Boolean)
+      .join(', ');
+  };
+  const navigate = useNavigate();
+
   return (
     <motion.div
       className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-2 ${
@@ -278,58 +317,63 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                     <img src="/icons/verified.svg" alt="verified" className="w-4 h-4 ml-1" />
                   </div>
                   {/* Location */}
-                  <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
-                    <span>📍</span>
-                    <span>Mumbai, India</span>
-                  </div>
+                  {/* Location (only for DARZEE) */}
+                  {item.platForm === 'DARZEE' && (
+                    <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
+                      <span>📍</span>
+                      <span>{formatAddress(item.address)}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 mt-2">
-                  <button
-                    //onClick={() => navigate(`/designer/${item.userId}`)}
-                    className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
-                  >
-                    View More
-                  </button>
+                {item.platForm === 'DARZEE' && (
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
+                      className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
+                    >
+                      View More
+                    </button>
 
-                  <button
-                    onClick={handleWhatsAppClick}
-                    disabled={whatsAppLoading}
-                    className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 hover:bg-green-600 transition disabled:opacity-70"
-                  >
-                    {whatsAppLoading ? (
-                      <>
-                        <svg
-                          className="animate-spin h-3.5 w-3.5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8z"
-                          ></path>
-                        </svg>
-                        <span>Sending</span>
-                      </>
-                    ) : (
-                      <>
-                        <i className="fa fa-whatsapp"></i>
-                        WhatsApp
-                      </>
-                    )}
-                  </button>
-                </div>
+                    <button
+                      onClick={handleWhatsAppClick}
+                      disabled={whatsAppLoading}
+                      className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 hover:bg-green-600 transition disabled:opacity-70"
+                    >
+                      {whatsAppLoading ? (
+                        <>
+                          <svg
+                            className="animate-spin h-3.5 w-3.5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v8z"
+                            ></path>
+                          </svg>
+                          <span>Sending</span>
+                        </>
+                      ) : (
+                        <>
+                          <i className="fa fa-whatsapp"></i>
+                          WhatsApp
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
 

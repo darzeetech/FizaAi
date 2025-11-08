@@ -310,35 +310,35 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               <div className="flex flex-col gap-2">
                 <div>
                   <div className="text-xs uppercase tracking-wide opacity-80">DESIGNED BY</div>
-                  <div className="flex items-center gap-2 mt-1">
+
+                  {/* Profile, name, verified tick - all in one line */}
+                  <div className="flex items-center gap-1 mt-1">
                     <img
                       src={getProfilePic()}
                       alt="Profile"
-                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+                      className="w-5 h-5 rounded-full object-cover"
                     />
-                    <div className="font-semibold text-white text-sm">
+                    <span className="font-semibold text-white text-xs">
                       {truncateText(designerName, maxLength)}
-                    </div>
+                    </span>
                     {item.userInfo?.activeSuscription && (
-                      <img src={verified} alt="verified" className="w-4 h-4 ml-1" />
+                      <img src={verified} alt="verified" className="w-3 h-3" />
                     )}
                   </div>
-                  {/* Location */}
-                  {/* Location (only for DARZEE) */}
+
+                  {/* Location (only for DARZEE) in one line with small icon */}
                   {item.platForm === 'DARZEE' && (
                     <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
-                      <span>
-                        <img src={location} />
-                      </span>
+                      <img src={location} alt="location" className="w-4 h-4" />
                       <span>{formatAddress(item.address)}</span>
                     </div>
                   )}
                 </div>
 
-                {/* Action Buttons */}
+                {/* Action Buttons in one line with small icons */}
                 {item.platForm === 'DARZEE' && (
-                  <div className="flex gap-2 mt-2">
-                    <img src={vec} />
+                  <div className="flex items-center gap-2 mt-2">
+                    <img src={vec} alt="vector icon" className="w-4 h-4" />
                     <button
                       onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
                       className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
@@ -349,12 +349,12 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                     <button
                       onClick={handleWhatsAppClick}
                       disabled={whatsAppLoading}
-                      className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 hover:bg-green-600 transition disabled:opacity-70"
+                      className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 hover:bg-green-600 transition disabled:opacity-70"
                     >
                       {whatsAppLoading ? (
                         <>
                           <svg
-                            className="animate-spin h-3.5 w-3.5 text-white"
+                            className="animate-spin h-3 w-3 text-white"
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -377,7 +377,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                         </>
                       ) : (
                         <>
-                          <img src={what} />
+                          <img src={what} alt="WhatsApp" className="w-4 h-4" />
                           WhatsApp
                         </>
                       )}
@@ -385,18 +385,18 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                   </div>
                 )}
               </div>
-            </motion.div>
 
-            {/* Timeline */}
-            <motion.div
-              initial={{ x: '100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '100%', opacity: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="absolute top-[148px] right-[20px] -translate-x-1/2 text-white w-3/4 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
-            >
-              <div className="text-xs uppercase tracking-wide opacity-80">TIMELINE</div>
-              <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
+              {/* Timeline */}
+              <motion.div
+                initial={{ x: '100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '100%', opacity: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="absolute top-[148px] right-[20px] -translate-x-1/2 text-white w-3/4 bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              >
+                <div className="text-xs uppercase tracking-wide opacity-80">TIMELINE</div>
+                <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
+              </motion.div>
             </motion.div>
           </>
         )}

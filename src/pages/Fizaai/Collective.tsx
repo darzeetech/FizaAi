@@ -24,6 +24,20 @@ export interface CollectiveItem {
   originId?: number;
   dressInfo?: { selectedOutfit?: string; gender?: string | null };
   userInfo?: { fullName?: string | null; profilePicture?: string | null };
+  address?: {
+    id?: number;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    lat?: number | null;
+    lon?: number | null;
+  };
+  portfolioUserName?: string;
 }
 
 interface CollectiveProps {

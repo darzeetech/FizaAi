@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import './sidebar.css';
 import location from '../../../assets/images/location_on.png';
 import person from '../../../assets/images/Vector1.png';
+import heart from '../../../assets/images/heart.png';
+import star from '../../../assets/images/star1.png';
+
 import qr from '../../../assets/images/qr_code_scanner.png';
 import share from '../../../assets/images/share.png';
 import copy from '../../../assets/images/content_copy.png';
@@ -123,6 +126,166 @@ export default function SinglePortfolio({
   const [filteredOutfits, setFilteredOutfits] = useState<FilteredOutfitsResponse>(null);
   const [filteredOutfitsLoading, setFilteredOutfitsLoading] = useState(false);
   const [filteredOutfitsError, setFilteredOutfitsError] = useState<string | null>(null);
+
+  // Small subcomponent to render vertically stacked, full-height images for an outfit
+  // and notify parent when the visible image changes (via IntersectionObserver).
+  const OutfitImages: React.FC<{
+    item: any;
+    selectedIndex: number;
+    onChange: (idx: number) => void;
+  }> = ({ item, selectedIndex, onChange }) => {
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const [isScrolling, setIsScrolling] = useState(false);
+
+    useEffect(() => {
+      const container = containerRef.current;
+
+      if (!container) {
+        return;
+      }
+
+      let rafId: number | null = null;
+      let debounceTimer: number | null = null;
+      let hideTimer: number | null = null;
+
+      const imgs = Array.from(container.querySelectorAll('img')) as HTMLImageElement[];
+
+      const updateVisible = () => {
+        if (!container || imgs.length === 0) {
+          return;
+        }
+
+        const containerRect = container.getBoundingClientRect();
+        const containerCenter = containerRect.top + containerRect.height / 2;
+
+        let bestIdx = 0;
+        let bestDistance = Infinity;
+
+        imgs.forEach((img, idx) => {
+          const r = img.getBoundingClientRect();
+          const imgCenter = r.top + r.height / 2;
+          const dist = Math.abs(imgCenter - containerCenter);
+
+          if (dist < bestDistance) {
+            bestDistance = dist;
+            bestIdx = idx;
+          }
+        });
+
+        if (bestIdx !== selectedIndex) {
+          onChange(bestIdx);
+        }
+      };
+
+      const handleScroll = () => {
+        // show that user is scrolling
+        setIsScrolling(true);
+
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+        }
+
+        rafId = requestAnimationFrame(() => {
+          if (debounceTimer) {
+            window.clearTimeout(debounceTimer);
+          }
+
+          debounceTimer = window.setTimeout(() => {
+            updateVisible();
+
+            // schedule hiding the "scrolling" state shortly after scrolling stops
+            if (hideTimer) {
+              window.clearTimeout(hideTimer);
+            }
+            hideTimer = window.setTimeout(() => {
+              setIsScrolling(false);
+            }, 400) as unknown as number;
+          }, 80) as unknown as number;
+        });
+      };
+
+      const initId = window.setTimeout(() => {
+        updateVisible();
+      }, 0);
+
+      container.addEventListener('scroll', handleScroll, { passive: true });
+
+      return () => {
+        container.removeEventListener('scroll', handleScroll);
+
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+        }
+
+        if (debounceTimer) {
+          window.clearTimeout(debounceTimer);
+        }
+
+        if (hideTimer) {
+          window.clearTimeout(hideTimer);
+        }
+
+        window.clearTimeout(initId);
+      };
+      // NOTE: no dependency on selectedIndex to avoid re-initializing on every change
+    }, [item.id, item?.image_url?.length, onChange]);
+
+    return (
+      <div
+        ref={containerRef}
+        className="relative w-[70%] custom-scrollbar h-[70vh] flex flex-col gap-3 overflow-y-scroll rounded-[20px] md:rounded-[10px] snap-y snap-mandatory"
+        style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+        onWheelCapture={(e) => {
+          // keep native scroll but stop the event from bubbling to parent swipe handlers
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {item.image_url?.map((img: string, idx: number) => (
+          <img
+            key={idx}
+            data-idx={idx}
+            src={img}
+            alt={`${item.title}`}
+            className={`block object-fill h-[70vh] flex-shrink-0 snap-start ${
+              selectedIndex === idx ? 'ring-2 ring-[#79539f]' : ''
+            }`}
+            onClick={() => {
+              onChange(idx);
+            }}
+          />
+        ))}
+
+        {/* Bottom-center absolute section: shows current image index / total; hidden while user is scrolling */}
+        {!isScrolling && (
+          <div className=" w-[80%] absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
+            <div className="mt-1 text-[#323232] text-[1.2rem] font-medium">{item.title}</div>
+            {/* <div className="text-[#666666] text-[.8rem] font-medium">
+            {typeof selectedIndex === 'number' && item.image_url?.length
+              ? `${selectedIndex + 1} / ${item.image_url.length}`
+              : ''}
+          </div> */}
+            <div className="flex my-2 gap-3">
+              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                <img src={heart} alt="person" className="h-6 md:h-6 aspect-auto" />
+                <p>52</p>
+              </div>
+              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                <img src={star} alt="person" className="h-6 md:h-6 aspect-auto" />
+                <p>52</p>
+              </div>
+              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                <img src={whatapp} alt="person" className="h-5 md:h-5 aspect-auto" />
+                <p>52</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Fetch lat/lon only once on mount
   useEffect(() => {
@@ -1068,22 +1231,25 @@ export default function SinglePortfolio({
                             <div className=" flex flex-col w-full gap-4">
                               {outfit?.portfolio_outfits.map((item) => (
                                 <div key={item.id} className="mb-4 w-full">
-                                  <div className="mt-1 text-[.9rem] font-medium">{item.title}</div>
+                                  {/* <div className="mt-1 text-[.9rem] font-medium">{item.title}</div>
                                   <div className="text-xs text-[#525252] mb-2">
                                     {item.creation_time}
-                                  </div>
+                                  </div> */}
 
                                   <div className="w-full flex justify-between gap-[2rem]">
-                                    {/* First image */}
-                                    <div className="w-[70%] h-[70vh] flex items-start  justify-center overflow-hidden rounded-[20px] md:rounded-[10px]">
-                                      {item.image_url && item.image_url.length > 0 && (
-                                        <img
-                                          src={item.image_url[selectedImageIndexes[item.id] ?? 0]}
-                                          alt={item.title}
-                                          className=" object-fill h-full"
-                                        />
-                                      )}
-                                    </div>
+                                    {/* First image (now handled by OutfitImages component which
+                                        makes each image full-height and updates selected index
+                                        as the user scrolls) */}
+                                    <OutfitImages
+                                      item={item}
+                                      selectedIndex={selectedImageIndexes[item.id] ?? 0}
+                                      onChange={(idx: number) =>
+                                        setSelectedImageIndexes((prev) => ({
+                                          ...prev,
+                                          [item.id]: idx,
+                                        }))
+                                      }
+                                    />
 
                                     {/* More images (if any) */}
                                     {item.image_url && item.image_url.length > 1 && (
@@ -1140,7 +1306,7 @@ export default function SinglePortfolio({
             )} */}
 
             {showSwapDiv && (
-              <div className="md:hidden block absolute top-[150px] left-0 right-0 flex items-center justify-between px-4 ">
+              <div className="md:hidden absolute top-[150px] left-0 right-0 flex items-center justify-between px-4 ">
                 <img
                   src={left_swap}
                   alt="Left Swap"

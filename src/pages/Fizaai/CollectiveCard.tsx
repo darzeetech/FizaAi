@@ -13,6 +13,10 @@ import malelogo from '../../assets/icons/ai-stylist-male.png';
 import life from '../../assets/icons/life.png';
 import notfavorite from '../../assets/icons/favorite.png';
 import favorite from '../../assets/icons/favoritselected.png';
+import verified from '../../assets/icons/verified.png';
+import location from '../../assets/icons/location.png';
+import what from '../../assets/icons/what.png';
+import vec from '../../assets/icons/vec.png';
 
 export interface CollectiveItem {
   id: number;
@@ -36,6 +40,7 @@ export interface CollectiveItem {
   userInfo?: {
     fullName?: string | null;
     profilePicture?: string | null;
+    activeSuscription?: boolean;
   };
   address?: {
     id?: number;
@@ -314,13 +319,17 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                     <div className="font-semibold text-white text-sm">
                       {truncateText(designerName, maxLength)}
                     </div>
-                    <img src="/icons/verified.svg" alt="verified" className="w-4 h-4 ml-1" />
+                    {item.userInfo?.activeSuscription && (
+                      <img src={verified} alt="verified" className="w-4 h-4 ml-1" />
+                    )}
                   </div>
                   {/* Location */}
                   {/* Location (only for DARZEE) */}
                   {item.platForm === 'DARZEE' && (
                     <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
-                      <span>📍</span>
+                      <span>
+                        <img src={location} />
+                      </span>
                       <span>{formatAddress(item.address)}</span>
                     </div>
                   )}
@@ -329,6 +338,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                 {/* Action Buttons */}
                 {item.platForm === 'DARZEE' && (
                   <div className="flex gap-2 mt-2">
+                    <img src={vec} />
                     <button
                       onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
                       className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
@@ -367,7 +377,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                         </>
                       ) : (
                         <>
-                          <i className="fa fa-whatsapp"></i>
+                          <img src={what} />
                           WhatsApp
                         </>
                       )}

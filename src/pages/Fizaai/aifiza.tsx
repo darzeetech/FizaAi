@@ -171,7 +171,11 @@ interface VersionDataa {
   originId?: number;
   platForm?: string;
   dressInfo?: { selectedOutfit?: string; gender?: string | null };
-  userInfo?: { fullName?: string | null; profilePicture?: string | null };
+  userInfo?: {
+    fullName?: string | null;
+    profilePicture?: string | null;
+    activeSuscription?: boolean;
+  };
   address?: {
     id?: number;
     addressLine1?: string;

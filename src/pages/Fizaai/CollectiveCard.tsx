@@ -15,7 +15,7 @@ import notfavorite from '../../assets/icons/favorite.png';
 import favorite from '../../assets/icons/favoritselected.png';
 import verified from '../../assets/icons/verified.png';
 import location from '../../assets/icons/location.png';
-import what from '../../assets/icons/what.png';
+import what from '../../assets/icons/whatt.png';
 import vec from '../../assets/icons/vec.png';
 
 export interface CollectiveItem {
@@ -329,7 +329,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                   {/* Location (only for DARZEE) in one line with small icon */}
                   {item.platForm === 'DARZEE' && (
                     <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
-                      <img src={location} alt="location" className="w-4 h-4" />
+                      <img src={location} alt="location" className="w-5 h-6" />
                       <span>{formatAddress(item.address)}</span>
                     </div>
                   )}
@@ -338,13 +338,15 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                 {/* Action Buttons in one line with small icons */}
                 {item.platForm === 'DARZEE' && (
                   <div className="flex items-center gap-2 mt-2">
-                    <img src={vec} alt="vector icon" className="w-4 h-4" />
-                    <button
-                      onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
-                      className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
-                    >
-                      View More
-                    </button>
+                    <div className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition">
+                      <img src={vec} alt="vector icon" className="w-4 h-4" />
+                      <button
+                        onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
+                        //className="bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
+                      >
+                        View More
+                      </button>
+                    </div>
 
                     <button
                       onClick={handleWhatsAppClick}

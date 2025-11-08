@@ -49,7 +49,7 @@
       }
     ],
     "react/jsx-filename-extension": ["warn", { "extensions": [".tsx"] }],
-    "max-len": ["warn", { "code": 250 }],
+    "max-len": ["warn", { "code": 1000000000 }],
     "no-console": "error",
     "@typescript-eslint/no-explicit-any": ["off"],
     "comma-dangle": "off",

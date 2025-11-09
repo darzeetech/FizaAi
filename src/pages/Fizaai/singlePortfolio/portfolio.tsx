@@ -369,7 +369,9 @@ export default function SinglePortfolio({
 
   // reset detail when a different portfolio is selected so user can fetch fresh data by clicking right pane
   useEffect(() => {
-    const username = 'new username2';
+    const pathSegments = window.location.pathname.split('/');
+    const username2 = pathSegments[pathSegments.length - 1];
+    const username = username2;
     setDetail(null);
     setDetailError(null);
     setDetailLoading(false);
@@ -382,7 +384,9 @@ export default function SinglePortfolio({
   }, [selected?.userName]);
 
   useEffect(() => {
-    const username = 'new username2';
+    const pathSegments = window.location.pathname.split('/');
+    const username2 = pathSegments[pathSegments.length - 1];
+    const username = username2;
     const tailorId = detail?.tailor_id ?? undefined;
     setFiltersData(null);
 

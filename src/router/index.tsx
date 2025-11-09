@@ -174,7 +174,7 @@ const allRoutes = [
         element: <PublicWrapper Content={ShareFizaai} showHeader={false} />,
       },
       {
-        path: '/designer/:desginername',
+        path: '/designer/:username',
         element: <PublicWrapper Content={singleportfolio} showHeader={false} />,
       },
       {

@@ -163,7 +163,7 @@ function OutfitImages({
         onScroll={handleScroll}
         className="relative w-[70%] h-[70vh] overflow-y-auto rounded-[20px] md:rounded-[10px] custom-scrollbar"
       >
-        <div className="w-full flex flex-col  ">
+        <div className="w-full flex flex-col gap-3">
           {item.image_url?.map((src, idx) => (
             <img
               key={idx}
@@ -171,29 +171,32 @@ function OutfitImages({
               ref={(el) => (imageRefs.current[idx] = el)}
               src={src}
               alt={`${item.title} ${idx + 1}`}
-              className=" h-[70vh] object-fill  "
+              className="w-full h-[70vh] object-fill block"
             />
           ))}
         </div>
 
         {/* ===== Bottom absolute info bar (hidden while scrolling) ===== */}
         {!isScrolling && (
-          <div className="pointer-events-none sticky bottom-4 z-10 w-[80%] mx-auto bg-white/80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
-            <div className="pointer-events-auto">
-              <div className="mt-1 text-[#323232] text-[1.2rem] font-medium">{item.title}</div>
-              <div className="flex my-2 gap-3">
-                <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                  <img src={heart} alt="heart" className="h-6 md:h-6 aspect-auto" />
-                  <p>52</p>
-                </div>
-                <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                  <img src={star} alt="star" className="h-6 md:h-6 aspect-auto" />
-                  <p>52</p>
-                </div>
-                <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                  <img src={whatapp} alt="whatsapp" className="h-5 md:h-5 aspect-auto" />
-                  <p>52</p>
-                </div>
+          <div className="w-[80%] absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
+            <div className="mt-1 text-[#323232] text-[1.2rem] font-medium">{item.title}</div>
+            {/* <div className="text-[#666666] text-[.8rem] font-medium">
+              {typeof selectedIndex === 'number' && item.image_url?.length
+                ? `${selectedIndex + 1} / ${item.image_url.length}`
+                : ''}
+            </div> */}
+            <div className="flex my-2 gap-3">
+              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                <img src={heart} alt="heart" className="h-6 md:h-6 aspect-auto" />
+                <p>52</p>
+              </div>
+              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                <img src={star} alt="star" className="h-6 md:h-6 aspect-auto" />
+                <p>52</p>
+              </div>
+              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                <img src={whatapp} alt="whatsapp" className="h-5 md:h-5 aspect-auto" />
+                <p>52</p>
               </div>
             </div>
           </div>

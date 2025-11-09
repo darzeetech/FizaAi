@@ -2,10 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import './sidebar.css';
 import location from '../../../assets/images/location_on.png';
 import person from '../../../assets/images/Vector1.png';
+import qr from '../../../assets/images/qr_code_scanner.png';
 import heart from '../../../assets/images/heart.png';
 import star from '../../../assets/images/star1.png';
-
-import qr from '../../../assets/images/qr_code_scanner.png';
 import share from '../../../assets/images/share.png';
 import copy from '../../../assets/images/content_copy.png';
 import facebook from '../../../assets/images/facebook.png';
@@ -62,6 +61,165 @@ type Props = {
   pageInfo?: PageInfo;
   className?: string;
 };
+
+/** ---------------------------
+ *  Scroll-synced image viewer
+ *  ---------------------------
+ *  - Left: a single scroll container (h-[70vh]) stacking ALL images, each h-[70vh]
+ *  - Right: thumbnails; clicking scrolls to image; scrolling updates highlight
+ */
+function OutfitImages({
+  item,
+  selectedIndex,
+  onChange,
+}: {
+  item: { id: number; title: string; image_url: string[] };
+  selectedIndex: number;
+  onChange: (idx: number) => void;
+}) {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const imageRefs = React.useRef<(HTMLImageElement | null)[]>([]);
+  const scrollHideTimerRef = React.useRef<number | null>(null);
+  const [isScrolling, setIsScrolling] = React.useState(false);
+
+  // Observe which image is most visible inside the container
+  React.useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const cb: IntersectionObserverCallback = (entries) => {
+      let bestIdx = selectedIndex;
+      let bestRatio = -1;
+
+      for (const e of entries) {
+        const idxAttr = e.target.getAttribute('data-idx');
+
+        if (!idxAttr) {
+          continue;
+        }
+        const idx = parseInt(idxAttr, 10);
+
+        if (e.isIntersecting && e.intersectionRatio > bestRatio) {
+          bestRatio = e.intersectionRatio;
+          bestIdx = idx;
+        }
+      }
+
+      if (bestIdx !== selectedIndex) {
+        onChange(bestIdx);
+      }
+    };
+
+    const io = new IntersectionObserver(cb, {
+      root: container,
+      threshold: [0.25, 0.5, 0.75, 1],
+    });
+
+    imageRefs.current.forEach((el) => el && io.observe(el));
+
+    return () => io.disconnect();
+  }, [item.id, item.image_url?.length, containerRef.current]);
+
+  // Scroll to the selected image when selectedIndex changes
+  React.useEffect(() => {
+    const container = containerRef.current;
+    const img = imageRefs.current[selectedIndex];
+
+    if (!container || !img) {
+      return;
+    }
+    const top = (img as any).offsetTop ?? 0;
+    container.scrollTo({ top, behavior: 'smooth' });
+  }, [selectedIndex]);
+
+  // Hide the bottom bar while scrolling; show it shortly after scroll stops
+  const handleScroll = React.useCallback(() => {
+    setIsScrolling(true);
+
+    if (scrollHideTimerRef.current) {
+      window.clearTimeout(scrollHideTimerRef.current);
+    }
+    scrollHideTimerRef.current = window.setTimeout(() => {
+      setIsScrolling(false);
+    }, 300) as unknown as number;
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (scrollHideTimerRef.current) {
+        window.clearTimeout(scrollHideTimerRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="w-full flex justify-between gap-[2rem]">
+      {/* Scrollable big images column */}
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="relative w-[70%] h-[70vh] overflow-y-auto rounded-[20px] md:rounded-[10px] custom-scrollbar"
+      >
+        <div className="w-full flex flex-col  ">
+          {item.image_url?.map((src, idx) => (
+            <img
+              key={idx}
+              data-idx={idx}
+              ref={(el) => (imageRefs.current[idx] = el)}
+              src={src}
+              alt={`${item.title} ${idx + 1}`}
+              className=" h-[70vh] object-fill  "
+            />
+          ))}
+        </div>
+
+        {/* ===== Bottom absolute info bar (hidden while scrolling) ===== */}
+        {!isScrolling && (
+          <div className="pointer-events-none sticky bottom-4 z-10 w-[80%] mx-auto bg-white/80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
+            <div className="pointer-events-auto">
+              <div className="mt-1 text-[#323232] text-[1.2rem] font-medium">{item.title}</div>
+              <div className="flex my-2 gap-3">
+                <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                  <img src={heart} alt="heart" className="h-6 md:h-6 aspect-auto" />
+                  <p>52</p>
+                </div>
+                <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                  <img src={star} alt="star" className="h-6 md:h-6 aspect-auto" />
+                  <p>52</p>
+                </div>
+                <div className="flex items-center gap-2 text-[1.1rem] font-inter">
+                  <img src={whatapp} alt="whatsapp" className="h-5 md:h-5 aspect-auto" />
+                  <p>52</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* ===== End bottom bar ===== */}
+      </div>
+
+      {/* Thumbnails */}
+      {item.image_url && item.image_url.length > 1 && (
+        <div className="grid grid-cols-1 grid-rows-4 gap-2 mt-[1rem]">
+          {item.image_url.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt={`${item.title} extra ${idx + 1}`}
+              className={`w-full h-[8rem] object-fill rounded-md cursor-pointer ${
+                selectedIndex === idx ? 'ring-2 ring-[#79539f]' : ''
+              }`}
+              onClick={() => onChange(idx)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SinglePortfolio({
   portfolios,
@@ -126,166 +284,6 @@ export default function SinglePortfolio({
   const [filteredOutfits, setFilteredOutfits] = useState<FilteredOutfitsResponse>(null);
   const [filteredOutfitsLoading, setFilteredOutfitsLoading] = useState(false);
   const [filteredOutfitsError, setFilteredOutfitsError] = useState<string | null>(null);
-
-  // Small subcomponent to render vertically stacked, full-height images for an outfit
-  // and notify parent when the visible image changes (via IntersectionObserver).
-  const OutfitImages: React.FC<{
-    item: any;
-    selectedIndex: number;
-    onChange: (idx: number) => void;
-  }> = ({ item, selectedIndex, onChange }) => {
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const [isScrolling, setIsScrolling] = useState(false);
-
-    useEffect(() => {
-      const container = containerRef.current;
-
-      if (!container) {
-        return;
-      }
-
-      let rafId: number | null = null;
-      let debounceTimer: number | null = null;
-      let hideTimer: number | null = null;
-
-      const imgs = Array.from(container.querySelectorAll('img')) as HTMLImageElement[];
-
-      const updateVisible = () => {
-        if (!container || imgs.length === 0) {
-          return;
-        }
-
-        const containerRect = container.getBoundingClientRect();
-        const containerCenter = containerRect.top + containerRect.height / 2;
-
-        let bestIdx = 0;
-        let bestDistance = Infinity;
-
-        imgs.forEach((img, idx) => {
-          const r = img.getBoundingClientRect();
-          const imgCenter = r.top + r.height / 2;
-          const dist = Math.abs(imgCenter - containerCenter);
-
-          if (dist < bestDistance) {
-            bestDistance = dist;
-            bestIdx = idx;
-          }
-        });
-
-        if (bestIdx !== selectedIndex) {
-          onChange(bestIdx);
-        }
-      };
-
-      const handleScroll = () => {
-        // show that user is scrolling
-        setIsScrolling(true);
-
-        if (rafId) {
-          cancelAnimationFrame(rafId);
-        }
-
-        rafId = requestAnimationFrame(() => {
-          if (debounceTimer) {
-            window.clearTimeout(debounceTimer);
-          }
-
-          debounceTimer = window.setTimeout(() => {
-            updateVisible();
-
-            // schedule hiding the "scrolling" state shortly after scrolling stops
-            if (hideTimer) {
-              window.clearTimeout(hideTimer);
-            }
-            hideTimer = window.setTimeout(() => {
-              setIsScrolling(false);
-            }, 400) as unknown as number;
-          }, 80) as unknown as number;
-        });
-      };
-
-      const initId = window.setTimeout(() => {
-        updateVisible();
-      }, 0);
-
-      container.addEventListener('scroll', handleScroll, { passive: true });
-
-      return () => {
-        container.removeEventListener('scroll', handleScroll);
-
-        if (rafId) {
-          cancelAnimationFrame(rafId);
-        }
-
-        if (debounceTimer) {
-          window.clearTimeout(debounceTimer);
-        }
-
-        if (hideTimer) {
-          window.clearTimeout(hideTimer);
-        }
-
-        window.clearTimeout(initId);
-      };
-      // NOTE: no dependency on selectedIndex to avoid re-initializing on every change
-    }, [item.id, item?.image_url?.length, onChange]);
-
-    return (
-      <div
-        ref={containerRef}
-        className="relative w-[70%] custom-scrollbar h-[70vh] flex flex-col gap-3 overflow-y-scroll rounded-[20px] md:rounded-[10px] snap-y snap-mandatory"
-        style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-        onWheelCapture={(e) => {
-          // keep native scroll but stop the event from bubbling to parent swipe handlers
-          e.stopPropagation();
-        }}
-        onTouchStart={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        {item.image_url?.map((img: string, idx: number) => (
-          <img
-            key={idx}
-            data-idx={idx}
-            src={img}
-            alt={`${item.title}`}
-            className={`block object-fill h-[70vh] flex-shrink-0 snap-start ${
-              selectedIndex === idx ? 'ring-2 ring-[#79539f]' : ''
-            }`}
-            onClick={() => {
-              onChange(idx);
-            }}
-          />
-        ))}
-
-        {/* Bottom-center absolute section: shows current image index / total; hidden while user is scrolling */}
-        {!isScrolling && (
-          <div className=" w-[80%] absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
-            <div className="mt-1 text-[#323232] text-[1.2rem] font-medium">{item.title}</div>
-            {/* <div className="text-[#666666] text-[.8rem] font-medium">
-            {typeof selectedIndex === 'number' && item.image_url?.length
-              ? `${selectedIndex + 1} / ${item.image_url.length}`
-              : ''}
-          </div> */}
-            <div className="flex my-2 gap-3">
-              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                <img src={heart} alt="person" className="h-6 md:h-6 aspect-auto" />
-                <p>52</p>
-              </div>
-              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                <img src={star} alt="person" className="h-6 md:h-6 aspect-auto" />
-                <p>52</p>
-              </div>
-              <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                <img src={whatapp} alt="person" className="h-5 md:h-5 aspect-auto" />
-                <p>52</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   // Fetch lat/lon only once on mount
   useEffect(() => {
@@ -541,15 +539,6 @@ export default function SinglePortfolio({
       window.location.href = upiPaymentLink;
     }
   };
-
-  // eslint-disable-next-line no-console
-  // console.log(filtersData, filtersError, selectedOutfits, selectedColors);
-
-  // // eslint-disable-next-line no-console
-  // console.log(selectedOutfits, selectedSubOutfits, selectedColors);
-
-  // // eslint-disable-next-line no-console
-  // console.log(filteredOutfits);
 
   const handleSwipeLeft = () => {
     const nextIndex = currentDesignerIndex < portfolios.length - 1 ? currentDesignerIndex + 1 : 0;
@@ -1236,45 +1225,18 @@ export default function SinglePortfolio({
                                     {item.creation_time}
                                   </div> */}
 
-                                  <div className="w-full flex justify-between gap-[2rem]">
-                                    {/* First image (now handled by OutfitImages component which
-                                        makes each image full-height and updates selected index
-                                        as the user scrolls) */}
-                                    <OutfitImages
-                                      item={item}
-                                      selectedIndex={selectedImageIndexes[item.id] ?? 0}
-                                      onChange={(idx: number) =>
-                                        setSelectedImageIndexes((prev) => ({
-                                          ...prev,
-                                          [item.id]: idx,
-                                        }))
-                                      }
-                                    />
-
-                                    {/* More images (if any) */}
-                                    {item.image_url && item.image_url.length > 1 && (
-                                      <div className="grid grid-cols-1 grid-rows-4 gap-2 mt-[1rem]">
-                                        {item.image_url?.map((img, idx) => (
-                                          <img
-                                            key={idx}
-                                            src={img}
-                                            alt={`${item.title} extra ${idx + 1}`}
-                                            className={`w-full h-[8rem] object-fill rounded-md cursor-pointer ${
-                                              (selectedImageIndexes[item.id] ?? 0) === idx
-                                                ? 'ring-2 ring-[#79539f]'
-                                                : ''
-                                            }`}
-                                            onClick={() => {
-                                              setSelectedImageIndexes((prev) => ({
-                                                ...prev,
-                                                [item.id]: idx,
-                                              }));
-                                            }}
-                                          />
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
+                                  {/* ===== Scroll-synced images (replaces old First image + More images) ===== */}
+                                  <OutfitImages
+                                    item={item}
+                                    selectedIndex={selectedImageIndexes[item.id] ?? 0}
+                                    onChange={(idx: number) =>
+                                      setSelectedImageIndexes((prev) => ({
+                                        ...prev,
+                                        [item.id]: idx,
+                                      }))
+                                    }
+                                  />
+                                  {/* ===== End scroll-synced images ===== */}
                                 </div>
                               ))}
                             </div>
@@ -1306,7 +1268,7 @@ export default function SinglePortfolio({
             )} */}
 
             {showSwapDiv && (
-              <div className="md:hidden absolute top-[150px] left-0 right-0 flex items-center justify-between px-4 ">
+              <div className="md:hidden block absolute top-[150px] left-0 right-0 flex items-center justify-between px-4 ">
                 <img
                   src={left_swap}
                   alt="Left Swap"

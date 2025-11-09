@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeable } from 'react-swipeable';
-import coins from '../../assets/images/coins.png';
+//import coins from '../../assets/images/coins.png';
 import Ai_refresh from '../../assets/icons/Ai_Loader.gif';
 import { api } from '../../utils/apiRequest';
 import circle from '../../assets/icons/circle.png';
@@ -56,6 +56,7 @@ export interface CollectiveItem {
     lon?: number | null;
   };
   portfolioUserName?: string;
+  sharedViaWhatsApp?: string;
 }
 
 interface CollectiveCardProps {
@@ -63,28 +64,30 @@ interface CollectiveCardProps {
   onShowInfoChange?: (isShown: boolean) => void;
 }
 
-const formatTimeline = (createdAt: string): string => {
+const formatTimeline = (createdAt: string, platForm: any): string => {
   const createdDate = new Date(createdAt);
   const now = new Date();
   const diffMs = now.getTime() - createdDate.getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
+  const label = platForm === 'DARZEE' ? 'Brought to Life' : 'Prompt Created';
+
   if (diffHours < 1) {
-    return 'Prompt Created - just now';
+    return `${label} - just now`;
   }
 
   if (diffDays < 1) {
-    return `Prompt Created - ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    return `${label} - ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
   }
 
   if (diffDays < 30) {
-    return `Prompt Created - ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    return `${label} - ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
   }
 
   const diffMonths = Math.floor(diffDays / 30);
 
-  return `Prompt Created - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
+  return `${label} - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
 };
 
 const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange }) => {
@@ -127,6 +130,38 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
   const totalImages = item.images.length;
 
   const handleWhatsAppClick = async () => {
+    if (!item) {
+      return;
+    }
+    setWhatsAppLoading(true);
+
+    try {
+      const body = {
+        imageId: item.id,
+        parameters: ['collective'],
+      };
+
+      const data = await api.postRequest('collective_link_share/generate', body);
+
+      // eslint-disable-next-line no-console
+      console.log('WhatsApp Link Response:', data);
+
+      if (data?.data?.link) {
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(data?.data?.link)}`;
+        window.open(whatsappUrl, '_blank');
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('No link returned from API');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error generating WhatsApp link:', error);
+    } finally {
+      setWhatsAppLoading(false);
+    }
+  };
+
+  const handleeWhatsAppClick = async () => {
     if (!item) {
       return;
     }
@@ -266,15 +301,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     }
 
     // Only include non-empty fields
-    return [
-      address.addressLine1,
-      address.addressLine2,
-      address.city,
-      address.state,
-      address.country,
-    ]
-      .filter(Boolean)
-      .join(', ');
+    return [address.city, address.state, address.country].filter(Boolean).join(', ');
   };
   const navigate = useNavigate();
 
@@ -391,7 +418,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               }}
             >
               <div className="text-xs uppercase tracking-wide opacity-80">TIMELINE</div>
-              <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
+              <div className="font-normal text-white">
+                {formatTimeline(item.createdAt, item.platForm)}
+              </div>
             </motion.div>
           </>
         )}
@@ -479,8 +508,13 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           </button>
           {item.platForm == 'FIZA' && (
             <>
-              <img src={coins} alt="Coin Icon" className="h-5 w-auto" />
-              <span className="text-sm font-medium">{item.coinUsed}</span>
+              <img
+                onClick={handleeWhatsAppClick}
+                src={what}
+                alt="whatsapp"
+                className="h-5 w-auto cursor-pointer "
+              />
+              <span className="text-sm font-medium">{item.sharedViaWhatsApp}</span>
             </>
           )}
         </div>
@@ -541,9 +575,58 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             </div>
             <div className="text-xs sm:text-sm text-gray-700 mt-1 flex items-start gap-2">
               <span className="text-lg leading-none">•</span>
-              <span>{formatTimeline(item.createdAt)}</span>
+              <span> {formatTimeline(item.createdAt, item.platForm)}</span>
             </div>
           </div>
+          {item.platForm === 'DARZEE' && (
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
+                className="flex items-center gap-1 bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition "
+                style={{ height: '40px', minWidth: '120px' }}
+              >
+                <img src={vec} alt="vector icon" className="w-4 h-4" />
+                View More
+              </button>
+              <button
+                onClick={handleWhatsAppClick}
+                disabled={whatsAppLoading}
+                className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 hover:bg-green-600 transition disabled:opacity-70"
+                style={{ height: '40px', minWidth: '120px' }}
+              >
+                {whatsAppLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin h-3 w-3 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                      ></path>
+                    </svg>
+                    <span>Sending</span>
+                  </>
+                ) : (
+                  <>
+                    <img src={what} alt="WhatsApp" className="w-4 h-4" />
+                    WhatsApp
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -560,8 +643,13 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             <div className="flex items-center gap-2">
               {item.platForm == 'FIZA' && (
                 <>
-                  <img src={coins} alt="Coin Icon" className="h-5 w-auto" />
-                  <span className="text-sm font-medium">{item.coinUsed}</span>
+                  <img
+                    onClick={handleeWhatsAppClick}
+                    src={what}
+                    alt="whatsapp"
+                    className="h-5 w-auto cursor-pointer "
+                  />
+                  <span className="text-sm font-medium">{item.sharedViaWhatsApp}</span>
                 </>
               )}
             </div>

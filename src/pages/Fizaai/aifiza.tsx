@@ -190,6 +190,7 @@ interface VersionDataa {
     lon?: number | null;
   };
   portfolioUserName?: string;
+  sharedViaWhatsApp?: string;
 }
 
 interface VersionData {

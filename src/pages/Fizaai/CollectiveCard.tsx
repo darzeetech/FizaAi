@@ -501,17 +501,16 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
             )}
             <span className="font-medium ">{favCount}</span>
           </button>
-          {item.platForm == 'FIZA' && (
-            <>
-              <img
-                onClick={handleeWhatsAppClick}
-                src={what}
-                alt="whatsapp"
-                className="h-5 w-auto cursor-pointer "
-              />
-              <span className="text-sm font-medium">{item.sharedViaWhatsApp}</span>
-            </>
-          )}
+
+          <>
+            <img
+              onClick={handleeWhatsAppClick}
+              src={what}
+              alt="whatsapp"
+              className="h-5 w-auto cursor-pointer "
+            />
+            <span className="text-sm font-medium">{item.sharedViaWhatsApp}</span>
+          </>
         </div>
 
         <div className="md:flex items-center gap-5 mt-3 hidden ">
@@ -638,17 +637,15 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           </span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              {item.platForm == 'FIZA' && (
-                <>
-                  <img
-                    onClick={handleeWhatsAppClick}
-                    src={what}
-                    alt="whatsapp"
-                    className="h-5 w-auto cursor-pointer "
-                  />
-                  <span className="text-sm font-medium">{item.sharedViaWhatsApp}</span>
-                </>
-              )}
+              <>
+                <img
+                  onClick={handleeWhatsAppClick}
+                  src={what}
+                  alt="whatsapp"
+                  className="h-5 w-auto cursor-pointer "
+                />
+                <span className="text-sm font-medium">{item.sharedViaWhatsApp}</span>
+              </>
             </div>
             <button
               type="button"

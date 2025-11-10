@@ -146,7 +146,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       waNumber = '91' + waNumber;
     }
 
-    const whatsappUrl = `https://wa.me/${waNumber}`;
+    const message = 'I need more information on this product. Could you assist?';
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${waNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 

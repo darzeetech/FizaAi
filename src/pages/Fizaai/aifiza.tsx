@@ -191,6 +191,9 @@ interface VersionDataa {
   };
   portfolioUserName?: string;
   sharedViaWhatsApp?: string;
+  socialMedia?: {
+    whatsapp?: string;
+  };
 }
 
 interface VersionData {

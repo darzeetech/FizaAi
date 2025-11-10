@@ -57,6 +57,9 @@ export interface CollectiveItem {
   };
   portfolioUserName?: string;
   sharedViaWhatsApp?: string;
+  socialMedia?: {
+    whatsapp?: string;
+  };
 }
 
 interface CollectiveCardProps {
@@ -129,36 +132,22 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
 
   const totalImages = item.images.length;
 
-  const handleWhatsAppClick = async () => {
-    if (!item) {
+  const handleWhatsAppClick = (phoneNumber: string) => {
+    if (!phoneNumber) {
+      alert('WhatsApp number is not available');
+
       return;
     }
-    setWhatsAppLoading(true);
 
-    try {
-      const body = {
-        imageId: item.id,
-        parameters: ['collective'],
-      };
+    // Clean number, add +91 if Indian 10-digit number (optional)
+    let waNumber = phoneNumber.trim().replace(/\D/g, '');
 
-      const data = await api.postRequest('collective_link_share/generate', body);
-
-      // eslint-disable-next-line no-console
-      console.log('WhatsApp Link Response:', data);
-
-      if (data?.data?.link) {
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(data?.data?.link)}`;
-        window.open(whatsappUrl, '_blank');
-      } else {
-        // eslint-disable-next-line no-console
-        console.error('No link returned from API');
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error generating WhatsApp link:', error);
-    } finally {
-      setWhatsAppLoading(false);
+    if (waNumber.length === 10 && !waNumber.startsWith('91')) {
+      waNumber = '91' + waNumber;
     }
+
+    const whatsappUrl = `https://wa.me/${waNumber}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const handleeWhatsAppClick = async () => {
@@ -365,7 +354,11 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                     View More
                   </button>
                   <button
-                    onClick={handleWhatsAppClick}
+                    onClick={() =>
+                      handleWhatsAppClick(
+                        item.socialMedia?.whatsapp || item.sharedViaWhatsApp || ''
+                      )
+                    }
                     disabled={whatsAppLoading}
                     className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 hover:bg-green-600 transition disabled:opacity-70"
                   >
@@ -589,7 +582,9 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
                 View More
               </button>
               <button
-                onClick={handleWhatsAppClick}
+                onClick={() =>
+                  handleWhatsAppClick(item.socialMedia?.whatsapp || item.sharedViaWhatsApp || '')
+                }
                 disabled={whatsAppLoading}
                 className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 hover:bg-green-600 transition disabled:opacity-70"
                 style={{ height: '40px', minWidth: '120px' }}

@@ -43,6 +43,9 @@ export interface CollectiveItem {
   };
   portfolioUserName?: string;
   sharedViaWhatsApp?: string;
+  socialMedia?: {
+    whatsapp?: string;
+  };
 }
 
 interface CollectiveProps {

@@ -280,6 +280,8 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     return text;
   };
 
+  const navigate = useNavigate();
+
   const formatAddress = (address?: {
     addressLine1?: string;
     addressLine2?: string;
@@ -291,10 +293,8 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
       return 'Location Not Available';
     }
 
-    // Only include non-empty fields
     return [address.city, address.state, address.country].filter(Boolean).join(', ');
   };
-  const navigate = useNavigate();
 
   return (
     <motion.div

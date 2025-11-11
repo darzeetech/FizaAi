@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeable } from 'react-swipeable';
-import coins from '../../../assets/images/coins.png';
+import { useNavigate } from 'react-router-dom';
+//import coins from '../../../assets/images/coins.png';
 import Ai_refresh from '../../../assets/icons/Ai_Loader.gif';
 import { api } from '../../../utils/apiRequest';
 import circle from '../../../assets/icons/circle.png';
@@ -12,14 +13,24 @@ import malelogo from '../../../assets/icons/ai-stylist-male.png';
 import life from '../../../assets/icons/life.png';
 import notfavorite from '../../../assets/icons/favorite.png';
 import favorite from '../../../assets/icons/favoritselected.png';
+import verified from '../../../assets/icons/verified.png';
+import location from '../../../assets/icons/location.png';
+import what from '../../../assets/icons/whatt.png';
+import vec from '../../../assets/icons/vec.png';
 
 export interface FavouriteItem {
   id: number;
+  data: string;
+  version: number;
+  parentId: number | null;
   createdAt: string;
   images: string[];
+  userId: number;
   children?: number | null;
+  collective: boolean;
   likeCount: number | null;
   likeByCurrentUser: boolean;
+  prof_pic: string;
   platForm?: string;
   coinUsed?: number;
   addedToFav?: boolean;
@@ -29,6 +40,25 @@ export interface FavouriteItem {
   userInfo?: {
     fullName?: string | null;
     profilePicture?: string | null;
+    activeSuscription?: boolean;
+  };
+  address?: {
+    id?: number;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    lat?: number | null;
+    lon?: number | null;
+  };
+  portfolioUserName?: string;
+  sharedViaWhatsApp?: string;
+  socialMedia?: {
+    whatsapp?: string;
   };
 }
 
@@ -38,28 +68,30 @@ interface CollectiveCardProps {
   onRemove?: (id: number) => void;
 }
 
-const formatTimeline = (createdAt: string): string => {
+const formatTimeline = (createdAt: string, platForm: any): string => {
   const createdDate = new Date(createdAt);
   const now = new Date();
   const diffMs = now.getTime() - createdDate.getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
+  const label = platForm === 'DARZEE' ? 'Brought to Life' : 'Prompt Created';
+
   if (diffHours < 1) {
-    return 'Prompt Created - just now';
+    return `${label} - just now`;
   }
 
   if (diffDays < 1) {
-    return `Prompt Created - ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    return `${label} - ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
   }
 
   if (diffDays < 30) {
-    return `Prompt Created - ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    return `${label} - ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
   }
 
   const diffMonths = Math.floor(diffDays / 30);
 
-  return `Prompt Created - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
+  return `${label} - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
 };
 
 const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange, onRemove }) => {
@@ -97,6 +129,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [favorited, setFavorited] = useState(item.addedToFav ?? false);
   const [favCount, setFavCount] = useState(item.favCount ?? 0);
+  const [whatsAppLoading, setWhatsAppLoading] = useState(false);
 
   const totalImages = item.images.length;
 
@@ -192,6 +225,73 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
     trackMouse: true,
   });
 
+  const formatAddress = (address?: {
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  }) => {
+    if (!address) {
+      return 'Location Not Available';
+    }
+
+    // Only include non-empty fields
+    return [address.city, address.state, address.country].filter(Boolean).join(', ');
+  };
+  const navigate = useNavigate();
+
+  const handleWhatsAppClick = (phoneNumber: string) => {
+    if (!phoneNumber) {
+      alert('WhatsApp number is not available');
+
+      return;
+    }
+
+    // Clean number, add +91 if Indian 10-digit number (optional)
+    let waNumber = phoneNumber.trim().replace(/\D/g, '');
+
+    if (waNumber.length === 10 && !waNumber.startsWith('91')) {
+      waNumber = '91' + waNumber;
+    }
+
+    const message = 'I need more information on this product. Could you assist?';
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${waNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleeWhatsAppClick = async () => {
+    if (!item) {
+      return;
+    }
+    setWhatsAppLoading(true);
+
+    try {
+      const body = {
+        imageId: item.id,
+        parameters: ['collective'],
+      };
+
+      const data = await api.postRequest('collective_link_share/generate', body);
+
+      // eslint-disable-next-line no-console
+      console.log('WhatsApp Link Response:', data);
+
+      if (data?.data?.link) {
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(data?.data?.link)}`;
+        window.open(whatsappUrl, '_blank');
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('No link returned from API');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error generating WhatsApp link:', error);
+    } finally {
+      setWhatsAppLoading(false);
+    }
+  };
   return (
     <motion.div
       className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-2 ${
@@ -213,38 +313,105 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
       <AnimatePresence>
         {showInfo && (
           <>
-            {/* Designed By */}
+            {/* DESIGNED BY + Location + Actions */}
             <motion.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2  text-sm font-medium shadow-md md:hidden"
+              className="absolute top-6 right-[20px] -translate-x-1/2 text-white w-3/4 max-w-xs min-w-[230px] bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-3 text-sm font-medium shadow-md md:hidden"
+              style={{ zIndex: 10 }}
             >
-              DESIGNED BY
+              <div className="text-xs uppercase tracking-wide opacity-80">DESIGNED BY</div>
               <div className="flex items-center gap-1 mt-1">
                 <img
                   src={getProfilePic()}
                   alt="Profile"
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+                  className="w-5 h-5 rounded-full object-cover"
                 />
-                <div className="font-semibold text-white">
-                  {' '}
+                <span className="font-semibold text-white text-xs">
                   {truncateText(designerName, maxLength)}
-                </div>
+                </span>
+                {item.userInfo?.activeSuscription && (
+                  <img src={verified} alt="verified" className="w-3 h-3" />
+                )}
               </div>
+              {item.platForm === 'DARZEE' && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-white/80">
+                  <img src={location} alt="location" className="w-4 h-4" />
+                  <span>{formatAddress(item.address)}</span>
+                </div>
+              )}
+              {item.platForm === 'DARZEE' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
+                    className="flex items-center gap-1 bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
+                  >
+                    <img src={vec} alt="vector icon" className="w-4 h-4" />
+                    View More
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleWhatsAppClick(
+                        item.socialMedia?.whatsapp || item.sharedViaWhatsApp || ''
+                      )
+                    }
+                    disabled={whatsAppLoading}
+                    className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 hover:bg-green-600 transition disabled:opacity-70"
+                  >
+                    {whatsAppLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin h-3 w-3 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          ></path>
+                        </svg>
+                        <span>Sending</span>
+                      </>
+                    ) : (
+                      <>
+                        <img src={what} alt="WhatsApp" className="w-4 h-4" />
+                        WhatsApp
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </motion.div>
-
-            {/* Timeline */}
+            {/* TIMELINE - spacing varies by platform */}
             <motion.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className=" absolute top-[104px] right-[20px] -translate-x-1/2 text-white w-3/4  bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              className="absolute right-[20px] -translate-x-1/2 text-white w-3/4 max-w-xs min-w-[230px] bg-[linear-gradient(90deg,rgba(179,156,122,0.67)_0%,rgba(179,156,122,0.268)_100%)] rounded-xl px-4 py-2 text-sm font-medium shadow-md md:hidden"
+              style={{
+                top:
+                  item.platForm === 'DARZEE'
+                    ? 'calc(6rem + 80px)' // spacing for DARZEE
+                    : 'calc(6rem)', // spacing for FIZA
+              }}
             >
-              TIMELINE{' '}
-              <div className="font-normal text-white">{formatTimeline(item.createdAt)}</div>
+              <div className="text-xs uppercase tracking-wide opacity-80">TIMELINE</div>
+              <div className="font-normal text-white">
+                {formatTimeline(item.createdAt, item.platForm)}
+              </div>
             </motion.div>
           </>
         )}
@@ -288,7 +455,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
           />
           {/* Mobile Dots Above Image */}
           {totalImages > 1 && (
-            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[30]">
+            <div className="flex justify-center gap-3 md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
               {item.images.map((_, index) => (
                 <button
                   key={index}
@@ -302,7 +469,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-lg md:text-xl font-semibold">
+        <div className="hidden md:flex items-center gap-4 mt-4 text-base sm:text-sm md:text-xl font-semibold">
           <span> {truncateText(outfitName, maxLength)}</span>
           <button
             type="button"
@@ -330,12 +497,16 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
             )}
             <span className="font-medium ">{favCount}</span>
           </button>
-          {item.platForm == 'FIZA' && (
-            <>
-              <img src={coins} alt="Coin Icon" className="h-5 w-auto" />
-              <span className="text-sm font-medium">{item.coinUsed}</span>
-            </>
-          )}
+
+          <>
+            <img
+              onClick={handleeWhatsAppClick}
+              src={what}
+              alt="whatsapp"
+              className="h-5 w-auto cursor-pointer "
+            />
+            <span className="text-sm font-medium">{item.sharedViaWhatsApp}</span>
+          </>
         </div>
 
         <div className="md:flex items-center gap-5 mt-3 hidden ">
@@ -382,7 +553,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
               />
 
               <span className="text-sm text-purple-700 font-medium cursor-pointer hover:underline">
-                {truncateText(designerName, maxLength)}
+                {designerName}
               </span>
             </div>
           </div>
@@ -394,9 +565,60 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
             </div>
             <div className="text-xs sm:text-sm text-gray-700 mt-1 flex items-start gap-2">
               <span className="text-lg leading-none">•</span>
-              <span>{formatTimeline(item.createdAt)}</span>
+              <span> {formatTimeline(item.createdAt, item.platForm)}</span>
             </div>
           </div>
+          {item.platForm === 'DARZEE' && (
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
+                className="flex items-center gap-1 bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition "
+                style={{ height: '40px', minWidth: '120px' }}
+              >
+                <img src={vec} alt="vector icon" className="w-4 h-4" />
+                View More
+              </button>
+              <button
+                onClick={() =>
+                  handleWhatsAppClick(item.socialMedia?.whatsapp || item.sharedViaWhatsApp || '')
+                }
+                disabled={whatsAppLoading}
+                className="bg-green-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 hover:bg-green-600 transition disabled:opacity-70"
+                style={{ height: '40px', minWidth: '120px' }}
+              >
+                {whatsAppLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin h-3 w-3 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                      ></path>
+                    </svg>
+                    <span>Sending</span>
+                  </>
+                ) : (
+                  <>
+                    <img src={what} alt="WhatsApp" className="w-4 h-4" />
+                    WhatsApp
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -405,15 +627,21 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
       {/* Mobile Bottom Bar */}
       <div className="md:hidden px-4 pb-3 bg-white rounded-b-[30px] shadow-md">
         <div className="flex items-center justify-between w-full px-2 text-sm">
-          <span className="font-semibold text-base truncate">{outfitName}</span>
+          <span className="font-semibold text-base truncate">
+            {' '}
+            {truncateText(outfitName, maxLength)}
+          </span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              {item.platForm == 'FIZA' && (
-                <>
-                  <img src={coins} alt="Coin Icon" className="h-5 w-auto" />
-                  <span className="text-sm font-medium">{item.coinUsed}</span>
-                </>
-              )}
+              <>
+                <img
+                  onClick={handleeWhatsAppClick}
+                  src={what}
+                  alt="whatsapp"
+                  className="h-5 w-auto cursor-pointer "
+                />
+                <span className="text-sm font-medium">{item.sharedViaWhatsApp}</span>
+              </>
             </div>
             <button
               type="button"

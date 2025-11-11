@@ -7,23 +7,45 @@ type Portfolio = LookbookPortfolio;
 
 interface FavouriteItem {
   id: number;
-  coinUsed: number;
+  data: string;
+  version: number;
+  parentId: number | null;
   createdAt: string;
-  likeCount: number;
-  favCount: number;
-  platForm: string;
-  originId: number;
   images: string[];
+  userId: number;
+  children?: number | null;
+  collective: boolean;
+  likeCount: number | null;
   likeByCurrentUser: boolean;
-  addedToFav: boolean;
-  userInfo: {
-    fullName: string;
-    profilePicture: string | null;
+  prof_pic: string;
+  platForm?: string;
+  coinUsed?: number;
+  addedToFav?: boolean;
+  favCount?: number;
+  originId?: number;
+  dressInfo?: { selectedOutfit?: string; gender?: string | null };
+  userInfo?: {
+    fullName?: string | null;
+    profilePicture?: string | null;
+    activeSuscription?: boolean;
   };
-  dressInfo: {
-    color: string;
-    gender: string;
-    selectedOutfit: string;
+  address?: {
+    id?: number;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    lat?: number | null;
+    lon?: number | null;
+  };
+  portfolioUserName?: string;
+  sharedViaWhatsApp?: string;
+  socialMedia?: {
+    whatsapp?: string;
   };
 }
 

@@ -178,7 +178,7 @@ function OutfitImages({
               ref={(el) => (imageRefs.current[idx] = el)}
               src={src}
               alt={`${item.title} ${idx + 1}`}
-              className="w-full md:h-[70vh] h-[73vh] object-fill block"
+              className="w-full md:h-[70vh] h-[73vh] object-fill block rounded-lg"
             />
           ))}
         </div>
@@ -578,11 +578,11 @@ export default function SinglePortfolio({
   });
 
   return (
-    <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
+    <div className={`w-full flex gap-2 md:px-1  ${className}`}>
       <section
         className={`${
           showMobilePreview ? 'w-full ' : ' md:block block'
-        } flex-1 border rounded-lg md:p-4 p- bg-white h-fit md:max-h-[calc(100vh-72px)]`}
+        } flex-1 border rounded-lg md:p-4  bg-white h-fit md:max-h-[calc(100vh-72px)]`}
       >
         {!selected ? (
           <div className="flex items-center justify-center h-full text-gray-500">

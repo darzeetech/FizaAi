@@ -292,9 +292,10 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange,
       setWhatsAppLoading(false);
     }
   };
+
   return (
     <motion.div
-      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-2 ${
+      className={`relative flex flex-col md:flex-row bg-white shadow-md hover:shadow-lg mx-auto w-full max-w-[95%] md:mt-  ${
         showInfo ? ' bg-black bg-opacity-25' : ''
       } rounded-[30px] border-2 border-[#F3D7AC] p-0 sm:p-5 sm:mx-auto`}
       initial={{ opacity: 0, y: 40 }}

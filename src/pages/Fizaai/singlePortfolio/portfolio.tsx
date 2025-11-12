@@ -73,7 +73,14 @@ function OutfitImages({
   selectedIndex,
   onChange,
 }: {
-  item: { id: number; title: string; image_url: string[] };
+  item: {
+    shared_via_whatsapp: number;
+    fav_counts: number;
+    like_counts: number;
+    id: number;
+    title: string;
+    image_url: string[];
+  };
   selectedIndex: number;
   onChange: (idx: number) => void;
 }) {
@@ -156,14 +163,14 @@ function OutfitImages({
   }, []);
 
   return (
-    <div className="w-full flex justify-between gap-[2rem]">
+    <div className="w-full flex md:flex-row flex-col justify-between gap-[2rem]">
       {/* Scrollable big images column */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="relative w-[70%] h-[70vh] overflow-y-auto rounded-[20px] md:rounded-[10px] custom-scrollbar"
+        className="relative  md:w-[70%] w-full md:h-[70vh] h-[75vh] md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px] custom-scrollbar"
       >
-        <div className="w-full flex flex-col gap-3">
+        <div className="w-full relative flex md:flex-col flex-row gap-3">
           {item.image_url?.map((src, idx) => (
             <img
               key={idx}
@@ -171,7 +178,7 @@ function OutfitImages({
               ref={(el) => (imageRefs.current[idx] = el)}
               src={src}
               alt={`${item.title} ${idx + 1}`}
-              className="w-full h-[70vh] object-fill block"
+              className="w-full md:h-[70vh] h-[73vh] object-fill block"
             />
           ))}
         </div>
@@ -188,15 +195,15 @@ function OutfitImages({
             <div className="flex my-2 gap-3">
               <div className="flex items-center gap-2 text-[1.1rem] font-inter">
                 <img src={heart} alt="heart" className="h-6 md:h-6 aspect-auto" />
-                <p>52</p>
+                <p>{item?.like_counts}</p>
               </div>
               <div className="flex items-center gap-2 text-[1.1rem] font-inter">
                 <img src={star} alt="star" className="h-6 md:h-6 aspect-auto" />
-                <p>52</p>
+                <p>{item?.fav_counts}</p>
               </div>
               <div className="flex items-center gap-2 text-[1.1rem] font-inter">
                 <img src={whatapp} alt="whatsapp" className="h-5 md:h-5 aspect-auto" />
-                <p>52</p>
+                <p>{item?.shared_via_whatsapp || 0}</p>
               </div>
             </div>
           </div>
@@ -206,7 +213,7 @@ function OutfitImages({
 
       {/* Thumbnails */}
       {item.image_url && item.image_url.length > 1 && (
-        <div className="grid grid-cols-1 grid-rows-4 gap-2 mt-[1rem]">
+        <div className=" md:grid hidden grid-cols-1 grid-rows-4 gap-2 mt-[1rem]">
           {item.image_url.map((img, idx) => (
             <img
               key={idx}
@@ -277,6 +284,10 @@ export default function SinglePortfolio({
       title: string;
       sub_outfit_name: string;
       image_url: string[];
+      color: string;
+      like_counts: number;
+      fav_counts: number;
+      shared_via_whatsapp: number;
     }[];
   };
 
@@ -570,7 +581,7 @@ export default function SinglePortfolio({
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
       <section
         className={`${
-          showMobilePreview ? 'w-full ' : ' md:block hidden'
+          showMobilePreview ? 'w-full ' : ' md:block block'
         } flex-1 border rounded-lg md:p-4 p- bg-white h-fit md:max-h-[calc(100vh-72px)]`}
       >
         {!selected ? (
@@ -583,7 +594,7 @@ export default function SinglePortfolio({
             {...(showMobilePreview && window.innerWidth < 768 ? handlers : {})}
           >
             {/* Left: owner & meta */}
-            <div className="md:w-[40%] h-fit w-full flex flex-col gap-4 p-[3rem] ">
+            <div className="md:w-[40%] h-fit w-full flex flex-col gap-4 md:p-[3rem] ">
               {showMobilePreview && window.innerWidth < 768 && (
                 <button
                   className="flex items-center font-semibold"

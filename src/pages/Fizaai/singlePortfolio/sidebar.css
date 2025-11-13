@@ -25,3 +25,15 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+/* Hide scrollbars on mobile only */
+@media (max-width: 768px) {
+  .scrollbar-hide-mobile {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide-mobile::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+}

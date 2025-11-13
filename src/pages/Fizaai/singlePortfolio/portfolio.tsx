@@ -87,62 +87,56 @@ function OutfitImages({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const imageRefs = React.useRef<(HTMLImageElement | null)[]>([]);
   const scrollHideTimerRef = React.useRef<number | null>(null);
+  const rafRef = React.useRef<number | null>(null);
+  const isProgrammaticScroll = React.useRef(false);
   const [isScrolling, setIsScrolling] = React.useState(false);
 
-  // Observe which image is most visible inside the container
-  React.useEffect(() => {
+  // Preset dot colors — these are used only for the "selected" dot.
+  // You can customize or expand this list as needed.
+  // const dotColors = ['#FF6B6B', '#6BCB77', '#4D7AFF', '#F59E0B', '#9F7AEA', '#00B8D9'];
+
+  const intersectionArea = (a: DOMRect, b: DOMRect) => {
+    const left = Math.max(a.left, b.left);
+    const right = Math.min(a.right, b.right);
+    const top = Math.max(a.top, b.top);
+    const bottom = Math.min(a.bottom, b.bottom);
+    const width = Math.max(0, right - left);
+    const height = Math.max(0, bottom - top);
+
+    return width * height;
+  };
+
+  const computeMostVisibleIndex = React.useCallback(() => {
     const container = containerRef.current;
 
     if (!container) {
       return;
     }
 
-    const cb: IntersectionObserverCallback = (entries) => {
-      let bestIdx = selectedIndex;
-      let bestRatio = -1;
+    const contRect = container.getBoundingClientRect();
+    let bestIdx = -1;
+    let bestArea = -1;
 
-      for (const e of entries) {
-        const idxAttr = e.target.getAttribute('data-idx');
+    for (let i = 0; i < imageRefs.current.length; i++) {
+      const el = imageRefs.current[i];
 
-        if (!idxAttr) {
-          continue;
-        }
-        const idx = parseInt(idxAttr, 10);
-
-        if (e.isIntersecting && e.intersectionRatio > bestRatio) {
-          bestRatio = e.intersectionRatio;
-          bestIdx = idx;
-        }
+      if (!el) {
+        continue;
       }
+      const rect = el.getBoundingClientRect();
+      const area = intersectionArea(rect, contRect);
 
-      if (bestIdx !== selectedIndex) {
-        onChange(bestIdx);
+      if (area > bestArea) {
+        bestArea = area;
+        bestIdx = i;
       }
-    };
-
-    const io = new IntersectionObserver(cb, {
-      root: container,
-      threshold: [0.25, 0.5, 0.75, 1],
-    });
-
-    imageRefs.current.forEach((el) => el && io.observe(el));
-
-    return () => io.disconnect();
-  }, [item.id, item.image_url?.length, containerRef.current]);
-
-  // Scroll to the selected image when selectedIndex changes
-  React.useEffect(() => {
-    const container = containerRef.current;
-    const img = imageRefs.current[selectedIndex];
-
-    if (!container || !img) {
-      return;
     }
-    const top = (img as any).offsetTop ?? 0;
-    container.scrollTo({ top, behavior: 'smooth' });
-  }, [selectedIndex]);
 
-  // Hide the bottom bar while scrolling; show it shortly after scroll stops
+    if (bestIdx >= 0 && bestIdx !== selectedIndex) {
+      onChange(bestIdx);
+    }
+  }, [selectedIndex, onChange]);
+
   const handleScroll = React.useCallback(() => {
     setIsScrolling(true);
 
@@ -152,23 +146,82 @@ function OutfitImages({
     scrollHideTimerRef.current = window.setTimeout(() => {
       setIsScrolling(false);
     }, 300) as unknown as number;
-  }, []);
+
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+    rafRef.current = requestAnimationFrame(() => {
+      computeMostVisibleIndex();
+    });
+  }, [computeMostVisibleIndex]);
 
   React.useEffect(() => {
     return () => {
       if (scrollHideTimerRef.current) {
         window.clearTimeout(scrollHideTimerRef.current);
       }
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
   }, []);
 
+  // Scroll to selected image ONLY if programmatic (thumbnail/dot click)
+  React.useEffect(() => {
+    if (!isProgrammaticScroll.current) {
+      return;
+    }
+
+    const container = containerRef.current;
+    const img = imageRefs.current[selectedIndex];
+
+    if (!container || !img) {
+      return;
+    }
+
+    const verticalScroll =
+      img.offsetHeight > img.offsetWidth || container.scrollHeight > container.clientHeight;
+
+    if (verticalScroll) {
+      const top = img.offsetTop ?? 0;
+      container.scrollTo({ top, behavior: 'smooth' });
+    } else {
+      const left = img.offsetLeft ?? 0;
+      container.scrollTo({ left, behavior: 'smooth' });
+    }
+
+    // reset flag after animation window
+    const timer = window.setTimeout(() => {
+      isProgrammaticScroll.current = false;
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [selectedIndex]);
+
+  // Recompute on resize
+  React.useEffect(() => {
+    const onResize = () => computeMostVisibleIndex();
+    window.addEventListener('resize', onResize);
+
+    return () => window.removeEventListener('resize', onResize);
+  }, [computeMostVisibleIndex]);
+
+  // Click handler helper for dots / thumbnails
+  const handleSelectIndex = (idx: number) => {
+    isProgrammaticScroll.current = true;
+    onChange(idx);
+  };
+
   return (
-    <div className="w-full flex md:flex-row flex-col justify-between gap-[2rem]">
+    <div className="w-full flex md:flex-row flex-col justify-between gap-[2rem] relative">
       {/* Scrollable big images column */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="relative  md:w-[70%] w-full md:h-[70vh] h-[75vh] md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px] custom-scrollbar"
+        className="relative md:w-[70%] w-full md:h-[78vh] h-[75vh]
+             md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
+             custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide"
       >
         <div className="w-full relative flex md:flex-col flex-row gap-3">
           {item.image_url?.map((src, idx) => (
@@ -178,14 +231,16 @@ function OutfitImages({
               ref={(el) => (imageRefs.current[idx] = el)}
               src={src}
               alt={`${item.title} ${idx + 1}`}
-              className="w-full md:h-[70vh] h-[73vh] object-fill block rounded-lg"
+              className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg"
             />
           ))}
         </div>
+      </div>
 
-        {/* ===== Bottom absolute info bar (hidden while scrolling) ===== */}
-        {!isScrolling && (
-          <div className="w-[80%] absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
+      {/* ===== Bottom absolute info bar (hidden while scrolling) ===== */}
+      {!isScrolling && (
+        <div className=" pointer-events-none md:w-[60%] w-[85%] absolute bottom-6 md:left-1/3 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
+          <div className="pointer-events-auto">
             <div className="mt-1 text-[#323232] text-[1.2rem] font-medium">{item.title}</div>
             {/* <div className="text-[#666666] text-[.8rem] font-medium">
               {typeof selectedIndex === 'number' && item.image_url?.length
@@ -206,24 +261,49 @@ function OutfitImages({
                 <p>{item?.shared_via_whatsapp || 0}</p>
               </div>
             </div>
-          </div>
-        )}
-        {/* ===== End bottom bar ===== */}
-      </div>
+            <div className=" md:hidden flex items-center justify-between p-2 rounded-lg bg-slate-100 bg-opacity-80 ">
+              {item.image_url.map((_, idx) => {
+                const selected = idx === selectedIndex;
+                const bg = selected ? '#8c3bdd' : '#a1a1a7';
 
-      {/* Thumbnails */}
+                return (
+                  <div key={idx} className="w-1/4 flex justify-center" /* 4 dots per row */>
+                    <button
+                      onClick={() => handleSelectIndex(idx)}
+                      aria-label={`Go to image ${idx + 1}`}
+                      className="rounded-full"
+                      style={{
+                        width: 12,
+                        height: 12,
+                        backgroundColor: bg,
+                        border: selected ? '2px solid rgba(0,0,0,0.08)' : 'none',
+                        transition: 'transform .12s ease',
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Thumbnails (desktop) */}
       {item.image_url && item.image_url.length > 1 && (
-        <div className=" md:grid hidden grid-cols-1 grid-rows-4 gap-2 mt-[1rem]">
+        <div className=" w-[30%] md:flex hidden flex-col gap-4  md:h-[76vh] h-[73vh]">
           {item.image_url.map((img, idx) => (
-            <img
+            <div
               key={idx}
-              src={img}
-              alt={`${item.title} extra ${idx + 1}`}
-              className={`w-full h-[8rem] object-fill rounded-md cursor-pointer ${
-                selectedIndex === idx ? 'ring-2 ring-[#79539f]' : ''
-              }`}
-              onClick={() => onChange(idx)}
-            />
+              className={`flex justify-center items-center h-[7rem] w-full rounded-md aspect-video overflow-hidden
+                ${selectedIndex === idx ? 'ring-2 ring-[#79539f]' : ''}`}
+            >
+              <img
+                src={img}
+                alt={`${item.title} extra ${idx + 1}`}
+                className={` object-cover cursor-pointer object-to relative top-[4.5rem] object-center`}
+                onClick={() => handleSelectIndex(idx)}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -298,6 +378,9 @@ export default function SinglePortfolio({
   const [filteredOutfits, setFilteredOutfits] = useState<FilteredOutfitsResponse>(null);
   const [filteredOutfitsLoading, setFilteredOutfitsLoading] = useState(false);
   const [filteredOutfitsError, setFilteredOutfitsError] = useState<string | null>(null);
+
+  const pathSegments = window.location.pathname.split('/');
+  const username2 = pathSegments[pathSegments.length - 1];
 
   // Fetch lat/lon only once on mount
   useEffect(() => {
@@ -525,12 +608,16 @@ export default function SinglePortfolio({
   };
 
   const handleCopyClick = () => {
+    const pathSegments = window.location.pathname.split('/');
+    const username2 = pathSegments[pathSegments.length - 1];
     const ap = process.env.REACT_APP_BASE_AP_URL;
-    navigator.clipboard.writeText(`${ap}explore`);
+    navigator.clipboard.writeText(`${ap}designer/${username2}`);
     alert('Link copied to clipboard!');
   };
 
   const handleShareClick = () => {
+    const pathSegments = window.location.pathname.split('/');
+    const username2 = pathSegments[pathSegments.length - 1];
     const ap = process.env.REACT_APP_BASE_AP_URL;
 
     if (navigator.share) {
@@ -541,7 +628,7 @@ export default function SinglePortfolio({
         })
         .catch(() => {});
     } else {
-      navigator.clipboard.writeText(`${ap}explore`);
+      navigator.clipboard.writeText(`${ap}designer/${username2}`);
       alert('Link copied! Native share is not supported in this browser.');
     }
   };
@@ -1313,7 +1400,12 @@ export default function SinglePortfolio({
             >
               <FaTimes size={20} />
             </button>
-            <QRCode size={260} bgColor="white" fgColor="black" value={`${ap}explore` || ''} />
+            <QRCode
+              size={260}
+              bgColor="white"
+              fgColor="black"
+              value={`${ap}designer/${username2}` || ''}
+            />
             <p className="mx-auto text-center font-semibold text-[1.2rem] mt-4"> QR Portfolio</p>
           </div>
         </div>

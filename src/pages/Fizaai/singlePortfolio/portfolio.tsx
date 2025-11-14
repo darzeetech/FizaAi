@@ -677,7 +677,7 @@ export default function SinglePortfolio({
       <section
         className={`${
           showMobilePreview ? 'w-full ' : ' md:block block'
-        } flex-1 border rounded-lg md:p-4  bg-white h-fit md:max-h-[calc(100vh-72px)]`}
+        } flex-1 md:p-4  bg-white h-fit md:max-h-[calc(100vh-72px)]`}
       >
         {!selected ? (
           <div className="flex items-center justify-center h-full text-gray-500">

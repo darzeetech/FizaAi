@@ -239,7 +239,7 @@ function OutfitImages({
 
       {/* ===== Bottom absolute info bar (hidden while scrolling) ===== */}
       {!isScrolling && (
-        <div className=" pointer-events-none md:w-[60%] w-[85%] absolute bottom-6 md:left-1/3 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
+        <div className=" pointer-events-none md:w-[60%] w-[85%] absolute bottom-10 md:left-1/3 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
           <div className="pointer-events-auto">
             <div className="mt-1 text-[#323232] text-[1.2rem] font-medium">{item.title}</div>
             {/* <div className="text-[#666666] text-[.8rem] font-medium">
@@ -261,32 +261,37 @@ function OutfitImages({
                 <p>{item?.shared_via_whatsapp || 0}</p>
               </div>
             </div>
-            <div className=" md:hidden flex items-center justify-between p-2 rounded-lg bg-slate-100 bg-opacity-80 ">
-              {item.image_url.map((_, idx) => {
-                const selected = idx === selectedIndex;
-                const bg = selected ? '#8c3bdd' : '#a1a1a7';
-
-                return (
-                  <div key={idx} className="w-1/4 flex justify-center" /* 4 dots per row */>
-                    <button
-                      onClick={() => handleSelectIndex(idx)}
-                      aria-label={`Go to image ${idx + 1}`}
-                      className="rounded-full"
-                      style={{
-                        width: 12,
-                        height: 12,
-                        backgroundColor: bg,
-                        border: selected ? '2px solid rgba(0,0,0,0.08)' : 'none',
-                        transition: 'transform .12s ease',
-                      }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </div>
       )}
+
+      <div className=" pointer-events-none md:w-[60%] w-[85%] absolute bottom-2 md:left-1/3 left-1/2 transform -translate-x-1/2  px-3 py-1 rounded-xl font-medium">
+        <div className="pointer-events-auto">
+          <div className=" md:hidden flex items-center justify-center p-2 rounded-lg">
+            {item.image_url.map((_, idx) => {
+              const selected = idx === selectedIndex;
+              const bg = selected ? '#D9D9D9E5' : '#D9D9D966';
+
+              return (
+                <div key={idx} className="w-1/6 flex justify-center" /* 4 dots per row */>
+                  <button
+                    onClick={() => handleSelectIndex(idx)}
+                    aria-label={`Go to image ${idx + 1}`}
+                    className="rounded-full"
+                    style={{
+                      width: 12,
+                      height: 12,
+                      backgroundColor: bg,
+                      border: selected ? '2px solid rgba(0,0,0,0.08)' : 'none',
+                      transition: 'transform .12s ease',
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       {/* Thumbnails (desktop) */}
       {item.image_url && item.image_url.length > 1 && (
@@ -1373,7 +1378,7 @@ export default function SinglePortfolio({
             )} */}
 
             {showSwapDiv && (
-              <div className="md:hidden block absolute top-[150px] left-0 right-0 flex items-center justify-between px-4 ">
+              <div className="hidden absolute top-[150px] left-0 right-0 flex items-center justify-between px-4 ">
                 <img
                   src={left_swap}
                   alt="Left Swap"

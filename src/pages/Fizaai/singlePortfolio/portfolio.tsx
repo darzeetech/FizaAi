@@ -225,23 +225,26 @@ function OutfitImages({
       >
         <div className="w-full relative flex md:flex-col flex-row gap-3">
           {item.image_url?.map((src, idx) => (
-            <img
-              key={idx}
-              data-idx={idx}
-              ref={(el) => (imageRefs.current[idx] = el)}
-              src={src}
-              alt={`${item.title} ${idx + 1}`}
-              className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg"
-            />
+            <div key={idx} className="md:w-full w-full flex-shrink-0">
+              <img
+                data-idx={idx}
+                ref={(el) => (imageRefs.current[idx] = el)}
+                src={src}
+                alt={`${item.title} ${idx + 1}`}
+                className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg opacity-100"
+              />
+            </div>
           ))}
         </div>
       </div>
 
       {/* ===== Bottom absolute info bar (hidden while scrolling) ===== */}
       {!isScrolling && (
-        <div className=" pointer-events-none md:w-[60%] w-[85%] absolute bottom-10 md:left-1/3 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
+        <div className=" pointer-events-none md:w-[60%] w-[85%] absolute md:bottom-6  bottom-10 md:left-1/3 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
           <div className="pointer-events-auto">
-            <div className="mt-1 text-[#323232] text-[1.2rem] font-medium">{item.title}</div>
+            <div className="mt-1 text-[#323232] md:text-[1.2rem] text-[1rem] font-medium">
+              {item.title}
+            </div>
             {/* <div className="text-[#666666] text-[.8rem] font-medium">
               {typeof selectedIndex === 'number' && item.image_url?.length
                 ? `${selectedIndex + 1} / ${item.image_url.length}`

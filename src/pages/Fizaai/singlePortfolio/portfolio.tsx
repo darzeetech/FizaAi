@@ -96,10 +96,11 @@ function OutfitImages({
   const isProgrammaticScroll = React.useRef(false);
   const [isScrolling, setIsScrolling] = React.useState(false);
 
-  // Prevent repeated auto-scroll triggers while an auto-scroll is in progress
+  const navigate = useNavigate();
+
+  // Prevent repeated auto-scroll triggers
   const autoScrollNextRef = React.useRef(false);
 
-  // Helper: intersection area (used to find most visible image inside container)
   const intersectionArea = (a: DOMRect, b: DOMRect) => {
     const left = Math.max(a.left, b.left);
     const right = Math.min(a.right, b.right);
@@ -111,7 +112,7 @@ function OutfitImages({
     return width * height;
   };
 
-  // Helper: find nearest scrollable parent or fallback to window
+  // Find nearest scrollable ancestor; fallback to window
   const findScrollableParent = (el: HTMLElement | null): HTMLElement | Window => {
     if (!el) {
       return window;
@@ -143,6 +144,7 @@ function OutfitImages({
     let bestIdx = -1;
     let bestArea = -1;
 
+    // 1) Normal: compute which image is most visible and update selectedIndex
     for (let i = 0; i < imageRefs.current.length; i++) {
       const el = imageRefs.current[i];
 
@@ -162,66 +164,74 @@ function OutfitImages({
       onChange(bestIdx);
     }
 
-    // Auto-scroll to next outfit SECTION when last image is visible and the image container is at its end
+    // 2) Auto-scroll logic: ONLY when last image is scrolled to TOP of container
     const lastIndex = (item.image_url?.length ?? 0) - 1;
 
-    if (bestIdx === lastIndex && lastIndex >= 0 && !autoScrollNextRef.current) {
-      const verticallyScrollable = container.scrollHeight > container.clientHeight;
-      const horizontallyScrollable = container.scrollWidth > container.clientWidth;
-      const nearEndThreshold = 8; // px tolerance
+    if (lastIndex < 0 || autoScrollNextRef.current) {
+      return;
+    }
 
-      const isAtVerticalEnd =
-        verticallyScrollable &&
-        Math.ceil(container.scrollTop + container.clientHeight) >=
-          Math.floor(container.scrollHeight - nearEndThreshold);
+    const lastImg = imageRefs.current[lastIndex];
 
-      const isAtHorizontalEnd =
-        horizontallyScrollable &&
-        Math.ceil(container.scrollLeft + container.clientWidth) >=
-          Math.floor(container.scrollWidth - nearEndThreshold);
+    if (!lastImg) {
+      return;
+    }
+    const lastRect = lastImg.getBoundingClientRect();
 
-      if (isAtVerticalEnd || isAtHorizontalEnd) {
-        autoScrollNextRef.current = true;
+    // How close is last image's TOP to container's TOP?
+    const topDiff = lastRect.top - contRect.top; // px
+    const topAlignThreshold = 8; // px ε: how precise "at top" should be
+    const isLastAtTop = topDiff >= -topAlignThreshold && topDiff <= topAlignThreshold;
 
-        // Ensure you have added data-outfit-section on the outer section wrapper
-        const outfitSection = (container.closest('[data-outfit-section]') as HTMLElement) || null;
+    const nearEndThreshold = 4; // bottom tolerance
+    const isAtVerticalEnd =
+      container.scrollHeight > container.clientHeight &&
+      Math.ceil(container.scrollTop + container.clientHeight) >=
+        Math.floor(container.scrollHeight - nearEndThreshold);
 
-        if (outfitSection) {
-          // Find the next sibling that has data-outfit-section (skip intervening nodes)
-          let nextSection = outfitSection.nextElementSibling as HTMLElement | null;
-          while (nextSection && !nextSection.hasAttribute('data-outfit-section')) {
-            nextSection = nextSection.nextElementSibling as HTMLElement | null;
-          }
+    // We *only* move to next section when:
+    // - last image is aligned with top of container
+    // - AND container is at its bottom
+    if (isLastAtTop && isAtVerticalEnd) {
+      autoScrollNextRef.current = true;
 
-          if (nextSection) {
-            const scrollParent = findScrollableParent(outfitSection);
+      const outfitSection = (container.closest('[data-outfit-section]') as HTMLElement) || null;
 
-            if (scrollParent === window) {
-              // Document-level scroll
-              const sectionTop = nextSection.getBoundingClientRect().top + window.scrollY;
-              window.scrollTo({
-                top: Math.max(0, Math.floor(sectionTop - 20)), // 20px offset
-                behavior: 'smooth',
-              });
-            } else {
-              // Scroll an ancestor container
-              const sp = scrollParent as HTMLElement;
-              const parentRect = sp.getBoundingClientRect();
-              const nextRect = nextSection.getBoundingClientRect();
-              const offsetWithinParent = nextRect.top - parentRect.top + sp.scrollTop;
-              sp.scrollTo({
-                top: Math.max(0, Math.floor(offsetWithinParent - 20)), // 20px offset
-                behavior: 'smooth',
-              });
-            }
-          }
+      if (outfitSection) {
+        // Find next section with data-outfit-section
+        let nextSection = outfitSection.nextElementSibling as HTMLElement | null;
+        while (nextSection && !nextSection.hasAttribute('data-outfit-section')) {
+          nextSection = nextSection.nextElementSibling as HTMLElement | null;
         }
 
-        // cooldown to avoid retriggering while smooth scroll happens
-        window.setTimeout(() => {
-          autoScrollNextRef.current = false;
-        }, 700);
+        if (nextSection) {
+          const scrollParent = findScrollableParent(outfitSection);
+
+          if (scrollParent === window) {
+            // Page scroll
+            const sectionTop = nextSection.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({
+              top: Math.max(0, Math.floor(sectionTop - 20)), // 20px offset from top
+              behavior: 'smooth',
+            });
+          } else {
+            // Scroll container
+            const sp = scrollParent as HTMLElement;
+            const parentRect = sp.getBoundingClientRect();
+            const nextRect = nextSection.getBoundingClientRect();
+            const offsetWithinParent = nextRect.top - parentRect.top + sp.scrollTop;
+            sp.scrollTo({
+              top: Math.max(0, Math.floor(offsetWithinParent - 20)), // 20px offset
+              behavior: 'smooth',
+            });
+          }
+        }
       }
+
+      // Cooldown to avoid retriggering
+      window.setTimeout(() => {
+        autoScrollNextRef.current = false;
+      }, 700);
     }
   }, [item.image_url, onChange, selectedIndex]);
 
@@ -294,16 +304,18 @@ function OutfitImages({
     return () => window.removeEventListener('resize', onResize);
   }, [computeMostVisibleIndex]);
 
-  // Click handler helper for dots / thumbnails
   const handleSelectIndex = (idx: number) => {
     isProgrammaticScroll.current = true;
     onChange(idx);
   };
 
+  const handleSingup = () => {
+    navigate('/');
+  };
+
   return (
     <div className="w-full flex md:flex-row flex-col justify-between gap-[2rem] relative">
       {/* Scrollable big images column */}
-
       <div
         ref={containerRef}
         onScroll={handleScroll}
@@ -326,7 +338,7 @@ function OutfitImages({
         </div>
       </div>
 
-      {/* Info bar hidden while scrolling */}
+      {/* Bottom info bar */}
       {!isScrolling && (
         <div className=" pointer-events-none md:w-[60%] w-[85%] absolute md:bottom-6  bottom-10 md:left-1/3 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
           <div className="pointer-events-auto">
@@ -335,15 +347,30 @@ function OutfitImages({
             </div>
             <div className="flex my-2 gap-3">
               <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                <img src={heart} alt="heart" className="h-6 md:h-6 aspect-auto" />
+                <img
+                  onClick={() => handleSingup()}
+                  src={heart}
+                  alt="heart"
+                  className="h-6 md:h-6 aspect-auto cursor-pointer"
+                />
                 <p>{item?.like_counts}</p>
               </div>
               <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                <img src={star} alt="star" className="h-6 md:h-6 aspect-auto" />
+                <img
+                  onClick={() => handleSingup()}
+                  src={star}
+                  alt="star"
+                  className="h-6 md:h-6 aspect-auto cursor-pointer"
+                />
                 <p>{item?.fav_counts}</p>
               </div>
               <div className="flex items-center gap-2 text-[1.1rem] font-inter">
-                <img src={whatapp} alt="whatsapp" className="h-5 md:h-5 aspect-auto" />
+                <img
+                  onClick={() => handleSingup()}
+                  src={whatapp}
+                  alt="whatsapp"
+                  className="h-5 md:h-5 aspect-auto cursor-pointer"
+                />
                 <p>{item?.shared_via_whatsapp || 0}</p>
               </div>
             </div>
@@ -351,22 +378,23 @@ function OutfitImages({
         </div>
       )}
 
+      {/* Mobile dots */}
       <div className=" pointer-events-none md:w-[60%] w-[85%] absolute bottom-2 md:left-1/3 left-1/2 transform -translate-x-1/2  px-3 py-1 rounded-xl font-medium">
         <div className="pointer-events-auto">
-          <div className=" md:hidden flex items-center justify-center p-2 rounded-lg gap-4">
+          <div className=" md:hidden flex items-center justify-center p-2 rounded-lg">
             {item.image_url.map((_, idx) => {
               const selected = idx === selectedIndex;
               const bg = selected ? '#D9D9D9E5' : '#D9D9D966';
 
               return (
-                <div key={idx} className="  flex justify-center ">
+                <div key={idx} className="w-1/6 flex justify-center">
                   <button
                     onClick={() => handleSelectIndex(idx)}
                     aria-label={`Go to image ${idx + 1}`}
                     className="rounded-full"
                     style={{
-                      width: 8,
-                      height: 8,
+                      width: 12,
+                      height: 12,
                       backgroundColor: bg,
                       border: selected ? '2px solid rgba(0,0,0,0.08)' : 'none',
                       transition: 'transform .12s ease',
@@ -391,7 +419,7 @@ function OutfitImages({
               <img
                 src={img}
                 alt={`${item.title} extra ${idx + 1}`}
-                className={` object-cover cursor-pointer object-to relative top-[4.5rem] object-center`}
+                className="object-cover cursor-pointer object-to relative top-[4.5rem] object-center"
                 onClick={() => handleSelectIndex(idx)}
               />
             </div>
@@ -718,7 +746,7 @@ export default function SinglePortfolio({
       navigator
         .share({
           title: 'Check Portfolio',
-          url: `${ap}explore`,
+          url: `${ap}designer/${username2}`,
         })
         .catch(() => {});
     } else {
@@ -1524,7 +1552,7 @@ export default function SinglePortfolio({
                           <div
                             key={outfit.outfit_type}
                             className="mb-6"
-                            data-outfit-section={`section-${outfit.outfit_type}`}
+                            // data-outfit-section={`section-${outfit.outfit_type}`}
                           >
                             <h4 className="font-semibold mb-2">{outfit.outfit_type}</h4>
 

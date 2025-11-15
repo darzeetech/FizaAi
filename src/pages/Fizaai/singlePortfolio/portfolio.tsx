@@ -22,10 +22,13 @@ import hexagonfinal from '../../../assets/images/Property 1=Variant2.png';
 import left_swap from '../../../assets/images/left_swipe.gif';
 import right_swap from '../../../assets/images/right_swipe.gif';
 import { FaTimes } from 'react-icons/fa';
+import aiimage from '../../../assets/images/ai.png';
+import lookbook from '../../../assets/images/Style.png';
 
 import { api } from '../../../utils/apiRequest';
 import { TiArrowLeft } from 'react-icons/ti';
 import { useSwipeable } from 'react-swipeable';
+import { useNavigate } from 'react-router-dom';
 
 import QRCode from 'react-qr-code';
 
@@ -68,6 +71,8 @@ type Props = {
  *  - Left: a single scroll container (h-[70vh]) stacking ALL images, each h-[70vh]
  *  - Right: thumbnails; clicking scrolls to image; scrolling updates highlight
  */
+// --- 2) Replace your existing OutfitImages component with this updated version ---
+
 function OutfitImages({
   item,
   selectedIndex,
@@ -91,10 +96,10 @@ function OutfitImages({
   const isProgrammaticScroll = React.useRef(false);
   const [isScrolling, setIsScrolling] = React.useState(false);
 
-  // Preset dot colors — these are used only for the "selected" dot.
-  // You can customize or expand this list as needed.
-  // const dotColors = ['#FF6B6B', '#6BCB77', '#4D7AFF', '#F59E0B', '#9F7AEA', '#00B8D9'];
+  // Prevent repeated auto-scroll triggers while an auto-scroll is in progress
+  const autoScrollNextRef = React.useRef(false);
 
+  // Helper: intersection area (used to find most visible image inside container)
   const intersectionArea = (a: DOMRect, b: DOMRect) => {
     const left = Math.max(a.left, b.left);
     const right = Math.min(a.right, b.right);
@@ -104,6 +109,27 @@ function OutfitImages({
     const height = Math.max(0, bottom - top);
 
     return width * height;
+  };
+
+  // Helper: find nearest scrollable parent or fallback to window
+  const findScrollableParent = (el: HTMLElement | null): HTMLElement | Window => {
+    if (!el) {
+      return window;
+    }
+    let node: HTMLElement | null = el.parentElement;
+    while (node && node !== document.body) {
+      const style = window.getComputedStyle(node);
+      const overflowY = style.overflowY;
+      const isScrollable =
+        (overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight;
+
+      if (isScrollable) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+
+    return window;
   };
 
   const computeMostVisibleIndex = React.useCallback(() => {
@@ -135,7 +161,69 @@ function OutfitImages({
     if (bestIdx >= 0 && bestIdx !== selectedIndex) {
       onChange(bestIdx);
     }
-  }, [selectedIndex, onChange]);
+
+    // Auto-scroll to next outfit SECTION when last image is visible and the image container is at its end
+    const lastIndex = (item.image_url?.length ?? 0) - 1;
+
+    if (bestIdx === lastIndex && lastIndex >= 0 && !autoScrollNextRef.current) {
+      const verticallyScrollable = container.scrollHeight > container.clientHeight;
+      const horizontallyScrollable = container.scrollWidth > container.clientWidth;
+      const nearEndThreshold = 8; // px tolerance
+
+      const isAtVerticalEnd =
+        verticallyScrollable &&
+        Math.ceil(container.scrollTop + container.clientHeight) >=
+          Math.floor(container.scrollHeight - nearEndThreshold);
+
+      const isAtHorizontalEnd =
+        horizontallyScrollable &&
+        Math.ceil(container.scrollLeft + container.clientWidth) >=
+          Math.floor(container.scrollWidth - nearEndThreshold);
+
+      if (isAtVerticalEnd || isAtHorizontalEnd) {
+        autoScrollNextRef.current = true;
+
+        // Ensure you have added data-outfit-section on the outer section wrapper
+        const outfitSection = (container.closest('[data-outfit-section]') as HTMLElement) || null;
+
+        if (outfitSection) {
+          // Find the next sibling that has data-outfit-section (skip intervening nodes)
+          let nextSection = outfitSection.nextElementSibling as HTMLElement | null;
+          while (nextSection && !nextSection.hasAttribute('data-outfit-section')) {
+            nextSection = nextSection.nextElementSibling as HTMLElement | null;
+          }
+
+          if (nextSection) {
+            const scrollParent = findScrollableParent(outfitSection);
+
+            if (scrollParent === window) {
+              // Document-level scroll
+              const sectionTop = nextSection.getBoundingClientRect().top + window.scrollY;
+              window.scrollTo({
+                top: Math.max(0, Math.floor(sectionTop - 20)), // 20px offset
+                behavior: 'smooth',
+              });
+            } else {
+              // Scroll an ancestor container
+              const sp = scrollParent as HTMLElement;
+              const parentRect = sp.getBoundingClientRect();
+              const nextRect = nextSection.getBoundingClientRect();
+              const offsetWithinParent = nextRect.top - parentRect.top + sp.scrollTop;
+              sp.scrollTo({
+                top: Math.max(0, Math.floor(offsetWithinParent - 20)), // 20px offset
+                behavior: 'smooth',
+              });
+            }
+          }
+        }
+
+        // cooldown to avoid retriggering while smooth scroll happens
+        window.setTimeout(() => {
+          autoScrollNextRef.current = false;
+        }, 700);
+      }
+    }
+  }, [item.image_url, onChange, selectedIndex]);
 
   const handleScroll = React.useCallback(() => {
     setIsScrolling(true);
@@ -191,7 +279,6 @@ function OutfitImages({
       container.scrollTo({ left, behavior: 'smooth' });
     }
 
-    // reset flag after animation window
     const timer = window.setTimeout(() => {
       isProgrammaticScroll.current = false;
     }, 500);
@@ -216,6 +303,7 @@ function OutfitImages({
   return (
     <div className="w-full flex md:flex-row flex-col justify-between gap-[2rem] relative">
       {/* Scrollable big images column */}
+
       <div
         ref={containerRef}
         onScroll={handleScroll}
@@ -238,18 +326,13 @@ function OutfitImages({
         </div>
       </div>
 
-      {/* ===== Bottom absolute info bar (hidden while scrolling) ===== */}
+      {/* Info bar hidden while scrolling */}
       {!isScrolling && (
         <div className=" pointer-events-none md:w-[60%] w-[85%] absolute md:bottom-6  bottom-10 md:left-1/3 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
           <div className="pointer-events-auto">
             <div className="mt-1 text-[#323232] md:text-[1.2rem] text-[1rem] font-medium">
               {item.title}
             </div>
-            {/* <div className="text-[#666666] text-[.8rem] font-medium">
-              {typeof selectedIndex === 'number' && item.image_url?.length
-                ? `${selectedIndex + 1} / ${item.image_url.length}`
-                : ''}
-            </div> */}
             <div className="flex my-2 gap-3">
               <div className="flex items-center gap-2 text-[1.1rem] font-inter">
                 <img src={heart} alt="heart" className="h-6 md:h-6 aspect-auto" />
@@ -270,20 +353,20 @@ function OutfitImages({
 
       <div className=" pointer-events-none md:w-[60%] w-[85%] absolute bottom-2 md:left-1/3 left-1/2 transform -translate-x-1/2  px-3 py-1 rounded-xl font-medium">
         <div className="pointer-events-auto">
-          <div className=" md:hidden flex items-center justify-center p-2 rounded-lg">
+          <div className=" md:hidden flex items-center justify-center p-2 rounded-lg gap-4">
             {item.image_url.map((_, idx) => {
               const selected = idx === selectedIndex;
               const bg = selected ? '#D9D9D9E5' : '#D9D9D966';
 
               return (
-                <div key={idx} className="w-1/6 flex justify-center" /* 4 dots per row */>
+                <div key={idx} className="  flex justify-center ">
                   <button
                     onClick={() => handleSelectIndex(idx)}
                     aria-label={`Go to image ${idx + 1}`}
                     className="rounded-full"
                     style={{
-                      width: 12,
-                      height: 12,
+                      width: 8,
+                      height: 8,
                       backgroundColor: bg,
                       border: selected ? '2px solid rgba(0,0,0,0.08)' : 'none',
                       transition: 'transform .12s ease',
@@ -361,6 +444,9 @@ export default function SinglePortfolio({
 
   const [showSwapDiv, setShowSwapDiv] = useState(true);
   const [showqr, setShowqr] = useState(false);
+
+  const navigate = useNavigate();
+  const [selectedTab, setSelectedTab] = useState<'studio' | 'lookbook'>('studio');
 
   const ap = process.env.REACT_APP_BASE_AP_URL;
 
@@ -672,12 +758,120 @@ export default function SinglePortfolio({
     trackMouse: true,
   });
 
+  const handleSingup = () => {
+    navigate('/');
+  };
+
   return (
-    <div className={`w-full flex gap-2 md:px-1  ${className}`}>
+    <div className={`w-full flex flex-col  md:px-1  ${className}`}>
+      <header className="w-full border hidde md:px-6 px-4 py-2 border-b border-gray-200 bg-white sticky top-0 z-50">
+        <div className="flex items-center justify-between w-full mx-auto">
+          {/* Left Section */}
+          <div className="flex items-center justify-between gap-4 w-1/2">
+            {/* Only show these if sidebar is NOT visible */}
+            {
+              <div className="flex items-center md:justify-between gap-2 md:gap-4  w-[15%] md:w-[40%]">
+                <img
+                  src="../img"
+                  alt="Sidebar Toggle"
+                  className="h-6 md:h-10 aspect-auto cursor-pointer hidden"
+                />
+                <div className="flex  w-[85%] md:w-[60%] md:pl-8 pl-4 ">
+                  {/* Studio Tab */}
+                  <div
+                    onClick={() => {
+                      setSelectedTab('studio');
+                    }}
+                    className={`flex  cursor-pointer pb-2 ${
+                      selectedTab === 'studio' ? 'border-b-2 border-[#4F2945]' : ''
+                    }`}
+                  >
+                    <img src={aiimage} alt="Studio Icon" className="h-6 md:h-7 aspect-auto" />
+                    <h1
+                      className={`text-[1rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
+                        selectedTab === 'studio' ? 'block' : 'hidden md:block'
+                      }`}
+                    >
+                      Lookbook
+                    </h1>
+                  </div>
+
+                  {/* Lookbook Tab */}
+                  <div
+                    onClick={() => setSelectedTab('lookbook')}
+                    className={`fle items-center md:gap-2 gap-1 cursor-pointer pb-2 hidden ${
+                      selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
+                    }`}
+                  >
+                    <img src={lookbook} alt="Lookbook Icon" className="h-6 md:h-10 aspect-auto" />
+                    <h1
+                      className={`text-[.9rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
+                        selectedTab === 'lookbook' ? 'block' : 'hidden md:block'
+                      }`}
+                    >
+                      Lookbook
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <div className="flex  w-[85%] md:w-[60%] ">
+              {/* Studio Tab */}
+              {/* <div
+                        onClick={() => {
+                          setSelectedTab('studio');
+                        }}
+                        className={`flex  cursor-pointer pb-2 ${
+                          selectedTab === 'studio' ? 'border-b-2 border-[#4F2945]' : ''
+                        }`}
+                      >
+                        <img src={aiimage} alt="Studio Icon" className="h-6 md:h-7 aspect-auto" />
+                        <h1
+                          className={`text-[1rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
+                            selectedTab === 'studio' ? 'block' : 'hidden md:block'
+                          }`}
+                        >
+                          Studio
+                        </h1>
+                      </div> */}
+
+              {/* Lookbook Tab */}
+              {/* <div
+                        onClick={() => setSelectedTab('lookbook')}
+                        className={`fle items-center md:gap-2 gap-1 cursor-pointer pb-2 hidden ${
+                          selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
+                        }`}
+                      >
+                        <img src={lookbook} alt="Lookbook Icon" className="h-6 md:h-10 aspect-auto" />
+                        <h1
+                          className={`text-[.9rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
+                            selectedTab === 'lookbook' ? 'block' : 'hidden md:block'
+                          }`}
+                        >
+                          Lookbook
+                        </h1>
+                      </div> */}
+            </div>
+          </div>
+
+          {/* Right Section headar */}
+          <div className="flex items-center justify-end gap-2 md:gap-4 w-1/2">
+            <div className="flex items-center gap-2 md:gap-3 py-1.5 rounded-full cursor-pointer transition-all duration-300">
+              <button
+                onClick={() => handleSingup()}
+                className="flex items-center bg-[#79539F]  text-white px-3 py-1 rounded-md text-[.8rem] md:text-[1rem] font-medium transition"
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
       <section
         className={`${
           showMobilePreview ? 'w-full ' : ' md:block block'
-        } flex-1 md:p-4  bg-white h-fit md:max-h-[calc(100vh-72px)]`}
+        } flex-1 md:px-4  bg-white h-fit md:max-h-[calc(100vh-72px)]`}
       >
         {!selected ? (
           <div className="flex items-center justify-center h-full text-gray-500">
@@ -1327,18 +1521,20 @@ export default function SinglePortfolio({
                       {filteredOutfits?.outfit_details &&
                       filteredOutfits?.outfit_details.length > 0 ? (
                         filteredOutfits?.outfit_details.map((outfit) => (
-                          <div key={outfit.outfit_type} className="mb-6">
+                          <div
+                            key={outfit.outfit_type}
+                            className="mb-6"
+                            data-outfit-section={`section-${outfit.outfit_type}`}
+                          >
                             <h4 className="font-semibold mb-2">{outfit.outfit_type}</h4>
 
                             <div className=" flex flex-col w-full gap-4">
                               {outfit?.portfolio_outfits.map((item) => (
-                                <div key={item.id} className="mb-4 w-full">
-                                  {/* <div className="mt-1 text-[.9rem] font-medium">{item.title}</div>
-                                  <div className="text-xs text-[#525252] mb-2">
-                                    {item.creation_time}
-                                  </div> */}
-
-                                  {/* ===== Scroll-synced images (replaces old First image + More images) ===== */}
+                                <div
+                                  key={item.id}
+                                  className="mb-4 w-full"
+                                  data-outfit-id={`outfit-${item.id}`}
+                                >
                                   <OutfitImages
                                     item={item}
                                     selectedIndex={selectedImageIndexes[item.id] ?? 0}
@@ -1349,14 +1545,13 @@ export default function SinglePortfolio({
                                       }))
                                     }
                                   />
-                                  {/* ===== End scroll-synced images ===== */}
                                 </div>
                               ))}
                             </div>
                           </div>
                         ))
                       ) : (
-                        <div className="text-gray-400 text-center py-8">
+                        <div className="text-gray-400 text-center py-8 flex items-center justify-center">
                           No filtered outfits found.
                         </div>
                       )}

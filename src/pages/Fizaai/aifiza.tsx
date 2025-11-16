@@ -398,13 +398,22 @@ export default function FizaAI() {
   const handleWhatsAppShare = async () => {
     setIsWhatsAppSharing(true);
 
-    const ok = await handleGenerateShareLink();
+    const link = await handleGenerateShareLink(); // Get link directly
 
-    if (ok) {
-      handleShare('whatsapp');
+    if (link) {
+      handleShareWithLink(link); // Pass the fresh link directly
+    } else {
+      // Optionally show error or fallback message
     }
 
     setIsWhatsAppSharing(false);
+  };
+
+  const handleShareWithLink = (link: string) => {
+    const whatsappText = link; // Just the link or customize message
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(whatsappText)}`, '_blank');
+    setShowShareModal(false);
   };
 
   const handleShare = (platform: string) => {
@@ -494,10 +503,12 @@ export default function FizaAI() {
         // Backend returns the direct shareable link here
         setShareLink(response.data.link);
 
-        return true;
+        return response.data.link;
       } else {
         alert('Failed to generate share link');
         setShareLink(null);
+
+        return null;
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -505,7 +516,7 @@ export default function FizaAI() {
       alert('An error occurred while generating share link');
       setShareLink(null);
 
-      return false;
+      return null;
     } finally {
       setIsGeneratingShareLink(false);
     }

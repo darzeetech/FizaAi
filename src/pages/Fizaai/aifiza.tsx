@@ -350,6 +350,8 @@ export default function FizaAI() {
 
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [isWhatsAppSharing, setIsWhatsAppSharing] = useState(false);
+
   // Store lat/lon from ipapi.co
 
   const [locationData] = useState<{ lat?: number; lon?: number }>({});
@@ -391,6 +393,18 @@ export default function FizaAI() {
     setTimeout(() => {
       setShowStudio(true);
     }, 10);
+  };
+
+  const handleWhatsAppShare = async () => {
+    setIsWhatsAppSharing(true);
+
+    const ok = await handleGenerateShareLink();
+
+    if (ok && shareLink) {
+      handleShare('whatsapp');
+    }
+
+    setIsWhatsAppSharing(false);
   };
 
   const handleShare = (platform: string) => {
@@ -2970,12 +2984,37 @@ export default function FizaAI() {
                         />
                       )}
 
-                      <img
-                        onClick={() => handleShare('whatsapp')}
-                        src={whatapp}
-                        alt=""
-                        className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                      />
+                      {isWhatsAppSharing ? (
+                        <div className="md:h-8 h-6 flex items-center justify-center">
+                          <svg
+                            className="animate-spin h-6 w-6"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="#79539F"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="#79539F"
+                              d="M4 12a8 8 0 018-8v8H4z"
+                            ></path>
+                          </svg>
+                        </div>
+                      ) : (
+                        <img
+                          onClick={handleWhatsAppShare}
+                          src={whatapp}
+                          alt="Share on WhatsApp"
+                          className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                        />
+                      )}
                     </div>
                   )}
                 </div>

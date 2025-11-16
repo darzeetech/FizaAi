@@ -347,7 +347,7 @@ export default function Lookbook({
 
   const handleCopyClick = () => {
     const ap = process.env.REACT_APP_BASE_AP_URL;
-    navigator.clipboard.writeText(`${ap}explore`);
+    navigator.clipboard.writeText(`${ap}designer/${selected?.userName}`);
     alert('Link copied to clipboard!');
   };
 
@@ -358,11 +358,11 @@ export default function Lookbook({
       navigator
         .share({
           title: 'Check Portfolio',
-          url: `${ap}explore`,
+          url: `${ap}designer/${selected?.userName}`,
         })
         .catch(() => {});
     } else {
-      navigator.clipboard.writeText(`${ap}explore`);
+      navigator.clipboard.writeText(`${ap}designer/${selected?.userName}`);
       alert('Link copied! Native share is not supported in this browser.');
     }
   };
@@ -1298,7 +1298,12 @@ export default function Lookbook({
             >
               <FaTimes size={20} />
             </button>
-            <QRCode size={260} bgColor="white" fgColor="black" value={`${ap}explore` || ''} />
+            <QRCode
+              size={260}
+              bgColor="white"
+              fgColor="black"
+              value={`${ap}designer/${selected?.userName}` || ''}
+            />
             <p className="mx-auto text-center font-semibold text-[1.2rem] mt-4"> QR Portfolio</p>
           </div>
         </div>

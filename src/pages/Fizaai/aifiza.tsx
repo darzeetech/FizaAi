@@ -400,7 +400,7 @@ export default function FizaAI() {
 
     const ok = await handleGenerateShareLink();
 
-    if (ok && shareLink) {
+    if (ok) {
       handleShare('whatsapp');
     }
 

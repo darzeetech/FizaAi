@@ -1712,8 +1712,22 @@ export default function FizaAI() {
         url += `&lat=${lat}&lon=${lon}`;
       }
 
-      if (query) {
-        url += `&query=${encodeURIComponent(query)}`;
+      let finalQuery = query;
+
+      if (finalQuery) {
+        // If user typed new query → delete stored one
+        localStorage.removeItem('username');
+      } else {
+        // No query → fallback to local storage
+        const storedUsername = localStorage.getItem('username');
+
+        if (storedUsername) {
+          finalQuery = storedUsername;
+        }
+      }
+
+      if (finalQuery) {
+        url += `&query=${encodeURIComponent(finalQuery)}`;
       }
 
       // API call
@@ -1855,6 +1869,7 @@ export default function FizaAI() {
                 {/* Studio Tab */}
                 <div
                   onClick={() => {
+                    localStorage.removeItem('username');
                     handleTabChange('studio');
                   }}
                   className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2 ${
@@ -1874,6 +1889,7 @@ export default function FizaAI() {
                 {/* Lookbook Tab */}
                 <div
                   onClick={() => {
+                    localStorage.removeItem('username');
                     handleTabChange('lookbook');
                   }}
                   className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2  ${

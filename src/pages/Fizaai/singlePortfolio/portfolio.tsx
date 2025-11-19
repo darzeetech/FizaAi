@@ -65,14 +65,6 @@ type Props = {
   className?: string;
 };
 
-/** ---------------------------
- *  Scroll-synced image viewer
- *  ---------------------------
- *  - Left: a single scroll container (h-[70vh]) stacking ALL images, each h-[70vh]
- *  - Right: thumbnails; clicking scrolls to image; scrolling updates highlight
- */
-// --- 2) Replace your existing OutfitImages component with this updated version ---
-
 function OutfitImages({
   item,
   selectedIndex,
@@ -117,6 +109,7 @@ function OutfitImages({
     if (!el) {
       return window;
     }
+
     let node: HTMLElement | null = el.parentElement;
     while (node && node !== document.body) {
       const style = window.getComputedStyle(node);
@@ -503,6 +496,8 @@ export default function SinglePortfolio({
 
   const pathSegments = window.location.pathname.split('/');
   const username2 = pathSegments[pathSegments.length - 1];
+  localStorage.setItem('selected_tab', 'lookbook');
+  localStorage.setItem('username', username2);
 
   // Fetch lat/lon only once on mount
   useEffect(() => {

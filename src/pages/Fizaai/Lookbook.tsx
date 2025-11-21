@@ -401,7 +401,7 @@ export default function Lookbook({
     onSelect(portfolios[prevIndex]);
   };
 
-  const SWIPE_MIN_DISTANCE = 80; // px – increase to make it even less sensitive
+  const SWIPE_MIN_DISTANCE = 60; // px – increase to make it even less sensitive
   const SWIPE_MAX_VERTICAL_DRIFT = 60; // px – allow some vertical movement, but not too much
 
   const handlers = useSwipeable({

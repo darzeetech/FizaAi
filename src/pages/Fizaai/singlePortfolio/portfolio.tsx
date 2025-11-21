@@ -380,14 +380,14 @@ function OutfitImages({
               const bg = selected ? '#D9D9D9E5' : '#D9D9D966';
 
               return (
-                <div key={idx} className="w-1/6 flex justify-center">
+                <div key={idx} className="flex justify-center items-center gap-1">
                   <button
                     onClick={() => handleSelectIndex(idx)}
                     aria-label={`Go to image ${idx + 1}`}
-                    className="rounded-full"
+                    className="rounded-full mx-1"
                     style={{
-                      width: 12,
-                      height: 12,
+                      width: 6,
+                      height: 6,
                       backgroundColor: bg,
                       border: selected ? '2px solid rgba(0,0,0,0.08)' : 'none',
                       transition: 'transform .12s ease',

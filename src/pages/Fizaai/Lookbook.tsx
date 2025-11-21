@@ -401,10 +401,43 @@ export default function Lookbook({
     onSelect(portfolios[prevIndex]);
   };
 
+  const SWIPE_MIN_DISTANCE = 50; // px – increase to make it even less sensitive
+  const SWIPE_MAX_VERTICAL_DRIFT = 60; // px – allow some vertical movement, but not too much
+
   const handlers = useSwipeable({
-    onSwipedLeft: handleSwipeLeft,
-    onSwipedRight: handleSwipeRight,
-    trackMouse: true,
+    // We'll use a single onSwiped handler and decide left/right ourselves
+    onSwiped: (eventData) => {
+      const { dir, deltaX, absX, absY } = eventData;
+
+      // 1) Require mostly horizontal gesture
+      if (absX <= absY) {
+        return; // vertical or diagonal swipe -> ignore
+      }
+
+      // 2) Require enough horizontal distance
+      if (Math.abs(deltaX) < SWIPE_MIN_DISTANCE || absY > SWIPE_MAX_VERTICAL_DRIFT) {
+        return; // too short or too vertical
+      }
+
+      // 3) Finally decide direction
+      if (dir === 'Left') {
+        handleSwipeLeft();
+      } else if (dir === 'Right') {
+        handleSwipeRight();
+      }
+    },
+
+    // Make it *less* sensitive overall
+    delta: SWIPE_MIN_DISTANCE, // minimum px before considering a swipe
+    swipeDuration: 300, // max time in ms for a swipe
+    rotationAngle: 25, // ignore more diagonal gestures
+
+    // Only care about touch (mobile), not mouse
+    trackTouch: true,
+    trackMouse: false,
+
+    // Let the page scroll vertically as usual
+    preventScrollOnSwipe: false,
   });
 
   return (

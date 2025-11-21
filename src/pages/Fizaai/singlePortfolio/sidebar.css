@@ -38,7 +38,4 @@
   }
 }
 
-.touch-pan-y {
-  /* Allow normal vertical scrolling, but let JS handle horizontal swipes smoothly */
-  touch-action: pan-y;
-}
+

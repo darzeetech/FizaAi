@@ -401,46 +401,28 @@ export default function Lookbook({
     onSelect(portfolios[prevIndex]);
   };
 
-  const SWIPE_TRIGGER_DISTANCE = 80; // how far finger must move horizontally to trigger change
-  const HORIZONTAL_LOCK_DISTANCE = 25; // when absX > absY and > 25px, we "lock" horizontally
+  const SWIPE_TRIGGER_DISTANCE = 80; // px – swipe must move at least this much horizontally
 
   const handlers = useSwipeable({
-    onSwiping: (eventData) => {
-      const { absX, absY, event } = eventData;
-
-      // If swipe is clearly more horizontal than vertical and has moved a bit,
-      // stop vertical scrolling so it feels smooth.
-      if (absX > absY && absX > HORIZONTAL_LOCK_DISTANCE) {
-        if (event.cancelable) {
-          event.preventDefault();
-        }
-      }
-    },
-
-    onSwipedLeft: (eventData) => {
-      const { absX, absY } = eventData;
-
-      // Only trigger if mostly horizontal and long enough
+    onSwipedLeft: ({ absX, absY }) => {
+      // Only if mostly horizontal and long enough
       if (absX > absY && absX >= SWIPE_TRIGGER_DISTANCE) {
         handleSwipeLeft();
       }
     },
 
-    onSwipedRight: (eventData) => {
-      const { absX, absY } = eventData;
-
+    onSwipedRight: ({ absX, absY }) => {
       if (absX > absY && absX >= SWIPE_TRIGGER_DISTANCE) {
         handleSwipeRight();
       }
     },
 
-    // General tuning
-    delta: 10, // minimal movement to START tracking swipe
-    // flickThreshold: 0.4,           // lower = slower flicks still count; 0.4 is pretty smooth
-    preventScrollOnSwipe: true, // but we also control via onSwiping + touch-action
+    // Sensible defaults
+    delta: 10, // how much movement before it starts tracking
+    // flickThreshold: 0.4,    // inertia, 0.4 is smooth
     trackTouch: true,
     trackMouse: false,
-    touchEventOptions: { passive: false }, // allow preventDefault() to work
+    preventScrollOnSwipe: false, // IMPORTANT: don't block vertical scroll
   });
 
   const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
@@ -596,7 +578,7 @@ export default function Lookbook({
           </div>
         ) : (
           <div
-            className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative md:custom-scrollbar overflow-y-scroll scrollbar-hide touch-pan-y"
+            className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative md:custom-scrollbar overflow-y-scroll scrollbar-hide "
             {...(showMobilePreview && isMobile ? handlers : {})}
           >
             {/* Left: owner & meta */}

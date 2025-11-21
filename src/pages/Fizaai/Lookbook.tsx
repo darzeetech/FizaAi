@@ -401,44 +401,49 @@ export default function Lookbook({
     onSelect(portfolios[prevIndex]);
   };
 
-  const SWIPE_MIN_DISTANCE = 60; // px – increase to make it even less sensitive
-  const SWIPE_MAX_VERTICAL_DRIFT = 60; // px – allow some vertical movement, but not too much
+  const SWIPE_TRIGGER_DISTANCE = 80; // how far finger must move horizontally to trigger change
+  const HORIZONTAL_LOCK_DISTANCE = 25; // when absX > absY and > 25px, we "lock" horizontally
 
   const handlers = useSwipeable({
-    // We'll use a single onSwiped handler and decide left/right ourselves
-    onSwiped: (eventData) => {
-      const { dir, deltaX, absX, absY } = eventData;
+    onSwiping: (eventData) => {
+      const { absX, absY, event } = eventData;
 
-      // 1) Require mostly horizontal gesture
-      if (absX <= absY) {
-        return; // vertical or diagonal swipe -> ignore
+      // If swipe is clearly more horizontal than vertical and has moved a bit,
+      // stop vertical scrolling so it feels smooth.
+      if (absX > absY && absX > HORIZONTAL_LOCK_DISTANCE) {
+        if (event.cancelable) {
+          event.preventDefault();
+        }
       }
+    },
 
-      // 2) Require enough horizontal distance
-      if (Math.abs(deltaX) < SWIPE_MIN_DISTANCE || absY > SWIPE_MAX_VERTICAL_DRIFT) {
-        return; // too short or too vertical
-      }
+    onSwipedLeft: (eventData) => {
+      const { absX, absY } = eventData;
 
-      // 3) Finally decide direction
-      if (dir === 'Left') {
+      // Only trigger if mostly horizontal and long enough
+      if (absX > absY && absX >= SWIPE_TRIGGER_DISTANCE) {
         handleSwipeLeft();
-      } else if (dir === 'Right') {
+      }
+    },
+
+    onSwipedRight: (eventData) => {
+      const { absX, absY } = eventData;
+
+      if (absX > absY && absX >= SWIPE_TRIGGER_DISTANCE) {
         handleSwipeRight();
       }
     },
 
-    // Make it *less* sensitive overall
-    delta: SWIPE_MIN_DISTANCE, // minimum px before considering a swipe
-    swipeDuration: 300, // max time in ms for a swipe
-    rotationAngle: 25, // ignore more diagonal gestures
-
-    // Only care about touch (mobile), not mouse
+    // General tuning
+    delta: 10, // minimal movement to START tracking swipe
+    // flickThreshold: 0.4,           // lower = slower flicks still count; 0.4 is pretty smooth
+    preventScrollOnSwipe: true, // but we also control via onSwiping + touch-action
     trackTouch: true,
     trackMouse: false,
-
-    // Let the page scroll vertically as usual
-    preventScrollOnSwipe: false,
+    touchEventOptions: { passive: false }, // allow preventDefault() to work
   });
+
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
 
   return (
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
@@ -591,8 +596,8 @@ export default function Lookbook({
           </div>
         ) : (
           <div
-            className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative md:custom-scrollbar overflow-y-scroll scrollbar-hide"
-            {...(showMobilePreview && window.innerWidth < 768 ? handlers : {})}
+            className="w-full h-screen flex flex-col md:flex-row md:gap-8 gap-1 relative md:custom-scrollbar overflow-y-scroll scrollbar-hide touch-pan-y"
+            {...(showMobilePreview && isMobile ? handlers : {})}
           >
             {/* Left: owner & meta */}
             <div className="md:w-[40%] h-fit w-full flex flex-col gap-4 ">

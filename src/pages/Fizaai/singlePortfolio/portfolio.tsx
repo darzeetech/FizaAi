@@ -22,7 +22,6 @@ import hexagonfinal from '../../../assets/images/Property 1=Variant2.png';
 import left_swap from '../../../assets/images/left_swipe.gif';
 import right_swap from '../../../assets/images/right_swipe.gif';
 import { FaTimes } from 'react-icons/fa';
-import aiimage from '../../../assets/images/ai.png';
 import lookbook from '../../../assets/images/Style.png';
 
 import { api } from '../../../utils/apiRequest';
@@ -790,26 +789,23 @@ export default function SinglePortfolio({
       <header className="w-full border hidde md:px-6 px-4 py-2 border-b border-gray-200 bg-white sticky top-0 z-50">
         <div className="flex items-center justify-between w-full mx-auto">
           {/* Left Section */}
-          <div className="flex items-center justify-between gap-4 w-1/2">
+          <div className="flex items-center justify-between gap-4 w-1/2 ">
             {/* Only show these if sidebar is NOT visible */}
-            {
-              <div className="flex items-center md:justify-between gap-2 md:gap-4  w-[15%] md:w-[40%]">
-                <img
-                  src="../img"
-                  alt="Sidebar Toggle"
-                  className="h-6 md:h-10 aspect-auto cursor-pointer hidden"
-                />
-                <div className="flex  w-[85%] md:w-[60%] md:pl-8 pl-4 ">
-                  {/* Studio Tab */}
+
+            <div className="flex items-center md:justify-between gap-2 md:gap-4  w-[100%] md:w-[40%]">
+              <div className="flex  w-[100%] md:w-[60%] md:pl-8 pl-0  ">
+                {/* Studio Tab */}
+                <div
+                  onClick={() => {
+                    setSelectedTab('studio');
+                  }}
+                >
                   <div
-                    onClick={() => {
-                      setSelectedTab('studio');
-                    }}
-                    className={`flex  cursor-pointer pb-2 ${
+                    className={`flex items-center md:gap-2 gap-1 ${
                       selectedTab === 'studio' ? 'border-b-2 border-[#4F2945]' : ''
                     }`}
                   >
-                    <img src={aiimage} alt="Studio Icon" className="h-6 md:h-7 aspect-auto" />
+                    <img src={lookbook} alt="Studio Icon" className="h-6 md:h-7 aspect-auto" />
                     <h1
                       className={`text-[1rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
                         selectedTab === 'studio' ? 'block' : 'hidden md:block'
@@ -818,63 +814,8 @@ export default function SinglePortfolio({
                       Lookbook
                     </h1>
                   </div>
-
-                  {/* Lookbook Tab */}
-                  <div
-                    onClick={() => setSelectedTab('lookbook')}
-                    className={`fle items-center md:gap-2 gap-1 cursor-pointer pb-2 hidden ${
-                      selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
-                    }`}
-                  >
-                    <img src={lookbook} alt="Lookbook Icon" className="h-6 md:h-10 aspect-auto" />
-                    <h1
-                      className={`text-[.9rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
-                        selectedTab === 'lookbook' ? 'block' : 'hidden md:block'
-                      }`}
-                    >
-                      Lookbook
-                    </h1>
-                  </div>
                 </div>
               </div>
-            }
-
-            <div className="flex  w-[85%] md:w-[60%] ">
-              {/* Studio Tab */}
-              {/* <div
-                        onClick={() => {
-                          setSelectedTab('studio');
-                        }}
-                        className={`flex  cursor-pointer pb-2 ${
-                          selectedTab === 'studio' ? 'border-b-2 border-[#4F2945]' : ''
-                        }`}
-                      >
-                        <img src={aiimage} alt="Studio Icon" className="h-6 md:h-7 aspect-auto" />
-                        <h1
-                          className={`text-[1rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
-                            selectedTab === 'studio' ? 'block' : 'hidden md:block'
-                          }`}
-                        >
-                          Studio
-                        </h1>
-                      </div> */}
-
-              {/* Lookbook Tab */}
-              {/* <div
-                        onClick={() => setSelectedTab('lookbook')}
-                        className={`fle items-center md:gap-2 gap-1 cursor-pointer pb-2 hidden ${
-                          selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
-                        }`}
-                      >
-                        <img src={lookbook} alt="Lookbook Icon" className="h-6 md:h-10 aspect-auto" />
-                        <h1
-                          className={`text-[.9rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
-                            selectedTab === 'lookbook' ? 'block' : 'hidden md:block'
-                          }`}
-                        >
-                          Lookbook
-                        </h1>
-                      </div> */}
             </div>
           </div>
 
@@ -924,26 +865,39 @@ export default function SinglePortfolio({
 
               <div className="flex flex-col w-full items-center   relative ">
                 <div className="w-full h-[300px] md:hidden block">
-                  <img
-                    src={detail?.base_info?.cover_picture_url}
-                    alt={`${selected.tailorName} cover`}
-                    className="w-full h-full object-cover rounded-b-lg"
-                  />
+                  {detail?.base_info?.cover_picture_url ? (
+                    <img
+                      src={detail.base_info.cover_picture_url}
+                      alt={`${selected.tailorName} cover`}
+                      className="w-full h-full object-cover rounded-b-lg"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-b-lg bg-gray-100 overflow-hidden relative">
+                      <div className="portfolio-cover-skeleton" />
+                    </div>
+                  )}
                 </div>
+
                 <div className="w-full md:relative absolute borde rounded-lg bg-gray-50 opacity-90  bg-[#9a9b9700 shadow   shadow-[#00000040] md:bottom-0 bottom-0 p-4">
                   <div className="flex items-center gap-3 w-full  ">
-                    {detail?.base_info?.profile_picture_url ? (
+                    {detailLoading ? (
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-100 relative overflow-hidden">
+                        <div className="portfolio-avatar-spinner" />
+                      </div>
+                    ) : detail?.base_info?.profile_picture_url ? (
                       <img
-                        src={detail?.base_info?.profile_picture_url}
+                        src={detail.base_info.profile_picture_url}
                         alt="profile"
                         className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                        <span className="text-md font-semibold text-gray-700">
+                      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+                        {/* subtle shimmer behind initials */}
+                        <div className="portfolio-avatar-skeleton" />
+                        <span className="text-md font-semibold text-gray-700 relative z-10">
                           {(detail?.base_info?.user_name &&
                             detail?.base_info?.user_name.charAt(0).toUpperCase()) ||
-                            '?'}
+                            ''}
                         </span>
                       </div>
                     )}
@@ -1405,8 +1359,9 @@ export default function SinglePortfolio({
                 <div className="md:w-[60%] w-full h-full md:pb-[2rem] pb-[3rem] ">
                   <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden md:block hidden">
                     {detailLoading && (
-                      <div className="text-sm text-gray-500 w-full flex items-center justify-center">
-                        Loading full profile…
+                      <div className="w-full h-full flex items-center justify-center rounded-b-lg bg-gray-100">
+                        {/* Simple spinner loader */}
+                        <div className="portfolio-cover-skeleton" />
                       </div>
                     )}
 

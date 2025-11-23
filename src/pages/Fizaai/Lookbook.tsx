@@ -124,6 +124,13 @@ export default function Lookbook({
   const [filteredOutfitsLoading, setFilteredOutfitsLoading] = useState(false);
   const [filteredOutfitsError, setFilteredOutfitsError] = useState<string | null>(null);
 
+  const [pullStartY, setPullStartY] = useState<number | null>(null);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const MAX_PULL_DISTANCE = 90; // max visual stretch in px
+  const REFRESH_THRESHOLD = 60; // how far to pull before refresh triggers
+
   // Fetch lat/lon only once on mount
   useEffect(() => {
     // Try to get from localStorage first
@@ -427,17 +434,121 @@ export default function Lookbook({
 
   const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
 
+  const handlePullStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    localStorage.removeItem('username');
+
+    if (!isMobile || !onRefresh) {
+      return;
+    }
+
+    if (!listRef.current) {
+      return;
+    }
+
+    if (isRefreshing) {
+      return;
+    }
+
+    // only start if we’re at the very top of the list
+    if (listRef.current.scrollTop !== 0) {
+      return;
+    }
+
+    const touch = e.touches[0];
+    setPullStartY(touch.clientY);
+    setPullDistance(0);
+  };
+
+  const handlePullMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isMobile || pullStartY === null || !onRefresh) {
+      return;
+    }
+
+    if (!listRef.current) {
+      return;
+    }
+
+    if (isRefreshing) {
+      return;
+    }
+
+    // if user has scrolled down, cancel pull
+    if (listRef.current.scrollTop > 0) {
+      setPullStartY(null);
+      setPullDistance(0);
+
+      return;
+    }
+
+    const touch = e.touches[0];
+    const diff = touch.clientY - pullStartY;
+
+    // only care about pulling *down*
+    if (diff > 0) {
+      // prevent the browser's native "bounce"
+      e.preventDefault();
+      const clamped = Math.min(diff, MAX_PULL_DISTANCE);
+      setPullDistance(clamped);
+    } else {
+      setPullDistance(0);
+    }
+  };
+
+  const handlePullEnd = async () => {
+    if (!isMobile || pullStartY === null || !onRefresh) {
+      setPullStartY(null);
+      setPullDistance(0);
+
+      return;
+    }
+
+    const shouldRefresh = pullDistance >= REFRESH_THRESHOLD;
+
+    setPullStartY(null);
+
+    if (shouldRefresh) {
+      try {
+        setIsRefreshing(true);
+
+        // works whether onRefresh is sync or async
+        await Promise.resolve(onRefresh());
+      } finally {
+        setIsRefreshing(false);
+        setPullDistance(0);
+      }
+    } else {
+      setPullDistance(0);
+    }
+  };
+
   return (
     <div className={`w-full flex gap-2 md:px-1 p-1 ${className}`}>
       <aside
         ref={listRef}
+        onTouchStart={handlePullStart}
+        onTouchMove={handlePullMove}
+        onTouchEnd={handlePullEnd}
         className={`${
           showMobilePreview ? 'hidden md:block md:w-[30%]' : 'md:w-[30%] w-full'
         }  w-full max-h-[calc(100vh-72px)] custom-scrollbar overflow-y-auto border rounded-lg md:p-3 p-2 bg-white`}
       >
+        {/* Pull-to-refresh indicator (mainly for mobile) */}
+        <div
+          className="flex items-center justify-center text-xs text-gray-500 overflow-hidden transition-[height] duration-150"
+          style={{ height: pullDistance }}
+        >
+          {isRefreshing
+            ? 'Refreshing...'
+            : pullDistance >= REFRESH_THRESHOLD
+              ? 'Release to refresh'
+              : pullDistance > 0
+                ? 'Pull to refresh'
+                : ''}
+        </div>
+
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Designers</h3>
-          <div className="fle items-center gap-2 hidden">
+          <div className="fle items-center gap-2 hidden ">
             {onRefresh && (
               <button
                 onClick={onRefresh}
@@ -449,6 +560,7 @@ export default function Lookbook({
             )}
           </div>
         </div>
+
         <div className="relative mb-3">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg text-black">🔍</span>
           <input
@@ -541,7 +653,6 @@ export default function Lookbook({
           </div>
         )}
 
-        {/* show loading more indicator when appending */}
         {loadingMore && portfolios.length > 0 && (
           <div className="flex items-center justify-center py-3">
             <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-[#79539f] rounded-full" />
@@ -549,7 +660,6 @@ export default function Lookbook({
           </div>
         )}
 
-        {/* Manual load more fallback */}
         {onLoadMore &&
           pageInfo &&
           (pageInfo.currentPage ?? 0) < (pageInfo.totalPages ?? 1) &&
@@ -1076,11 +1186,11 @@ export default function Lookbook({
               <>
                 <div className="md:w-[60%] w-full h-full md:pb-[2rem] pb-[3rem] ">
                   <div className="w-full h-64 md:h-[350px] bg-gray-100 rounded-lg overflow-hidden md:block hidden">
-                    {detailLoading && (
+                    {/* {detailLoading && (
                       <div className="text-sm text-gray-500 w-full flex items-center justify-center">
                         Loading full profile…
                       </div>
-                    )}
+                    )} */}
 
                     {detailError && (
                       <div className="text-sm text-red-500">
@@ -1201,11 +1311,7 @@ export default function Lookbook({
                         ))}
                       </div>
                       {/* End Outfit Type Filter Buttons */}
-                      {filteredOutfitsLoading && (
-                        <div className="text-sm text-gray-500 w-full flex items-center justify-center">
-                          Loading full profile…
-                        </div>
-                      )}
+                      {filteredOutfitsLoading && <div className="portfolio-cover-skeleton" />}
 
                       {filteredOutfitsError && (
                         <div className="text-sm text-red-500">

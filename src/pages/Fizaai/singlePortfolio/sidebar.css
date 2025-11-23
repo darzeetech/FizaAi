@@ -132,4 +132,13 @@
 }
 
 
+.h-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.child-snap-center {
+  scroll-snap-align: center;
+}
+
+
 

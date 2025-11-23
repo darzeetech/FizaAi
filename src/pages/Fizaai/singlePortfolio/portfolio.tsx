@@ -311,13 +311,39 @@ function OutfitImages({
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="relative md:w-[70%] w-full md:h-[78vh] h-[75vh]
+        className="relative md:block hidden   md:w-[70%] w-full md:h-[78vh] h-[75vh]
              md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
              custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide"
       >
         <div className="w-full relative flex md:flex-col flex-row gap-3">
           {item.image_url?.map((src, idx) => (
             <div key={idx} className="md:w-full w-full flex-shrink-0">
+              <img
+                data-idx={idx}
+                ref={(el) => (imageRefs.current[idx] = el)}
+                src={src}
+                alt={`${item.title} ${idx + 1}`}
+                className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg opacity-100"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="relative md:hidden md:w-[70%] w-full md:h-[78vh] h-[75vh]
+      md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
+      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide h-snap-x"
+      >
+        <div className="w-full relative flex md:flex-col flex-row gap-3">
+          {item.image_url?.map((src, idx) => (
+            <div
+              key={idx}
+              className="md:w-full w-full flex-shrink-0 child-snap-center"
+              // style={{ width: '100vw', maxWidth: '100vw' }} // Ensure each image fills the screen
+            >
               <img
                 data-idx={idx}
                 ref={(el) => (imageRefs.current[idx] = el)}

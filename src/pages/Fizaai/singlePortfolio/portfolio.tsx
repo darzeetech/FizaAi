@@ -308,12 +308,63 @@ function OutfitImages({
   return (
     <div className="w-full flex md:flex-row flex-col justify-between gap-[2rem] relative">
       {/* Scrollable big images column */}
-      <div
+
+      {window.innerWidth > 768 ? (
+        <div
+          ref={containerRef}
+          onScroll={handleScroll}
+          className="relative md:block hidden md:w-[70%] w-full md:h-[78vh] h-[75vh]
+      md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
+      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide"
+        >
+          <div className="w-full relative flex md:flex-col flex-row gap-3">
+            {item.image_url?.map((src, idx) => (
+              <div key={idx} className="md:w-full w-full flex-shrink-0">
+                <img
+                  data-idx={idx}
+                  ref={(el) => (imageRefs.current[idx] = el)}
+                  src={src}
+                  alt={`${item.title} ${idx + 1}`}
+                  className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg opacity-100"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div
+          ref={containerRef}
+          onScroll={handleScroll}
+          className="scroll-container relative md:w-[70%] w-full md:h-[78vh] h-[75vh]
+      md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
+      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide
+      flex lg:hidden h-snap-x" // Add scroll snap classes
+        >
+          <div className="w-full relative flex md:flex-col flex-row gap-3">
+            {item.image_url?.map((src, idx) => (
+              <div
+                key={idx}
+                className="image-wrapper md:w-full w-full flex-shrink-0 h-snap-center"
+                // style={{ width: '100vw', maxWidth: '100vw' }} // Full screen per image
+              >
+                <img
+                  data-idx={idx}
+                  ref={(el) => (imageRefs.current[idx] = el)}
+                  src={src}
+                  alt={`${item.title} ${idx + 1}`}
+                  className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg opacity-100"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="relative md:block hidden   md:w-[70%] w-full md:h-[78vh] h-[75vh]
-             md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
-             custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide"
+        className="relative md:block hidden md:w-[70%] w-full md:h-[78vh] h-[75vh]
+      md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
+      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide"
       >
         <div className="w-full relative flex md:flex-col flex-row gap-3">
           {item.image_url?.map((src, idx) => (
@@ -333,16 +384,17 @@ function OutfitImages({
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="relative md:hidden md:w-[70%] w-full md:h-[78vh] h-[75vh]
+        className="scroll-container relative md:w-[70%] w-full md:h-[78vh] h-[75vh]
       md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
-      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide h-snap-x"
+      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide
+      flex lg:hidden h-snap-x" // Add scroll snap classes
       >
         <div className="w-full relative flex md:flex-col flex-row gap-3">
           {item.image_url?.map((src, idx) => (
             <div
               key={idx}
-              className="md:w-full w-full flex-shrink-0 child-snap-center"
-              // style={{ width: '100vw', maxWidth: '100vw' }} // Ensure each image fills the screen
+              className="image-wrapper md:w-full w-full flex-shrink-0 h-snap-center"
+              style={{ width: '100vw', maxWidth: '100vw' }} // Full screen per image
             >
               <img
                 data-idx={idx}
@@ -354,7 +406,7 @@ function OutfitImages({
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Bottom info bar */}
       {!isScrolling && (

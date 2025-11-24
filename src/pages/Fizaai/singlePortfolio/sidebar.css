@@ -140,5 +140,21 @@
   scroll-snap-align: center;
 }
 
+/* Scroll container */
+.scroll-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* For smoother mobile scrolling */
+}
+
+/* Each image wrapper */
+.image-wrapper {
+  flex: 0 0 95vw; /* Each image takes up full viewport width */
+  scroll-snap-align: start;
+  scroll-snap-stop: always; /* Ensures snapping to every image, not skipping */
+}
+
 
 

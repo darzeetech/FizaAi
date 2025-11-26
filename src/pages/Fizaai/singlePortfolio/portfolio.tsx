@@ -86,6 +86,7 @@ function OutfitImages({
   const rafRef = React.useRef<number | null>(null);
   const isProgrammaticScroll = React.useRef(false);
   const [isScrolling, setIsScrolling] = React.useState(false);
+  const [pressedImageIdx, setPressedImageIdx] = React.useState<number | null>(null);
 
   const navigate = useNavigate();
 
@@ -308,14 +309,13 @@ function OutfitImages({
   return (
     <div className="w-full flex md:flex-row flex-col justify-between gap-[2rem] relative">
       {/* Scrollable big images column */}
-
       {window.innerWidth > 768 ? (
         <div
           ref={containerRef}
           onScroll={handleScroll}
           className="relative md:block hidden md:w-[70%] w-full md:h-[78vh] h-[75vh]
-      md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
-      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide"
+        md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
+        custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide"
         >
           <div className="w-full relative flex md:flex-col flex-row gap-3">
             {item.image_url?.map((src, idx) => (
@@ -325,7 +325,13 @@ function OutfitImages({
                   ref={(el) => (imageRefs.current[idx] = el)}
                   src={src}
                   alt={`${item.title} ${idx + 1}`}
-                  className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg opacity-100"
+                  className={`object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg transition-opacity duration-150`}
+                  onMouseDown={() => setPressedImageIdx(idx)}
+                  onMouseUp={() => setPressedImageIdx(null)}
+                  onMouseLeave={() => setPressedImageIdx(null)}
+                  onTouchStart={() => setPressedImageIdx(idx)}
+                  onTouchEnd={() => setPressedImageIdx(null)}
+                  draggable={false}
                 />
               </div>
             ))}
@@ -336,80 +342,34 @@ function OutfitImages({
           ref={containerRef}
           onScroll={handleScroll}
           className="scroll-container relative md:w-[70%] w-full md:h-[78vh] h-[75vh]
-      md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
-      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide
-      flex lg:hidden h-snap-x" // Add scroll snap classes
+        md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
+        custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide
+        flex lg:hidden h-snap-x"
         >
           <div className="w-full relative flex md:flex-col flex-row gap-3">
             {item.image_url?.map((src, idx) => (
-              <div
-                key={idx}
-                className="image-wrapper md:w-full w-full flex-shrink-0 h-snap-center"
-                // style={{ width: '100vw', maxWidth: '100vw' }} // Full screen per image
-              >
+              <div key={idx} className="image-wrapper md:w-full w-full flex-shrink-0 h-snap-center">
                 <img
                   data-idx={idx}
                   ref={(el) => (imageRefs.current[idx] = el)}
                   src={src}
                   alt={`${item.title} ${idx + 1}`}
-                  className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg opacity-100"
+                  className={`object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg transition-opacity duration-150 `}
+                  onMouseDown={() => setPressedImageIdx(idx)}
+                  onMouseUp={() => setPressedImageIdx(null)}
+                  onMouseLeave={() => setPressedImageIdx(null)}
+                  onTouchStart={() => setPressedImageIdx(idx)}
+                  onTouchEnd={() => setPressedImageIdx(null)}
+                  draggable={false}
                 />
               </div>
             ))}
           </div>
         </div>
       )}
-      {/* <div
-        ref={containerRef}
-        onScroll={handleScroll}
-        className="relative md:block hidden md:w-[70%] w-full md:h-[78vh] h-[75vh]
-      md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
-      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide"
-      >
-        <div className="w-full relative flex md:flex-col flex-row gap-3">
-          {item.image_url?.map((src, idx) => (
-            <div key={idx} className="md:w-full w-full flex-shrink-0">
-              <img
-                data-idx={idx}
-                ref={(el) => (imageRefs.current[idx] = el)}
-                src={src}
-                alt={`${item.title} ${idx + 1}`}
-                className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg opacity-100"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div
-        ref={containerRef}
-        onScroll={handleScroll}
-        className="scroll-container relative md:w-[70%] w-full md:h-[78vh] h-[75vh]
-      md:overflow-y-auto overflow-x-auto rounded-[20px] md:rounded-[10px]
-      custom-scrollbar md:scrollbar-thumb-gray-300 scrollbar-hide
-      flex lg:hidden h-snap-x" // Add scroll snap classes
-      >
-        <div className="w-full relative flex md:flex-col flex-row gap-3">
-          {item.image_url?.map((src, idx) => (
-            <div
-              key={idx}
-              className="image-wrapper md:w-full w-full flex-shrink-0 h-snap-center"
-              style={{ width: '100vw', maxWidth: '100vw' }} // Full screen per image
-            >
-              <img
-                data-idx={idx}
-                ref={(el) => (imageRefs.current[idx] = el)}
-                src={src}
-                alt={`${item.title} ${idx + 1}`}
-                className="object-cover w-full md:h-[77vh] h-[73vh] object-top rounded-lg opacity-100"
-              />
-            </div>
-          ))}
-        </div>
-      </div> */}
 
       {/* Bottom info bar */}
-      {!isScrolling && (
+      {!isScrolling && pressedImageIdx === null && (
         <div className=" pointer-events-none md:w-[60%] w-[85%] absolute md:bottom-6  bottom-10 md:left-1/3 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-sm px-3 py-1 rounded-xl shadow-md text-sm font-medium">
           <div className="pointer-events-auto">
             <div className="mt-1 text-[#323232] md:text-[1.2rem] text-[1rem] font-medium">
@@ -484,7 +444,7 @@ function OutfitImages({
             <div
               key={idx}
               className={`flex justify-center items-center h-[7rem] w-full rounded-md aspect-video overflow-hidden
-                ${selectedIndex === idx ? 'ring-2 ring-[#79539f]' : ''}`}
+              ${selectedIndex === idx ? 'ring-2 ring-[#79539f]' : ''}`}
             >
               <img
                 src={img}

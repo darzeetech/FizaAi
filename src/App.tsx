@@ -15,24 +15,32 @@ import routes from './router';
 const App = () => {
   const dispatch = useDispatch();
 
+  // 🔹 On app load: restore user + fetch boutique if logged in
   useEffect(() => {
+    // Restore user from localStorage
     dispatch(updateUserData({ data: getValueFromLocalStorage('userDetails') }));
 
-    const token = getValueFromLocalStorage('token');
+    const token = getValueFromLocalStorage('userToken') || getValueFromLocalStorage('token');
 
     if (!_isNil(token) && !_isEmpty(token)) {
-      //get Boutique Details if boutique Id is present
+      // get Boutique Details if boutique Id is present
       void getBoutiqueDetails();
     }
-  }, []);
+  }, [dispatch]);
 
   const getBoutiqueDetails = async () => {
     const boutique_id = getValueFromLocalStorage('boutique_id');
 
-    if (!_isNil(boutique_id)) {
-      const response = await api.getRequest(`boutique/${boutique_id}`);
+    if (!_isNil(boutique_id) && boutique_id !== '') {
+      // 👇 Important:
+      // - We now call "boutique/" (no ID in path)
+      // - apiRequest will automatically:
+      //   - attach Authorization: Bearer <token>
+      //   - attach x-boutique-id: <boutique_id>
+      const response = await api.getRequest('boutique/');
 
       const { data, status } = response;
+      // console.log('boutique response:', response);
 
       if (status) {
         dispatch(updateBoutiqueData({ boutiqueData: data }));
@@ -40,6 +48,7 @@ const App = () => {
     }
   };
 
+  // 🔹 GA + AI Bot for production only
   useEffect(() => {
     const buildEnv = process.env.REACT_APP_BUILD_ENVIRONMENT;
 

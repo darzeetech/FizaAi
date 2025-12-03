@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import _isNil from 'lodash/isNil';
+
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { auth } from '../firbase/index';
 import { ContentContainer, PrivateContainer, RightContainer } from './style';
-import { onAuthStateChanged } from 'firebase/auth';
 import { Loader } from '../ui-component';
+import { getValueFromLocalStorage } from '../utils/common';
 
 type PrivateWrapperProps = {
   Content: () => JSX.Element | null;
@@ -15,41 +15,37 @@ type PrivateWrapperProps = {
 
 const PrivateWrapper = ({ Content, sidebarRequired = true }: PrivateWrapperProps) => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('isAuthenticated') === 'true';
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const storedFlag = localStorage.getItem('isAuthenticated') === 'true';
+    const token = getValueFromLocalStorage('userToken') || getValueFromLocalStorage('token');
+
+    return storedFlag && !_isNil(token) && token !== '';
   });
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const token = await user.getIdToken();
+    const storedFlag = localStorage.getItem('isAuthenticated') === 'true';
+    const token = getValueFromLocalStorage('userToken') || getValueFromLocalStorage('token');
 
-          if (!_isNil(token) && token !== '') {
-            setIsAuthenticated(true);
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userToken', token);
-          } else {
-            handleLogout();
-          }
-        } catch (error) {
-          handleLogout();
-        }
-      } else {
-        handleLogout();
-      }
-      setIsLoading(false);
-    });
+    if (storedFlag && !_isNil(token) && token !== '') {
+      setIsAuthenticated(true);
+    } else {
+      handleLogout();
+    }
 
-    return () => unsubscribe();
-  }, [navigate]);
+    setIsLoading(false);
+  }, []);
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userToken');
-    navigate('/login');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    // No dedicated /login route now → go to home (FizaAI)
+    navigate('/');
   };
 
   if (isLoading) {
@@ -57,6 +53,9 @@ const PrivateWrapper = ({ Content, sidebarRequired = true }: PrivateWrapperProps
   }
 
   if (!isAuthenticated) {
+    // Optionally redirect immediately
+    navigate('/');
+
     return null;
   }
 

@@ -50,8 +50,7 @@ import { api } from '../../utils/apiRequest';
 import SignupFlow from './signup-flow';
 import TokenPopup from './TokenPopup';
 import StudioSidebar from './StudioSidebar';
-import { auth } from '../../firbase'; // make sure path is correct
-import { onAuthStateChanged } from 'firebase/auth';
+import { getValueFromLocalStorage } from '../../utils/common';
 import { TiArrowLeft } from 'react-icons/ti';
 import { HexColorPicker } from 'react-colorful';
 import designerone from '../../assets/icons/designerone.png';
@@ -406,7 +405,7 @@ export default function FizaAI() {
   // ✅ Lookbook Tab Change Trigger Integration
 
   useEffect(() => {
-    if (!isLoggedIn || !auth.currentUser || selectedTab !== 'lookbook') {
+    if (!isLoggedIn || selectedTab !== 'lookbook') {
       return;
     }
 
@@ -415,10 +414,10 @@ export default function FizaAI() {
     } else if (selectlookbook === 'Favorites') {
       fetchFavourites(0, false);
     }
-  }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
+  }, [selectlookbook, selectedTab, isLoggedIn]);
 
   useEffect(() => {
-    if (!isLoggedIn || !auth.currentUser || selectedTab !== 'lookbook') {
+    if (!isLoggedIn || selectedTab !== 'lookbook') {
       return;
     }
 
@@ -427,7 +426,7 @@ export default function FizaAI() {
     } else if (selectlookbook === 'Favorites') {
       fetchFavourites(0, false);
     }
-  }, [selectlookbook, selectedTab, isLoggedIn, auth.currentUser]);
+  }, [selectlookbook, selectedTab, isLoggedIn]);
 
   const handleShowStudio = () => {
     setSidebarAnimating(true);
@@ -630,35 +629,41 @@ export default function FizaAI() {
   }, []);
 
   // Add this useEffect to fetch coin balance when component mounts
-
   useEffect(() => {
-    // Listen to auth changes and set manual login flag
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setIsLoggedIn(true);
-        try {
-          const token = await user.getIdToken();
-          const response = await api.getRequest('coin/balance', {
-            Authorization: `Bearer ${token}`,
-            Accept: '*/*',
-          });
+    // Check if user is logged in based on stored token
+    const token = getValueFromLocalStorage('userToken') || getValueFromLocalStorage('token');
 
-          if (response.status && response.data !== null) {
-            setCoinBalance(response.data ?? 0);
-          } else {
-            setCoinBalance(0);
-          }
-        } catch {
+    if (!token) {
+      // Not logged in
+      setIsLoggedIn(false);
+      setCoinBalance(0);
+
+      return;
+    }
+
+    // Logged in
+    setIsLoggedIn(true);
+
+    const fetchCoinBalance = async () => {
+      try {
+        // apiRequest will automatically add Authorization + x-boutique-id + refresh_token logic
+        const response = await api.getRequest('coin/balance', {
+          Accept: '*/*',
+        });
+
+        if (response.status && response.data !== null && response.data !== undefined) {
+          setCoinBalance(response.data ?? 0);
+        } else {
           setCoinBalance(0);
         }
-      } else {
+      } catch {
         setCoinBalance(0);
-        setIsLoggedIn(false);
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, [isLoggedIn, generatedImageUrl, formDataSection1.first_name, currentStep]);
+    void fetchCoinBalance();
+    // Recalculate coins when these change
+  }, [generatedImageUrl, formDataSection1.first_name, currentStep]);
 
   // Add this useEffect to update the fabric URLs whenever fabricImageTop or fabricImageBottom changes
   useEffect(() => {
@@ -874,22 +879,25 @@ export default function FizaAI() {
   }, [showStudio]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsLoggedInn(true);
-      } else {
-        setItems([]); // Clear versions on logout
-        setIsLoggedInn(false);
-      }
-    });
+    // Check authentication from localStorage instead of Firebase
+    const isAuth = localStorage.getItem('isAuthenticated');
 
-    return () => unsubscribe();
+    if (isAuth === 'true') {
+      setIsLoggedInn(true);
+    } else {
+      setItems([]); // Clear versions on logout
+      setIsLoggedInn(false);
+    }
   }, []);
+
+  //   return () => unsubscribe();
+  // }, []);
 
   // ✅ Step 2: When logged in, fetch versions
   useEffect(() => {
     if (!isLoggedInn) {
       return;
+      setIsLoggedInn(true);
     }
 
     const fetchVersions = async () => {
@@ -913,8 +921,6 @@ export default function FizaAI() {
             const ipData = await ipRes.json();
             // Save full response for future use
             localStorage.setItem('ipapidata', JSON.stringify(ipData));
-            // eslint-disable-next-line no-console
-            // console.log('User timezone:', zone);
 
             if (ipData?.timezone) {
               zone = ipData.timezone;
@@ -926,22 +932,14 @@ export default function FizaAI() {
         console.warn('Failed to get timezone, using default:', ipError);
       }
 
-      // You can now use `zone`
+      // eslint-disable-next-line no-console
+      console.log('nitisj');
 
       try {
-        const user = auth.currentUser;
-
-        if (!user) {
-          return;
-        }
-
-        const token = await user.getIdToken();
-
-        // Fetch parent versions
+        // 🔹 api.getRequest will add Authorization + x-boutique-id + refresh logic
         const parentRes = await api.getRequest(
           'fiza/image/versions?pageNo=0&pageSize=100&sortBy=id&sortDir=DESC',
           {
-            Authorization: `Bearer ${token}`,
             Accept: '*/*',
             'time-zone': zone,
           }
@@ -957,7 +955,6 @@ export default function FizaAI() {
               .getRequest(
                 `fiza/image/fetch_by_parent?pageNo=0&pageSize=100&sortBy=id&sortDir=ASC&parentId=${parent.id}`,
                 {
-                  Authorization: `Bearer ${token}`,
                   Accept: '*/*',
                   'time-zone': zone,
                 }
@@ -974,7 +971,6 @@ export default function FizaAI() {
         // eslint-disable-next-line no-console
         console.error('Failed to fetch versions:', err);
 
-        // Check if it's a network error vs other error
         if (err instanceof TypeError && err.message === 'Failed to fetch') {
           // eslint-disable-next-line no-console
           console.warn('Network connectivity issue - API server may be unreachable');
@@ -986,26 +982,25 @@ export default function FizaAI() {
 
     fetchVersions();
   }, [isLoggedInn, showStudio, generatedImageUrl]);
+
   useEffect(() => {
-    if (isLoggedIn && auth.currentUser) {
-      fetchCollective(0, false);
-      fetchFavourites(0, false);
+    if (!isLoggedIn) {
+      return;
     }
-    // Only runs when auth state is ready
-  }, [selectedTab, isLoggedIn, auth.currentUser]);
+
+    // Load default data when tab changes or user is logged in
+    fetchCollective(0, false);
+    fetchFavourites(0, false);
+  }, [selectedTab, isLoggedIn]);
 
   const fetchCollective = async (pageNo = 0, append = false) => {
     setLoadingCollective(true);
 
     try {
-      const user = auth.currentUser;
-      const token = user && (await user.getIdToken());
-      // eslint-disable-next-line no-console
-      // console.log(token);
       const response = await api.getRequest(
         `fiza/collective/feed?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`,
         {
-          Authorization: `Bearer ${token}`,
+          Accept: '*/*',
         }
       );
 
@@ -1017,7 +1012,8 @@ export default function FizaAI() {
         const totalPages =
           typeof response.data.totalPages === 'number' ? response.data.totalPages : 1;
 
-        setCollectiveItems(append ? [...collectiveItems, ...content] : content);
+        // ✅ use functional update to avoid stale `collectiveItems`
+        setCollectiveItems((prev) => (append ? [...prev, ...content] : content));
         setCollectivePage(currentPage);
         setCollectiveTotalPages(totalPages);
         setCollectiveLastPage(lastPage);
@@ -1026,21 +1022,26 @@ export default function FizaAI() {
           setCollectiveItems([]);
         }
       }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching collective feed:', err);
+
+      if (!append) {
+        setCollectiveItems([]);
+      }
     } finally {
       setLoadingCollective(false);
     }
   };
+
   const fetchFavourites = async (pageNo = 0, append = false) => {
     setLoadingFavourites(true);
 
     try {
-      const user = auth.currentUser;
-      const token = user && (await user.getIdToken());
-
       const response = await api.getRequest(
         `fiza/collective/fav_list?pageNo=${pageNo}&pageSize=10&sortBy=id&sortDir=DESC`,
         {
-          Authorization: `Bearer ${token}`,
+          Accept: '*/*',
         }
       );
 
@@ -1052,7 +1053,9 @@ export default function FizaAI() {
         const totalPages =
           typeof response.data.totalPages === 'number' ? response.data.totalPages : 1;
 
-        setFavouriteItems(append ? [...favouriteItems, ...content] : content);
+        // ✅ Functional update to avoid stale state
+        setFavouriteItems((prev) => (append ? [...prev, ...content] : content));
+
         setFavouritePage(currentPage);
         setFavouriteTotalPages(totalPages);
         setFavouriteLastPage(lastPage);
@@ -1060,6 +1063,13 @@ export default function FizaAI() {
         if (!append) {
           setFavouriteItems([]);
         }
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching favourites:', err);
+
+      if (!append) {
+        setFavouriteItems([]);
       }
     } finally {
       setLoadingFavourites(false);
@@ -1196,11 +1206,10 @@ export default function FizaAI() {
     if (!currentVersionEntry) {
       return;
     }
+
     setCollectiveLoading(true);
 
     try {
-      const user = auth.currentUser;
-      const token = user && (await user.getIdToken());
       const imageVersionId = currentVersionEntry.id;
       const addToCollective = !currentVersionEntry.collective;
 
@@ -1208,22 +1217,26 @@ export default function FizaAI() {
         ? `fiza/collective/mark_as_collective?imageVersionId=${imageVersionId}`
         : `fiza/collective/remove_from_collective?imageVersionId=${imageVersionId}`;
 
+      // ❗Minimal change: removed token + firebase user
       const response = await api.putRequest(
         apiUrl,
-        {}, // Empty body for PUT
+        {},
         false,
-        { Authorization: `Bearer ${token}`, Accept: '*/*' }
+        { Accept: '*/*' } // apiRequest adds Bearer + boutique automatically
       );
 
       if (response.status) {
-        // Update local state
-        setCurrentVersionEntry({ ...currentVersionEntry, collective: addToCollective });
+        setCurrentVersionEntry({
+          ...currentVersionEntry,
+          collective: addToCollective,
+        });
+
         toast.success(addToCollective ? 'Added to Collective' : 'Removed from Collective');
       } else {
         throw new Error('API error');
       }
     } catch (error) {
-      // toast.error('There is Already An Image Added To Collective.');
+      // toast.error("There is Already An Image Added To Collective.");
     } finally {
       setCollectiveLoading(false);
     }

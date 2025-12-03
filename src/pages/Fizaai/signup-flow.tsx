@@ -1,13 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { MdClose, MdPhone, MdArrowForward } from 'react-icons/md';
-import {
-  ConfirmationResult,
-  onAuthStateChanged,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-} from 'firebase/auth';
 import aiimage from '../../assets/images/ai.png';
 import mobilenoti from '../../assets/images/image 360.png';
 import PhoneInput from 'react-phone-number-input';
@@ -15,11 +9,9 @@ import parsePhoneNumberFromString from 'libphonenumber-js';
 import type { CountryCode } from 'libphonenumber-js';
 
 import { phone } from 'phone';
-import { auth } from '../../firbase';
-import { toasts } from '../../ui-component';
-import { Loader } from '../../ui-component';
+import { toasts, Loader } from '../../ui-component';
 import { api } from '../../utils/apiRequest';
-import _isNil from 'lodash/isNil';
+import { getValueFromLocalStorage, setValueInLocalStorage } from '../../utils/common';
 
 type Step = 'signup' | 'verify';
 
@@ -41,33 +33,23 @@ export default function SignupFlow({
     country_code: '+91',
     phone_number: '',
   });
-  const [user, setUser] = useState<ConfirmationResult>();
   const [isLoading, setIsLoading] = useState(false);
   const [otpTimer, setOtpTimer] = useState<number>(45);
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
-  const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
   const [defaultCountry, setDefaultCountry] = useState<CountryCode>('IN');
 
+  // Existing stored user (if any)
   const fizaaiUserData = localStorage.getItem('fizaaiuser');
-  // eslint-disable-next-line no-console
-  //console.log(fizaaiUserData);
   const parsedData = fizaaiUserData ? JSON.parse(fizaaiUserData) : null;
-
-  // eslint-disable-next-line no-console
-  //console.log(parsedData);
-
   const phoneNumber1 = parsedData?.user?.phoneNumber || '';
 
-  // eslint-disable-next-line no-console
-  //console.log(phoneNumber1);
-
+  // 🔹 1) Detect country & prefill dial code
   useEffect(() => {
     async function getUserCountry() {
-      // Try to get user info from localStorage first
       const savedData = localStorage.getItem('ipapidata');
 
       if (savedData) {
         const data = JSON.parse(savedData);
+
         setDefaultCountry((data.country_code as CountryCode) || 'IN');
         setFormData((prev) => ({
           ...prev,
@@ -75,17 +57,16 @@ export default function SignupFlow({
           country_code: data.country_calling_code || '+91',
         }));
 
-        return; // Exit if data is present
+        return;
       }
 
-      // If not present, fetch from the API
       try {
         const res = await fetch('https://ipapi.co/json/');
         const data = await res.json();
-        // Store API result in localStorage for future use
-        localStorage.setItem('ipapidata', JSON.stringify(data));
-        setDefaultCountry((data.country_code as CountryCode) || 'IN');
 
+        localStorage.setItem('ipapidata', JSON.stringify(data));
+
+        setDefaultCountry((data.country_code as CountryCode) || 'IN');
         setFormData((prev) => ({
           ...prev,
           phoneNumber: data.country_calling_code || '+91',
@@ -104,89 +85,29 @@ export default function SignupFlow({
     getUserCountry();
   }, []);
 
-  // Auto-authenticate on page load/refresh if userToken exists
+  // 🔹 2) Auto-flow if already authenticated (token present)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          // Get the token from the authenticated user
-          const token = await firebaseUser.getIdToken();
+    const token = getValueFromLocalStorage('userToken') || getValueFromLocalStorage('token');
 
-          if (!_isNil(token) && token !== '') {
-            // Store authentication data
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userToken', token);
+    if (token) {
+      const fullPhoneNumber = phoneNumber1;
 
-            // Get the user's phone number with country code
-            const fullPhoneNumber = firebaseUser.phoneNumber || phoneNumber1;
-
-            // If we have a phone number and the callback exists, call it
-            // Pass the full phone number with country code to the callback
-            if (fullPhoneNumber && onMobileNumberVerified) {
-              onMobileNumberVerified(fullPhoneNumber);
-            }
-
-            if (fullPhoneNumber) {
-              // Check if user exists in the backend - send full phone number with country code
-              try {
-                const apiResponse = await api.postRequest('auth/user/login', {
-                  mobileNumber: fullPhoneNumber, // Send full number with country code
-                });
-
-                // Store user data if it exists
-                if (apiResponse.data?.user) {
-                  localStorage.setItem('fizaaiuser', JSON.stringify(apiResponse.data));
-
-                  // Close the popup and set the appropriate step
-                  if (setCurrentStep1) {
-                    // If user has preferences, go to step 2, otherwise step 1
-                    const hasPreferences = apiResponse.data.user.userPreference;
-                    setCurrentStep1(hasPreferences ? 2 : 1);
-                  }
-
-                  // Close the popup
-                  setPopup(false);
-                }
-              } catch (apiError) {
-                // eslint-disable-next-line no-console
-                console.error('API error:', apiError);
-              }
-            }
-          }
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Error getting token:', error);
-        }
+      if (fullPhoneNumber && onMobileNumberVerified) {
+        onMobileNumberVerified(fullPhoneNumber);
       }
 
-      // Set loading to false regardless of authentication status
-      setIsLoading(false);
-    });
+      if (setCurrentStep1) {
+        const hasPreferences = parsedData?.user?.userPreference;
+        setCurrentStep1(hasPreferences ? 2 : 1);
+      }
 
-    // Clean up the subscription
-    return () => unsubscribe();
+      setPopup(false);
+    }
+
+    setIsLoading(false);
   }, [onMobileNumberVerified, setCurrentStep1, setPopup, phoneNumber1]);
 
-  useEffect(() => {
-    // Clean up recaptcha when component unmounts
-    return () => {
-      if (recaptchaVerifierRef.current) {
-        try {
-          recaptchaVerifierRef.current.clear();
-          recaptchaVerifierRef.current = null;
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Error clearing recaptcha:', error);
-        }
-      }
-
-      // Also clear the container
-      if (recaptchaContainerRef.current) {
-        recaptchaContainerRef.current.innerHTML = '';
-      }
-    };
-  }, []);
-
+  // 🔹 3) OTP timer
   useEffect(() => {
     if (currentStep === 'verify' && otpTimer > 0) {
       const timerID = setInterval(() => setOtpTimer((timer) => timer - 1), 1000);
@@ -194,52 +115,6 @@ export default function SignupFlow({
       return () => clearInterval(timerID);
     }
   }, [currentStep, otpTimer]);
-
-  // This function directly matches how it's done in the signin flow
-  // Replace the setupRecaptcha function with this improved version
-  const setupRecaptcha = () => {
-    try {
-      // Clear any existing recaptcha
-      if (recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current.clear();
-        recaptchaVerifierRef.current = null;
-      }
-
-      // Clear the container element
-      if (recaptchaContainerRef.current) {
-        recaptchaContainerRef.current.innerHTML = '';
-      }
-
-      // Create a new div element for the recaptcha
-      const recaptchaDiv = document.createElement('div');
-      recaptchaDiv.id = 'recaptcha-container-inner';
-
-      // Append the new div to the container
-      if (recaptchaContainerRef.current) {
-        recaptchaContainerRef.current.appendChild(recaptchaDiv);
-      }
-
-      // Create a new recaptcha verifier using the new div
-      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container-inner', {
-        size: 'invisible',
-        callback: () => {
-          // eslint-disable-next-line no-console
-          console.log('Recaptcha verified');
-        },
-      });
-
-      return recaptchaVerifierRef.current;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error setting up recaptcha:', error);
-
-      if (error instanceof Error) {
-        toasts('error', error.message, 'recaptcha-setup');
-      }
-
-      return null;
-    }
-  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -256,147 +131,141 @@ export default function SignupFlow({
     return result.isValid;
   };
 
+  // 🔹 4) Send OTP via backend API (no Firebase)
   const handleSendOTP = async () => {
     try {
       setIsLoading(true);
 
-      // Format the phone number correctly - ensure no spaces
-      const phoneNumber = `${formData.country_code}${formData.phone_number}`.replace(/\s+/g, '');
+      const fullMobileNumber = `${formData.country_code}${formData.phone_number}`.replace(
+        /\s+/g,
+        ''
+      );
 
-      // Set up recaptcha - this matches the signin flow approach
-      const recaptchaVerifier = setupRecaptcha();
+      const res = await api.postRequest('api/v1/auth/user/generate_otp', {
+        mobile_number: fullMobileNumber,
+      });
 
-      if (!recaptchaVerifier) {
-        throw new Error('Failed to set up reCAPTCHA. Please refresh and try again.');
+      if (res.status) {
+        toasts('success', 'OTP sent successfully!', 'send-otp');
+        setCurrentStep('verify');
+        setOtpTimer(45);
+      } else {
+        toasts('error', res.message || 'Failed to send OTP', 'send-otp');
       }
-
-      // Send OTP via Firebase - using the same approach as signin flow
-      const confirmation = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-      setUser(confirmation);
-
-      // Move to verification step
-      setCurrentStep('verify');
-      setOtpTimer(45);
-
-      toasts('success', 'OTP sent successfully!', 'send-otp');
-    } catch (error: unknown) {
+    } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error('Error sending OTP:', error);
-
-      if (error instanceof Error) {
-        toasts('error', error.message, 'request-otp');
-      } else {
-        toasts('error', 'Failed to send OTP. Please try again.', 'request-otp');
-      }
+      toasts('error', error?.message || 'Failed to send OTP. Please try again.', 'send-otp');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 🔹 5) Verify OTP via backend API (no Firebase)
   const handleVerifyOTP = async () => {
     try {
       setIsLoading(true);
 
-      if (!user) {
-        throw new Error('Verification session expired. Please request a new OTP.');
+      const fullMobileNumber = `${formData.country_code}${formData.phone_number}`.replace(
+        /\s+/g,
+        ''
+      );
+
+      if (formData.otp.length !== 6) {
+        toasts('error', 'Please enter a valid 6-digit OTP', 'verify-otp');
+
+        return;
       }
 
-      // Confirm the OTP
-      const response = await user.confirm(formData.otp);
+      // 1️⃣ Verify OTP with your API
+      const verifyResponse = await api.postRequest('api/v1/auth/user/verify_otp', {
+        mobile_number: fullMobileNumber,
+        otp: formData.otp,
+      });
 
-      if (response.user) {
-        // Get the Firebase token
-        const token = await response.user.getIdToken();
+      if (!verifyResponse.status || !verifyResponse.data?.auth_token) {
+        toasts('error', verifyResponse.message || 'Invalid OTP', 'verify-otp');
 
-        // Store authentication token in localStorage
-        if (token) {
-          localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('userToken', token);
-        }
+        return;
+      }
 
-        // Handle successful verification
-        toasts('success', 'Phone number verified successfully!', 'verify-otp');
+      const { auth_token, refresh_token } = verifyResponse.data;
 
-        // Pass the full mobile number with country code back to the parent component
-        const fullMobileNumber = `${formData.country_code}${formData.phone_number}`;
+      // 2️⃣ Store tokens in localStorage (used by apiRequest.ts)
+      setValueInLocalStorage('userToken', auth_token);
+      setValueInLocalStorage('token', auth_token);
 
-        if (onMobileNumberVerified) {
-          onMobileNumberVerified(fullMobileNumber);
-        }
+      if (refresh_token) {
+        setValueInLocalStorage('refreshToken', refresh_token);
+      }
 
-        // Make API call to check user status - send full number with country code
-        const apiResponse = await api.postRequest('auth/user/login', {
-          mobileNumber: fullMobileNumber,
-        });
+      window.localStorage.setItem('isAuthenticated', 'true');
 
-        // Store user data in localStorage if it exists
-        if (apiResponse.data?.user) {
-          localStorage.setItem('fizaaiuser', JSON.stringify(apiResponse.data));
-        }
+      // 3️⃣ Inform parent about verified number
+      if (onMobileNumberVerified) {
+        onMobileNumberVerified(fullMobileNumber);
+      }
 
-        // Close the popup after successful verification
-        setTimeout(() => {
-          setPopup(false);
+      // 4️⃣ Check user status in your backend (existing logic)
+      const loginResponse = await api.postRequest('auth/user/login', {
+        mobileNumber: fullMobileNumber,
+      });
 
-          if (setCurrentStep1) {
-            // If user is null, set to step 1 (new user flow)
-            if (!apiResponse.data?.user) {
-              setCurrentStep1(1);
-            } else {
-              // If user exists with preferences, set to step 2
-              setCurrentStep1(2);
-            }
+      if (loginResponse.data?.user) {
+        localStorage.setItem('fizaaiuser', JSON.stringify(loginResponse.data));
+      }
+
+      toasts('success', 'Phone number verified successfully!', 'verify-otp');
+
+      // 5️⃣ Close popup & control main Fiza AI flow
+      setTimeout(() => {
+        setPopup(false);
+
+        if (setCurrentStep1) {
+          if (!loginResponse.data?.user) {
+            // new user
+            setCurrentStep1(1);
+          } else {
+            // existing user with preferences → step 2
+            const hasPreferences = loginResponse.data.user.userPreference;
+            setCurrentStep1(hasPreferences ? 2 : 1);
           }
-        }, 100);
-      }
-    } catch (error: unknown) {
+        }
+      }, 100);
+    } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error('Error verifying OTP:', error);
-
-      if (error instanceof Error) {
-        toasts('error', error.message, 'verify-otp');
-      } else {
-        toasts('error', 'Failed to verify OTP. Please try again.', 'verify-otp');
-      }
+      toasts('error', error?.message || 'Failed to verify OTP. Please try again.', 'verify-otp');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 🔹 6) Resend OTP via backend
   const handleResendCode = async () => {
     try {
       setIsLoading(true);
-
-      // Reset OTP field
       setFormData((prev) => ({ ...prev, otp: '' }));
 
-      // Format the phone number correctly - ensure no spaces
-      const phoneNumber = `${formData.country_code}${formData.phone_number}`.replace(/\s+/g, '');
+      const fullMobileNumber = `${formData.country_code}${formData.phone_number}`.replace(
+        /\s+/g,
+        ''
+      );
 
-      // Set up recaptcha again
-      const recaptchaVerifier = setupRecaptcha();
+      const res = await api.postRequest('api/v1/auth/user/generate_otp', {
+        mobile_number: fullMobileNumber,
+      });
 
-      if (!recaptchaVerifier) {
-        throw new Error('Failed to set up reCAPTCHA. Please refresh and try again.');
+      if (res.status) {
+        setOtpTimer(45);
+        toasts('success', 'OTP resent successfully!', 'resend-otp');
+      } else {
+        toasts('error', res.message || 'Failed to resend OTP', 'resend-otp');
       }
-
-      // Resend OTP
-      const confirmation = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-      setUser(confirmation);
-
-      // Reset timer
-      setOtpTimer(45);
-
-      toasts('success', 'OTP resent successfully!', 'resend-otp');
-    } catch (error: unknown) {
+    } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error('Error resending OTP:', error);
-
-      if (error instanceof Error) {
-        toasts('error', error.message, 'resend-otp');
-      } else {
-        toasts('error', 'Failed to resend OTP. Please try again.', 'resend-otp');
-      }
+      toasts('error', error?.message || 'Failed to resend OTP. Please try again.', 'resend-otp');
     } finally {
       setIsLoading(false);
     }
@@ -412,10 +281,8 @@ export default function SignupFlow({
 
   const handlePhoneChange = (value: string | undefined) => {
     if (value) {
-      // Parse the phone number
       const phoneNumberObj = parsePhoneNumberFromString(value);
 
-      // Check if parsing was successful
       if (phoneNumberObj) {
         const countryCode = `+${phoneNumberObj.countryCallingCode}`;
         const phoneNumber = phoneNumberObj.nationalNumber;
@@ -441,14 +308,6 @@ export default function SignupFlow({
     return (
       <div className="h-fit bg-white flex items-center justify-center p-4 rounded-md">
         <div className="w-full max-w-md bg-white border border-gray-200 rounded-lg p-4 relative">
-          {/* Close Button */}
-          {/* <button
-            onClick={handleClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          >
-            <MdClose size={24} />
-          </button> */}
-
           {/* Header */}
           <div className="mb-8">
             <h1 className="md:text-[1.5rem] text-[1rem]  font-semibold text-gray-900 flex items-center gap-2">
@@ -470,7 +329,7 @@ export default function SignupFlow({
               <div className="flex items-center ">
                 <PhoneInput
                   defaultCountry={defaultCountry}
-                  value={`${formData.phoneNumber}`}
+                  value={formData.phoneNumber}
                   onChange={handlePhoneChange}
                   international
                   countryCallingCodeEditable={false}
@@ -524,24 +383,14 @@ export default function SignupFlow({
               </a>
               .
             </p>
-
-            {/* Sign In Link */}
-            {/* <div className="text-center pt-4 font-inter font-[500]">
-              <p className="text-sm text-gray-600">Already have an account?</p>
-              <a href="#" className="text-sm text-gray-900 underline">
-                Sign in here
-              </a>
-            </div> */}
           </div>
-
-          {/* Recaptcha Container - must match the ID used in the signin flow */}
-          <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
         </div>
         {isLoading && <Loader showLoader={isLoading} />}
       </div>
     );
   }
 
+  // ===== VERIFY STEP =====
   return (
     <div className="h-fit bg-white flex items-center justify-center p-4 rounded-md">
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-lg p-6 relative">
@@ -626,9 +475,6 @@ export default function SignupFlow({
             {!isLoading && <MdArrowForward size={20} />}
           </button>
         </div>
-
-        {/* Recaptcha Container - needed for resend OTP */}
-        <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
       </div>
       {isLoading && <Loader showLoader={isLoading} />}
     </div>

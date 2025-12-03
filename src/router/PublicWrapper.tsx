@@ -18,7 +18,7 @@ const PublicWrapper = ({ Content, showHeader = true }: WrapperProps) => {
 
   useEffect(() => {
     if (!_isNil(token) && token !== '') {
-      navigate('/dashboard');
+      navigate('/');
     }
   }, [token]);
 

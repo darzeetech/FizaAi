@@ -895,7 +895,7 @@ export default function FizaAI() {
 
   // ✅ Step 2: When logged in, fetch versions
   useEffect(() => {
-    if (!isLoggedInn) {
+    if (isLoggedInn) {
       return;
       setIsLoggedInn(true);
     }
@@ -931,9 +931,6 @@ export default function FizaAI() {
         // eslint-disable-next-line no-console
         console.warn('Failed to get timezone, using default:', ipError);
       }
-
-      // eslint-disable-next-line no-console
-      console.log('nitisj');
 
       try {
         // 🔹 api.getRequest will add Authorization + x-boutique-id + refresh logic

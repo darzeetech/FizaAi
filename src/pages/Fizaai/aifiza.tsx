@@ -895,7 +895,7 @@ export default function FizaAI() {
 
   // ✅ Step 2: When logged in, fetch versions
   useEffect(() => {
-    if (isLoggedInn) {
+    if (!isLoggedInn) {
       return;
       setIsLoggedInn(true);
     }

@@ -995,7 +995,7 @@ export default function FizaAI() {
 
     try {
       const response = await api.getRequest(
-        `fiza/collective/feed?pageNo=${pageNo}&pageSize=10&sortBy=likeCount&sortDir=DESC`,
+        `fiza/collective/feed?pageNo=${pageNo}&pageSize=5&sortBy=likeCount&sortDir=DESC`,
         {
           Accept: '*/*',
         }
@@ -1036,7 +1036,7 @@ export default function FizaAI() {
 
     try {
       const response = await api.getRequest(
-        `fiza/collective/fav_list?pageNo=${pageNo}&pageSize=10&sortBy=id&sortDir=DESC`,
+        `fiza/collective/fav_list?pageNo=${pageNo}&pageSize=5&sortBy=id&sortDir=DESC`,
         {
           Accept: '*/*',
         }
@@ -1090,7 +1090,7 @@ export default function FizaAI() {
   // Fetch portfolios when user switches to Lookbook tab
   useEffect(() => {
     fetchPortfolios(0, false);
-  }, [selectedTab]);
+  }, [selectedTab, selectlookbook]);
 
   const handleLoadMorePortfolios = () => {
     if (loadingPortfolios || loadingPortfoliosMore || portfoliosLastPage) {
@@ -3502,6 +3502,7 @@ export default function FizaAI() {
                         data={collectiveItems}
                         loading={loadingCollective}
                         onLoadMore={handleLoadMoreCollective}
+                        setSelectlookbook={setSelectlookbook}
                         pageInfo={{
                           currentPage: collectivePage,
                           totalPages: collectiveTotalPages,

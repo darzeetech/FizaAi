@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeable } from 'react-swipeable';
 //import coins from '../../assets/images/coins.png';
@@ -65,6 +64,7 @@ export interface CollectiveItem {
 interface CollectiveCardProps {
   item: CollectiveItem;
   onShowInfoChange?: (isShown: boolean) => void;
+  setSelectlookbook?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const formatTimeline = (createdAt: string, platForm: any): string => {
@@ -93,7 +93,11 @@ const formatTimeline = (createdAt: string, platForm: any): string => {
   return `${label} - ${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
 };
 
-const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange }) => {
+const CollectiveCard: React.FC<CollectiveCardProps> = ({
+  item,
+  onShowInfoChange,
+  setSelectlookbook,
+}) => {
   const outfitName = item.dressInfo?.selectedOutfit
     ? item.dressInfo.selectedOutfit.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
     : 'Outfit';
@@ -280,7 +284,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     return text;
   };
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const formatAddress = (address?: {
     addressLine1?: string;
@@ -294,6 +298,13 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
     }
 
     return [address.city, address.state, address.country].filter(Boolean).join(', ');
+  };
+
+  const handleOpenDesigner = (username: any) => {
+    localStorage.setItem('selected_tab', 'lookbook');
+    localStorage.setItem('username', username);
+    localStorage.setItem('selectlookbook', 'Explore Designers');
+    setSelectlookbook?.('Explore Designers'); // safe call
   };
 
   return (
@@ -349,7 +360,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
               {item.platForm === 'DARZEE' && (
                 <div className="flex items-center gap-2 mt-2">
                   <button
-                    onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
+                    onClick={() => handleOpenDesigner(item?.portfolioUserName)}
                     className="flex items-center gap-1 bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition"
                   >
                     <img src={vec} alt="vector icon" className="w-4 h-4" />
@@ -575,7 +586,7 @@ const CollectiveCard: React.FC<CollectiveCardProps> = ({ item, onShowInfoChange 
           {item.platForm === 'DARZEE' && (
             <div className="flex items-center gap-2 mt-2">
               <button
-                onClick={() => navigate(`/designer/${item.portfolioUserName}`)}
+                onClick={() => handleOpenDesigner(item?.portfolioUserName)}
                 className="flex items-center gap-1 bg-[#5C3B94] text-white text-xs px-3 py-1 rounded-full hover:bg-[#4b2f7e] transition "
                 style={{ height: '40px', minWidth: '120px' }}
               >

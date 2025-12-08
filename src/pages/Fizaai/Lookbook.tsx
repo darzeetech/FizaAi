@@ -254,6 +254,14 @@ export default function Lookbook({
     return () => clearTimeout(timer); // cleanup on unmount
   }, []);
 
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      // mobile or small tablet width
+      setShowMobilePreview(true);
+      // localStorage.setItem('mobile_preview', 'true'); // optional
+    }
+  }, []);
+
   const fetchByUsername = async (username: string) => {
     if (!username) {
       return;

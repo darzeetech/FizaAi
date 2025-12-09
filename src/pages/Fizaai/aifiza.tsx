@@ -440,12 +440,13 @@ export default function FizaAI() {
   const handleWhatsAppShare = async () => {
     setIsWhatsAppSharing(true);
 
-    const link = await handleGenerateShareLink(); // Get link directly
+    const link = await handleGenerateShareLink(); // returns string | boolean
 
-    if (link) {
-      handleShareWithLink(link); // Pass the fresh link directly
+    if (typeof link === 'string') {
+      handleShareWithLink(link); // ✔ now guaranteed to be string
     } else {
-      // Optionally show error or fallback message
+      //
+      //console.error('Failed to generate WhatsApp share link');
     }
 
     setIsWhatsAppSharing(false);
@@ -1463,11 +1464,11 @@ export default function FizaAI() {
       const apiCallPromise =
         entry && entry.id !== null
           ? api.postRequest(`fiza/image/edit?id=${entry.id}`, requestBody, false, {
-              'Content-Type': 'application/json',
-            })
+            'Content-Type': 'application/json',
+          })
           : api.postRequest('fiza/image/generate', requestBody, false, {
-              'Content-Type': 'application/json',
-            });
+            'Content-Type': 'application/json',
+          });
 
       // Show ticking animation first
       for (let i = 0; i < selectedOptions.length; i++) {
@@ -1806,11 +1807,10 @@ export default function FizaAI() {
       {/* Sidebar */}
       {(showStudio || sidebarAnimating) && (
         <div
-          className={`md:w-[300px] w-[280px] md:fixed md:left-0 md:top-0 absolute md:min-w-[260px] h-screen bg-[#F9F6F1] border-r shadow-md z-[100] transform transition-all duration-500 ease-in-out ${
-            showStudio
+          className={`md:w-[300px] w-[280px] md:fixed md:left-0 md:top-0 absolute md:min-w-[260px] h-screen bg-[#F9F6F1] border-r shadow-md z-[100] transform transition-all duration-500 ease-in-out ${showStudio
               ? 'md:translate-x-0 translate-x-0 opacity-100'
               : 'md:-translate-x-full -translate-x-full opacity-0'
-          }`}
+            }`}
           onTransitionEnd={() => {
             if (!showStudio) {
               setSidebarAnimating(false);
@@ -1837,7 +1837,7 @@ export default function FizaAI() {
             selectlookbook={selectlookbook}
             setSelectlookbook={setSelectlookbook}
 
-            // This now expects the entire entry object
+          // This now expects the entire entry object
           />
         </div>
       )}
@@ -1850,9 +1850,8 @@ export default function FizaAI() {
             setShowStudio(false);
           }
         }}
-        className={`w-full flex flex-col items-center justify-between flex-1 min-h-screen bg-white transition-all duration-500 ease-in-out ${
-          showStudio ? 'md:ml-[300px]' : 'md:ml-0'
-        }`}
+        className={`w-full flex flex-col items-center justify-between flex-1 min-h-screen bg-white transition-all duration-500 ease-in-out ${showStudio ? 'md:ml-[300px]' : 'md:ml-0'
+          }`}
       >
         {/* signup-popup */}
         {popup && (
@@ -1905,15 +1904,13 @@ export default function FizaAI() {
                     localStorage.removeItem('username');
                     handleTabChange('studio');
                   }}
-                  className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2 ${
-                    selectedTab === 'studio' ? 'border-b-2 border-[#4F2945]' : ''
-                  }`}
+                  className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2 ${selectedTab === 'studio' ? 'border-b-2 border-[#4F2945]' : ''
+                    }`}
                 >
                   <img src={aiimage} alt="Studio Icon" className="h-6 md:h-7 aspect-auto" />
                   <h1
-                    className={`text-[1rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
-                      selectedTab === 'studio' ? 'block' : 'hidden md:block'
-                    }`}
+                    className={`text-[1rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${selectedTab === 'studio' ? 'block' : 'hidden md:block'
+                      }`}
                   >
                     Studio
                   </h1>
@@ -1925,15 +1922,13 @@ export default function FizaAI() {
                     localStorage.removeItem('username');
                     handleTabChange('lookbook');
                   }}
-                  className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2  ${
-                    selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
-                  }`}
+                  className={`flex items-center md:gap-2 gap-1 cursor-pointer pb-2  ${selectedTab === 'lookbook' ? 'border-b-2 border-[#4F2945]' : ''
+                    }`}
                 >
                   <img src={lookbook} alt="Lookbook Icon" className="h-6 md:h-10 aspect-auto" />
                   <h1
-                    className={`text-[.9rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${
-                      selectedTab === 'lookbook' ? 'block' : 'hidden md:block'
-                    }`}
+                    className={`text-[.9rem] md:text-[1.4rem] font-semibold text-[#4F2945] ${selectedTab === 'lookbook' ? 'block' : 'hidden md:block'
+                      }`}
                   >
                     Lookbook
                   </h1>
@@ -2032,21 +2027,19 @@ export default function FizaAI() {
               <label className="block mb-3 font-medium text-sm md:text-base">Gender</label>
               <div className="flex gap-3 md:gap-4">
                 <button
-                  className={`flex-1 md:flex-none md:px-6 px-4 py-2.5 md:py-2 rounded-md text-sm md:text-base font-medium transition-colors ${
-                    formDataSection1.gender === 'male'
+                  className={`flex-1 md:flex-none md:px-6 px-4 py-2.5 md:py-2 rounded-md text-sm md:text-base font-medium transition-colors ${formDataSection1.gender === 'male'
                       ? 'bg-[#79539f] text-white'
                       : 'bg-white border border-[#79539F] text-[#79539F]'
-                  }`}
+                    }`}
                   onClick={() => updateFormDataSection1('gender', 'male')}
                 >
                   Male
                 </button>
                 <button
-                  className={`flex-1 md:flex-none md:px-6 px-4 py-2.5 md:py-2 rounded-md text-sm md:text-base font-medium transition-colors ${
-                    formDataSection1.gender === 'female'
+                  className={`flex-1 md:flex-none md:px-6 px-4 py-2.5 md:py-2 rounded-md text-sm md:text-base font-medium transition-colors ${formDataSection1.gender === 'female'
                       ? 'bg-[#79539f] text-white'
                       : 'bg-white border border-[#79539F] text-[#79539F]'
-                  }`}
+                    }`}
                   onClick={() => updateFormDataSection1('gender', 'female')}
                 >
                   Female
@@ -2198,11 +2191,10 @@ export default function FizaAI() {
                   {bodyTypes.map((bodyType) => (
                     <button
                       key={bodyType.id}
-                      className={`px-6 py-2 rounded-md flex flex-col items-center justify-center text-[1rem] font-light relative ${
-                        formDataSection1.bodyType === bodyType.bodyType
+                      className={`px-6 py-2 rounded-md flex flex-col items-center justify-center text-[1rem] font-light relative ${formDataSection1.bodyType === bodyType.bodyType
                           ? 'bg-[#79539f  border-2 border-[#79539F]  text-black shadow-md '
                           : 'bg-white border border-[#79539F] '
-                      }`}
+                        }`}
                       onClick={() => updateFormDataSection1('bodyType', bodyType.bodyType)}
                     >
                       {/* Checkmark for selected state */}
@@ -2241,11 +2233,10 @@ export default function FizaAI() {
                   {skinColors.map((color) => (
                     <button
                       key={color.id}
-                      className={`flex-shrink-0 w-10 h-10 md:w-10 md:h-10 rounded-full border-2 transition-all ${
-                        formDataSection1.skinColor === color.colorCode
+                      className={`flex-shrink-0 w-10 h-10 md:w-10 md:h-10 rounded-full border-2 transition-all ${formDataSection1.skinColor === color.colorCode
                           ? 'border-[#79539f] ring-1 ring-offset-1 ring-[#79539f] scale-110'
                           : 'border-gray-300 hover:border-[#79539f]'
-                      }`}
+                        }`}
                       style={{ backgroundColor: color.colorCode }}
                       onClick={() => updateFormDataSection1('skinColor', color.colorCode)}
                       title={`Skin tone ${color.id}`}
@@ -2260,11 +2251,10 @@ export default function FizaAI() {
               <button
                 onClick={currentStep === 1 ? handleRegisterUser : handleNext}
                 disabled={currentStep === 1 && !isAboutYouSectionValid()}
-                className={`flex items-center justify-center w-full md:max-w-xs md:mx-auto px-6 py-3 md:py-3 rounded-md text-sm md:text-base font-medium transition-colors ${
-                  currentStep === 1 && !isAboutYouSectionValid()
+                className={`flex items-center justify-center w-full md:max-w-xs md:mx-auto px-6 py-3 md:py-3 rounded-md text-sm md:text-base font-medium transition-colors ${currentStep === 1 && !isAboutYouSectionValid()
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-[#4f2945] text-white hover:bg-[#3d1f35]'
-                }`}
+                  }`}
               >
                 <span>Save</span>
                 <FaArrowRight className="ml-2" size={16} />
@@ -2278,9 +2268,8 @@ export default function FizaAI() {
             <div className="flex flex-1 w-full ">
               {/* Left side - Form (50%) */}
               <div
-                className={`${
-                  showMobilePreview ? 'hidden md:block md:w-1/2' : 'md:w-1/2 w-full'
-                } overflow-auto max-h-[calc(100vh-72px)] md:p-4 p-1 custom-scrollbar `}
+                className={`${showMobilePreview ? 'hidden md:block md:w-1/2' : 'md:w-1/2 w-full'
+                  } overflow-auto max-h-[calc(100vh-72px)] md:p-4 p-1 custom-scrollbar `}
               >
                 <div className="md:px-6 py-4 px-3 font-semibold md:mb-1 mb-[2rem] relative">
                   {/* Steps */}
@@ -2293,26 +2282,23 @@ export default function FizaAI() {
                       }}
                     >
                       <div
-                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
-                          currentStep > 2
+                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${currentStep > 2
                             ? 'bg-green-500'
                             : currentStep === 2
                               ? 'bg-[#79539f]'
                               : 'bg-gray-200'
-                        } ${
-                          currentStep >= 2 ? 'text-white' : 'text-gray-500'
-                        } flex items-center justify-center`}
+                          } ${currentStep >= 2 ? 'text-white' : 'text-gray-500'
+                          } flex items-center justify-center`}
                       >
                         {currentStep > 2 ? <FaCheckCircle size={16} /> : '1'}
                       </div>
                       <span
-                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
-                          currentStep > 2
+                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${currentStep > 2
                             ? 'text-green-500'
                             : currentStep === 2
                               ? 'font-semibold'
                               : 'text-gray-500'
-                        }`}
+                          }`}
                       >
                         Select Outfit
                       </span>
@@ -2325,26 +2311,23 @@ export default function FizaAI() {
                       }}
                     >
                       <div
-                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
-                          currentStep > 3
+                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${currentStep > 3
                             ? 'bg-green-500'
                             : currentStep === 3
                               ? 'bg-[#79539f]'
                               : 'bg-gray-200'
-                        } ${
-                          currentStep >= 3 ? 'text-white' : 'text-gray-500'
-                        } flex items-center justify-center`}
+                          } ${currentStep >= 3 ? 'text-white' : 'text-gray-500'
+                          } flex items-center justify-center`}
                       >
                         {currentStep > 3 ? <FaCheckCircle size={16} /> : '2'}
                       </div>
                       <span
-                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
-                          currentStep > 3
+                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${currentStep > 3
                             ? 'text-green-500'
                             : currentStep === 3
                               ? 'font-medium'
                               : 'text-gray-500'
-                        }`}
+                          }`}
                       >
                         Color
                       </span>
@@ -2357,18 +2340,15 @@ export default function FizaAI() {
                       }}
                     >
                       <div
-                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${
-                          currentStep === 4 ? 'bg-[#79539f]' : 'bg-gray-200'
-                        } ${
-                          currentStep === 4 ? 'text-white' : 'text-gray-500'
-                        } flex items-center justify-center`}
+                        className={`md:w-8 w-6 md:h-8 h-6 rounded-full ${currentStep === 4 ? 'bg-[#79539f]' : 'bg-gray-200'
+                          } ${currentStep === 4 ? 'text-white' : 'text-gray-500'
+                          } flex items-center justify-center`}
                       >
                         3
                       </div>
                       <span
-                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${
-                          currentStep === 4 ? 'font-medium' : 'text-gray-500'
-                        }`}
+                        className={`ml-2 md:text-[1.15rem] text-[.8rem] ${currentStep === 4 ? 'font-medium' : 'text-gray-500'
+                          }`}
                       >
                         Stitch Options
                       </span>
@@ -2404,11 +2384,10 @@ export default function FizaAI() {
                               {filteredOutfitOptions.map((outfit) => (
                                 <div
                                   key={outfit.outfit_index}
-                                  className={`md:p-7 p-3 border rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all ${
-                                    formDataSection234.selectedOutfit === outfit.outfit_name
+                                  className={`md:p-7 p-3 border rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all ${formDataSection234.selectedOutfit === outfit.outfit_name
                                       ? 'border-[#79539f]'
                                       : 'border-gray-200 shadow-md shadow-[#C1C7D899] hover:border-gray-300'
-                                  }`}
+                                    }`}
                                   onClick={() => {
                                     handleOutfitSelect(outfit.outfit_name);
                                     setoutfit_index(outfit.outfit_index);
@@ -2516,11 +2495,10 @@ export default function FizaAI() {
                                 {colorOptions.map((color) => (
                                   <div
                                     key={`top-${color.id}`}
-                                    className={`w-8 h-8 rounded cursor-pointer ${
-                                      formDataSection234.topColor === color.color
+                                    className={`w-8 h-8 rounded cursor-pointer ${formDataSection234.topColor === color.color
                                         ? 'ring-2 ring-offset-2 ring-[#79539f]'
                                         : ''
-                                    }`}
+                                      }`}
                                     style={{
                                       backgroundColor: color.color,
                                       border:
@@ -2603,11 +2581,10 @@ export default function FizaAI() {
                                 {colorOptions.map((color) => (
                                   <div
                                     key={`bottom-${color.id}`}
-                                    className={`w-8 h-8 rounded cursor-pointer ${
-                                      formDataSection234.bottomColor === color.color
+                                    className={`w-8 h-8 rounded cursor-pointer ${formDataSection234.bottomColor === color.color
                                         ? 'ring-2 ring-offset-2 ring-[#79539f]'
                                         : ''
-                                    }`}
+                                      }`}
                                     style={{
                                       backgroundColor: color.color,
                                       border:
@@ -2654,51 +2631,51 @@ export default function FizaAI() {
                                     showPickerone) ||
                                     (selectedOutfitDetails?.outfit_type !== 'BOTTOM' &&
                                       showPicker)) && (
-                                    <div
-                                      style={{
-                                        position: 'absolute',
-                                        top: 'calc(100% + 8px)',
-                                        left: 0,
-                                        zIndex: 1000,
-                                        boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                                        borderRadius: 8,
-                                        backgroundColor: '#fff',
-                                        padding: 8,
-                                      }}
-                                    >
-                                      <HexColorPicker
-                                        color={
-                                          selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                            ? bottommcolor
-                                            : toppcolor
-                                        }
-                                        onChange={(newColor) =>
-                                          selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                            ? updateFormDataSection234('bottomColor', newColor)
-                                            : updateFormDataSection234('topColor', newColor)
-                                        }
-                                      />
-                                      <button
-                                        onClick={() =>
-                                          selectedOutfitDetails?.outfit_type === 'BOTTOM'
-                                            ? setShowPickerone(false)
-                                            : setShowPicker(false)
-                                        }
+                                      <div
                                         style={{
-                                          marginTop: 8,
-                                          padding: '4px 8px',
-                                          border: 'none',
-                                          background: '#357edd',
-                                          color: 'white',
-                                          borderRadius: 4,
-                                          cursor: 'pointer',
-                                          width: '100%',
+                                          position: 'absolute',
+                                          top: 'calc(100% + 8px)',
+                                          left: 0,
+                                          zIndex: 1000,
+                                          boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                                          borderRadius: 8,
+                                          backgroundColor: '#fff',
+                                          padding: 8,
                                         }}
                                       >
-                                        Close
-                                      </button>
-                                    </div>
-                                  )}
+                                        <HexColorPicker
+                                          color={
+                                            selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                              ? bottommcolor
+                                              : toppcolor
+                                          }
+                                          onChange={(newColor) =>
+                                            selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                              ? updateFormDataSection234('bottomColor', newColor)
+                                              : updateFormDataSection234('topColor', newColor)
+                                          }
+                                        />
+                                        <button
+                                          onClick={() =>
+                                            selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                              ? setShowPickerone(false)
+                                              : setShowPicker(false)
+                                          }
+                                          style={{
+                                            marginTop: 8,
+                                            padding: '4px 8px',
+                                            border: 'none',
+                                            background: '#357edd',
+                                            color: 'white',
+                                            borderRadius: 4,
+                                            cursor: 'pointer',
+                                            width: '100%',
+                                          }}
+                                        >
+                                          Close
+                                        </button>
+                                      </div>
+                                    )}
                                 </div>
                                 <span className="ml-2 text-sm">
                                   {selectedOutfitDetails?.outfit_type === 'BOTTOM'
@@ -2712,13 +2689,12 @@ export default function FizaAI() {
                               {colorOptions.map((color) => (
                                 <div
                                   key={`single-${color.id}`}
-                                  className={`w-8 h-8 rounded cursor-pointer ${
-                                    (selectedOutfitDetails?.outfit_type === 'BOTTOM'
+                                  className={`w-8 h-8 rounded cursor-pointer ${(selectedOutfitDetails?.outfit_type === 'BOTTOM'
                                       ? formDataSection234.bottomColor
                                       : formDataSection234.topColor) === color.color
                                       ? 'ring-2 ring-offset-2 ring-[#79539f]'
                                       : ''
-                                  }`}
+                                    }`}
                                   style={{
                                     backgroundColor: color.color,
                                     border:
@@ -2836,16 +2812,15 @@ export default function FizaAI() {
                                         const isSelected =
                                           formDataSection234.stitchOptions[option.label] !== null &&
                                           String(formDataSection234.stitchOptions[option.label]) ===
-                                            String(choice.value);
+                                          String(choice.value);
 
                                         return (
                                           <button
                                             key={choiceIndex}
-                                            className={`md:px-4 px-3 md:py-2 py-1.5 rounded-full text-sm font-medium ${
-                                              isSelected
+                                            className={`md:px-4 px-3 md:py-2 py-1.5 rounded-full text-sm font-medium ${isSelected
                                                 ? 'bg-[#79539f] text-white'
                                                 : 'bg-white border border-gray-300 hover:bg-gray-50'
-                                            }`}
+                                              }`}
                                             onClick={() =>
                                               updateStitchOption(option.label, choice.value)
                                             }
@@ -2927,11 +2902,10 @@ export default function FizaAI() {
 
                           {/* Action Buttons */}
                           <div
-                            className={`fixed flex items-center justify-between md:bottom-1 bottom-2 left-0 gap-4 bg-transparent py-4 px-6 transition-all duration-500 ease-in-out w-full ${
-                              showStudio
+                            className={`fixed flex items-center justify-between md:bottom-1 bottom-2 left-0 gap-4 bg-transparent py-4 px-6 transition-all duration-500 ease-in-out w-full ${showStudio
                                 ? 'md:w-[calc(58%-300px)] md:ml-[300px]'
                                 : 'md:w-1/2 md:ml-0'
-                            }`}
+                              }`}
                           >
                             <button
                               className="flex-1 flex items-center md:text-[1rem] text-[.9rem] justify-center gap-2 px-6 py-3 bg-[#fef6ea] text-[#4f2945] rounded-md"
@@ -2945,7 +2919,7 @@ export default function FizaAI() {
                               onClick={() =>
                                 handleGeneratePreview(currentVersionEntry || undefined)
                               }
-                              // disabled={isGeneratingImage || animationStep !== 'idle'}
+                            // disabled={isGeneratingImage || animationStep !== 'idle'}
                             >
                               {animationStep === 'ticking' ? (
                                 <>
@@ -2975,9 +2949,8 @@ export default function FizaAI() {
                   {/* Next Button - Only show if not on the last step */}
                   {currentStep < 4 && (
                     <div
-                      className={`fixed md:bottom-1 bottom-2 left-0 w-full bg-transparent py-4 px-6 z-10 transition-all duration-500 ease-in-out ${
-                        showStudio ? 'md:w-[calc(100%-350px)] ' : 'md:w-1/2 md:ml-0'
-                      }`}
+                      className={`fixed md:bottom-1 bottom-2 left-0 w-full bg-transparent py-4 px-6 z-10 transition-all duration-500 ease-in-out ${showStudio ? 'md:w-[calc(100%-350px)] ' : 'md:w-1/2 md:ml-0'
+                        }`}
                     >
                       <button
                         onClick={handleNext}
@@ -2985,12 +2958,11 @@ export default function FizaAI() {
                           (currentStep === 1 && !isAboutYouSectionValid()) ||
                           (currentStep === 2 && !formDataSection234.selectedOutfit)
                         }
-                        className={`flex items-center justify-center w-full max-w-xs mx-auto px-6 py-3 rounded-md ${
-                          (currentStep === 1 && !isAboutYouSectionValid()) ||
-                          (currentStep === 2 && !formDataSection234.selectedOutfit)
+                        className={`flex items-center justify-center w-full max-w-xs mx-auto px-6 py-3 rounded-md ${(currentStep === 1 && !isAboutYouSectionValid()) ||
+                            (currentStep === 2 && !formDataSection234.selectedOutfit)
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-[#4f2945] text-white'
-                        }`}
+                          }`}
                       >
                         <span>Next</span>
                         <FaArrowRight className="ml-2" size={18} />
@@ -3007,9 +2979,8 @@ export default function FizaAI() {
 
               {/* Right side - Preview (50%) */}
               <div
-                className={`${
-                  showMobilePreview ? 'w-full md:w-1/2' : 'w-1/2 md:block hidden'
-                } md:p-6 p-4 sticky top-0 min-h-[calc(100vh-72px)] overflow-y-scroll`}
+                className={`${showMobilePreview ? 'w-full md:w-1/2' : 'w-1/2 md:block hidden'
+                  } md:p-6 p-4 sticky top-0 min-h-[calc(100vh-72px)] overflow-y-scroll`}
               >
                 <div className="flex items-center justify-between md:mb-6 mb-3">
                   <div className="flex items-center">
@@ -3017,9 +2988,8 @@ export default function FizaAI() {
                       onClick={() => {
                         setShowMobilePreview(false);
                       }}
-                      className={`${
-                        showMobilePreview ? ' block' : ' hidden'
-                      } size-8 cursor-pointer`}
+                      className={`${showMobilePreview ? ' block' : ' hidden'
+                        } size-8 cursor-pointer`}
                     />
                     <h2 className="text-xl font-medium ">Preview</h2>
                   </div>
@@ -3417,7 +3387,7 @@ export default function FizaAI() {
                                         </span>
                                         <div className="ml-2">
                                           {tickedOptions.has('topColor') &&
-                                          animationStep === 'ticking' ? (
+                                            animationStep === 'ticking' ? (
                                             <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
                                               <FaCheckCircle className="text-white text-xs" />
                                             </div>
@@ -3451,7 +3421,7 @@ export default function FizaAI() {
                                         </span>
                                         <div className="ml-2">
                                           {tickedOptions.has('bottomColor') &&
-                                          animationStep === 'ticking' ? (
+                                            animationStep === 'ticking' ? (
                                             <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
                                               <FaCheckCircle className="text-white text-xs" />
                                             </div>

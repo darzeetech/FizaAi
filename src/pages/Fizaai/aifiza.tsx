@@ -390,6 +390,7 @@ export default function FizaAI() {
   const [favouriteLastPage, setFavouriteLastPage] = useState(false);
   const [loadingFavourites, setLoadingFavourites] = useState(false);
   const [searchhTerm, setSearchhTerm] = useState('');
+  const [isWhatsAppSharing, setIsWhatsAppSharing] = useState(false);
 
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -434,6 +435,27 @@ export default function FizaAI() {
     setTimeout(() => {
       setShowStudio(true);
     }, 10);
+  };
+
+  const handleWhatsAppShare = async () => {
+    setIsWhatsAppSharing(true);
+
+    const link = await handleGenerateShareLink(); // Get link directly
+
+    if (link) {
+      handleShareWithLink(link); // Pass the fresh link directly
+    } else {
+      // Optionally show error or fallback message
+    }
+
+    setIsWhatsAppSharing(false);
+  };
+
+  const handleShareWithLink = (link: string) => {
+    const whatsappText = link; // Just the link or customize message
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(whatsappText)}`, '_blank');
+    setShowShareModal(false);
   };
 
   const handleShare = (platform: string) => {
@@ -488,6 +510,7 @@ export default function FizaAI() {
 
     setShowShareModal(false);
   };
+
   const handleGenerateShareLink = async () => {
     if (!currentVersionEntry?.id) {
       alert('No generated image available to create share link');
@@ -3040,12 +3063,37 @@ export default function FizaAI() {
                         />
                       )}
 
-                      <img
-                        onClick={() => handleShare('whatsapp')}
-                        src={whatapp}
-                        alt=""
-                        className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
-                      />
+                      {isWhatsAppSharing ? (
+                        <div className="md:h-8 h-6 flex items-center justify-center">
+                          <svg
+                            className="animate-spin h-6 w-6"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="#79539F"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="#79539F"
+                              d="M4 12a8 8 0 018-8v8H4z"
+                            ></path>
+                          </svg>
+                        </div>
+                      ) : (
+                        <img
+                          onClick={handleWhatsAppShare}
+                          src={whatapp}
+                          alt="Share on WhatsApp"
+                          className="md:h-8 h-6 aspect-auto cursor-pointer hover:opacity-70 transition-opacity"
+                        />
+                      )}
                     </div>
                   )}
                 </div>

@@ -304,7 +304,7 @@ export default function FizaAI() {
   );
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoggedInn, setIsLoggedInn] = useState(false);
+
   const [sidebarAnimating, setSidebarAnimating] = useState(false);
   const [currentVersionEntry, setCurrentVersionEntry] = useState<VersionData | null>(null);
   const [showProfile, setShowProfile] = useState(false);
@@ -902,26 +902,10 @@ export default function FizaAI() {
     }
   }, [showStudio]);
 
-  useEffect(() => {
-    // Check authentication from localStorage instead of Firebase
-    const isAuth = localStorage.getItem('isAuthenticated');
-
-    if (isAuth === 'true') {
-      setIsLoggedInn(true);
-    } else {
-      setItems([]); // Clear versions on logout
-      setIsLoggedInn(false);
-    }
-  }, []);
-
-  //   return () => unsubscribe();
-  // }, []);
-
   // ✅ Step 2: When logged in, fetch versions
   useEffect(() => {
-    if (!isLoggedInn) {
+    if (!isLoggedIn) {
       return;
-      setIsLoggedInn(true);
     }
 
     const fetchVersions = async () => {
@@ -1002,7 +986,7 @@ export default function FizaAI() {
     };
 
     fetchVersions();
-  }, [isLoggedInn, showStudio, generatedImageUrl]);
+  }, [isLoggedIn, showStudio, generatedImageUrl, popup]);
 
   useEffect(() => {
     if (!isLoggedIn) {

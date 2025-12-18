@@ -12,6 +12,31 @@ import App from './App';
 
 import './index.css';
 
+/* 🔹 SAFETY CHECK: clear stale auth BEFORE React renders */
+const safeBootstrapAuth = () => {
+  try {
+    const token = localStorage.getItem('userToken') || localStorage.getItem('token');
+
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    // ❌ Partial / broken auth → clear everything
+    if (!token || !refreshToken) {
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('userDetails');
+      localStorage.removeItem('boutique_id');
+    }
+  } catch {
+    // Absolute fallback
+    localStorage.clear();
+  }
+};
+
+// ✅ Run BEFORE app mounts
+safeBootstrapAuth();
+
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 root.render(

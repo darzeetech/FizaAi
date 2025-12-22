@@ -176,6 +176,9 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
   );
 
   const handleLookbookTabChange = (tab: string) => {
+    if (window.innerWidth < 768) {
+      setShowStudio(false);
+    }
     setSelectlookbook(tab);
     localStorage.setItem('selectlookbook', tab);
   };
@@ -327,7 +330,13 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
           <div className="flex flex-col">
             {/* Explore Designers */}
             <div
-              onClick={() => handleLookbookTabChange('Explore Designers')}
+              onClick={() => {
+                handleLookbookTabChange('Explore Designers');
+
+                if (window.innerWidth < 768) {
+                  setShowStudio(false);
+                }
+              }}
               className={`w-full py-3 px-6 cursor-pointer flex items-center gap-3 ${
                 selectlookbook === 'Explore Designers' ? 'bg-[#EFE1D5]' : 'hover:bg-[#F5EDE6]'
               }`}

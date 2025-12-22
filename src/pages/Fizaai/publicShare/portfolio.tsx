@@ -78,7 +78,7 @@ export default function Lookbook({
   const [detailError, setDetailError] = useState<string | null>(null);
   const [lastFetchedUsername, setLastFetchedUsername] = useState<string | null>(null);
 
-  const [viewStage, setViewStage] = useState<'INFO' | 'PORTFOLIO'>('INFO');
+  const [viewStage, setViewStage] = useState<'INFO' | 'PORTFOLIO'>('PORTFOLIO');
 
   // filters / store data state
   const [filtersData, setFiltersData] = useState<any | null>(null);
@@ -732,31 +732,6 @@ export default function Lookbook({
                   <div className="flex items-center gap-3">
                     <div className="flex flex-col items-center gap-1">
                       <button
-                        onClick={() => setViewStage('INFO')}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
-                          viewStage === 'INFO'
-                            ? 'bg-[#111827] text-white shadow'
-                            : 'bg-white border-2 border-gray-200 text-[#333333B2]'
-                        }`}
-                        title="Info"
-                      >
-                        {viewStage === 'INFO' ? (
-                          <img src={info1} alt="info" className="h-6 md:h-7 aspect-auto" />
-                        ) : (
-                          <img src={info2} alt="info" className="h-6 md:h-7 aspect-auto" />
-                        )}
-                      </button>
-                      <p
-                        className={`text-sm font-semibold  ${
-                          viewStage === 'INFO' ? ' text-[#000000] ' : ' text-[#333333B2]'
-                        }`}
-                      >
-                        Info
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col items-center gap-1">
-                      <button
                         onClick={() => setViewStage('PORTFOLIO')}
                         className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
                           viewStage === 'PORTFOLIO'
@@ -781,6 +756,30 @@ export default function Lookbook({
                         }`}
                       >
                         Portfolio
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => setViewStage('INFO')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition ${
+                          viewStage === 'INFO'
+                            ? 'bg-[#111827] text-white shadow'
+                            : 'bg-white border-2 border-gray-200 text-[#333333B2]'
+                        }`}
+                        title="Info"
+                      >
+                        {viewStage === 'INFO' ? (
+                          <img src={info1} alt="info" className="h-6 md:h-7 aspect-auto" />
+                        ) : (
+                          <img src={info2} alt="info" className="h-6 md:h-7 aspect-auto" />
+                        )}
+                      </button>
+                      <p
+                        className={`text-sm font-semibold  ${
+                          viewStage === 'INFO' ? ' text-[#000000] ' : ' text-[#333333B2]'
+                        }`}
+                      >
+                        Info
                       </p>
                     </div>
                   </div>

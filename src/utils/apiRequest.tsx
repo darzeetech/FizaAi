@@ -75,7 +75,7 @@ const makeApiRequest = async (url: string, config: any, retry = true): Promise<a
 
       if (!_isEmpty(refreshToken)) {
         try {
-          const refreshResponse = await fetch(baseUrl + 'auth/user/refresh_token', {
+          const refreshResponse = await fetch(baseUrl + 'api/v1/auth/user/refresh_token', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

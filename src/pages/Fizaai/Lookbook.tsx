@@ -255,10 +255,11 @@ export default function Lookbook({
   }, []);
 
   useEffect(() => {
-    if (window.innerWidth <= 768) {
-      // mobile or small tablet width
+    const isMobile = window.innerWidth <= 768;
+    const username = localStorage.getItem('username'); // e.g. "patialadesigner1"
+
+    if (isMobile && username) {
       setShowMobilePreview(true);
-      // localStorage.setItem('mobile_preview', 'true'); // optional
     }
   }, []);
 

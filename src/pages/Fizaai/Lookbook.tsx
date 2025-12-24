@@ -709,6 +709,7 @@ export default function Lookbook({
                 >
                   <TiArrowLeft
                     onClick={() => {
+                      localStorage.removeItem('username');
                       setShowMobilePreview(false);
                     }}
                     className={`${showMobilePreview ? ' block' : ' hidden'} size-8 cursor-pointer`}
